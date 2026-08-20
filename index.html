@@ -305,7 +305,7 @@ input[type=range]{accent-color:var(--us2)}
     border-radius:16px 16px 0 0;max-height:var(--peek,138px);
     box-shadow:0 -16px 34px -14px rgba(0,0,0,.6);
     transition:max-height .22s ease;overflow:hidden}
-  .railwrap.open{max-height:var(--sheet,64dvh)}
+  .railwrap.open{max-height:64dvh}
   .grab{display:flex;min-height:44px}
   .rail{padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
   .rinkwrap{aspect-ratio:auto!important;width:100%;min-height:150px}
@@ -349,7 +349,7 @@ input[type=range]{accent-color:var(--us2)}
   .mhead .mheadl{min-width:0}
   .mcol h3,.mcol .mq{padding:0}
   .mcol .mq{margin:2px 0 0}
-  .mchev{display:block;flex:0 0 auto;font-size:11px;color:var(--dim);transition:transform .18s}
+  .mchev{display:block;flex:0 0 auto;font-size:15px;line-height:1;color:var(--dim);transition:transform .18s}
   .mcol.open .mchev{transform:rotate(180deg)}
   .mrow{display:none;gap:8px;padding:0 14px 14px}
   .mcol.open .mrow{display:flex}
@@ -2106,10 +2106,42 @@ const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in wi
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
    that line. Everything falls back to on-device speech when it's missing, so shipping
    with an empty manifest is always safe. */
-const AUDIO={base:'audio/',have:{},loaded:false};
+const AUDIO={base:'audio/',have:{},loaded:false,el:null,unlocked:false,
+  fails:{locked:0,missing:0,other:0},lastFail:null};
+/* ONE element for the whole app. iOS grants playback permission per element, so a
+   freshly constructed Audio() is always locked and its play() rejects - which used to
+   look exactly like a missing file and fell back to speech on every single line. */
+const SILENT_WAV='data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
+function audioEl(){
+  if(!AUDIO.el){ AUDIO.el=new Audio(); AUDIO.el.preload='auto'; }
+  return AUDIO.el;
+}
+/* must run INSIDE the tap, in the same task as the event - no await, no setTimeout */
+function unlockAudioEl(){
+  if(AUDIO.unlocked)return;
+  const a=audioEl();
+  try{
+    a.src=SILENT_WAV;
+    const p=a.play();
+    if(p&&p.then) p.then(()=>{AUDIO.unlocked=true;}).catch(e=>{ audioNote('(unlock)',(e&&e.name)||'rejected',(e&&e.name)==='NotAllowedError'?'locked':'other'); });
+    else AUDIO.unlocked=true;
+  }catch(e){ AUDIO.lastFail={id:'(unlock)',reason:'throw: '+(e&&e.message)}; }
+}
+function audioNote(id,reason,kind){
+  kind=kind||'other';
+  AUDIO.fails[kind]=(AUDIO.fails[kind]||0)+1; AUDIO.lastFail={id:id,reason:reason,kind:kind};
+  const hint=kind==='locked'
+    ? 'the element was never unlocked inside a tap - this is a permissions problem, NOT a missing file'
+    : (kind==='missing'?'check audio/'+id+'.mp3 exists and is a real mp3':'unexpected');
+  try{ console.warn('[hiq audio] '+kind.toUpperCase()+' - speech fallback for "'+id+'": '+reason+' | '+hint); }catch(e){}
+}
 function loadAudioManifest(){
   fetch(AUDIO.base+'manifest.json').then(r=>r.ok?r.json():[]).then(list=>{
-    (list||[]).forEach(id=>AUDIO.have[id]=true); AUDIO.loaded=true;
+    if(!Array.isArray(list)){
+      try{ console.warn('[hiq audio] manifest.json must be a bare array of ids - got '+typeof list+'. No baked audio will play.'); }catch(e){}
+      list=[];
+    }
+    list.forEach(id=>AUDIO.have[id]=true); AUDIO.loaded=true;
   }).catch(()=>{ AUDIO.loaded=true; });
 }
 loadAudioManifest();
@@ -2235,7 +2267,10 @@ function render(){
      the ice bigger in the panel we actually have, and stand the rink up if that wins
      - their net at the top, ours at the bottom. */
   const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
-  const rot = isPhone() && perV > perH*1.05;
+  /* the panel's own shape decides first: a landscape panel never stands the rink up, no
+     matter how square the zoom-to-zone crop is (a near-square crop could otherwise clear
+     the scale test by a couple of percent and turn the ice sideways) */
+  const rot = isPhone() && bh > bw && perV > perH*1.05;
   S.rot=rot;
   svg.setAttribute('viewBox', rot ? [vb[1],-(vb[0]+vb[2]),vb[3],vb[2]].join(' ') : vb.join(' '));
   [...svg.children].forEach(n=>{
@@ -2515,7 +2550,7 @@ let spkPrimed=false;
 function primeSpeech(){
   if(spkPrimed)return; spkPrimed=true;
   if(SPK.ok){ try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){} }
-  try{ const a=new Audio(); a.volume=0; a.src='data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'; a.play().catch(()=>{}); }catch(e){}
+  unlockAudioEl();
 }
 ['pointerdown','touchstart','keydown'].forEach(ev=>
   document.addEventListener(ev,primeSpeech,{once:true,passive:true}));
@@ -2640,7 +2675,12 @@ function chunk(txt,opt){
 /* ---- 3. the queue ------------------------------------------------- */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function setSpeakUI(on){ const b=$('p-listen'); if(b) b.classList.toggle('speaking',!!on); }
-function hush(){ if(SPK.ok){ try{speechSynthesis.cancel();}catch(e){} } setSpeakUI(false); }
+function hush(){
+  if(SPK.ok){ try{speechSynthesis.cancel();}catch(e){} }
+  /* a baked clip is a real media element - cancelling speech does not stop it */
+  if(AUDIO.el){ try{ AUDIO.el.pause(); }catch(e){} }
+  setSpeakUI(false);
+}
 /* iOS restarts its audio session for every single utterance - that is what clips the
    first syllable, ragges the gaps and now and then drops a line entirely. So on iOS we
    hand it ONE utterance per press and let punctuation do the breathing. */
@@ -2690,13 +2730,21 @@ function speakLines(lines,done){
     try{ speechSynthesis.speak(u); }catch(e){ done1(); }
   };
   const playOne=(L,go)=>{
-    const a=new Audio(AUDIO.base+L.id+'.mp3');
-    a.playbackRate=clamp(SPK.rate*(L.r||1),0.5,2);
+    const a=audioEl();
     let moved=false;
-    const done1=()=>{ if(moved)return; moved=true; go(); };
+    const done1=()=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null; go(); };
+    const bail=(reason,kind)=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null;
+      audioNote(L.id,reason,kind); speakOne(L,go); };
     a.onended=done1;
-    a.onerror=()=>{ if(moved)return; speakOne(L,done1); };  // 404 or codec miss - fall back for this line only
-    a.play().catch(()=>{ if(!moved) speakOne(L,done1); });
+    a.onerror=()=>{ const c=(a.error&&a.error.code)||0;
+      bail('media error code '+(c||'?'),(c===4||c===2)?'missing':'other'); };
+    try{
+      a.src=AUDIO.base+L.id+'.mp3';
+      a.playbackRate=clamp(SPK.rate*(L.r||1),0.5,2);
+      const p=a.play();
+      if(p&&p.catch) p.catch(err=>{ const n=(err&&err.name)||'play() rejected';
+        bail(n, n==='NotAllowedError'?'locked':(n==='NotSupportedError'?'missing':'other')); });
+    }catch(err){ bail('throw: '+((err&&err.message)||'unknown'),'other'); }
   };
   const next=()=>{
     if(gen!==S.gen) return;
@@ -2706,8 +2754,9 @@ function speakLines(lines,done){
     if(L.kind==='audio') playOne(L,go); else speakOne(L,go);
   };
   setSpeakUI(true);
-  /* cancel() followed immediately by speak() is silent on iOS - give it a tick */
-  if(IOS) setTimeout(next,240); else next();
+  /* cancel() followed immediately by speak() is silent on iOS - give it a tick. But an
+     audio clip must NOT wait: the 240ms broke the user-gesture chain and locked it out. */
+  if(IOS && q[0] && q[0].kind==='tts') setTimeout(next,240); else next();
   return gen;
 }
 /* kept for the simple one-liner call sites */
@@ -2771,6 +2820,7 @@ function speakIntro(done){ if(!SPK.on){ if(done)done(); return; } return speakLi
 $('p-listen').onclick=()=>{
   if(!SPK.ok){ note('off','This browser cannot read out loud. Try Chrome, Edge or Safari.'); return; }
   primeSpeech();                       // unlock inside THIS tap, not on some earlier one
+  unlockAudioEl();                     // retries every tap until it actually succeeds
   if($('p-listen').classList.contains('speaking')){ stop(); return; }   // tap again to shush it
   if(!SPK.on){ SPK.on=true; $('t-speak').checked=true; saveVoicePrefs(); speakNote(); }
   speakLines(introLines());
@@ -2800,7 +2850,7 @@ $('voicesel').onchange=e=>{
   if(v){ SPK.voice=v; saveVoicePrefs(); }
 };
 $('voicetest').onclick=()=>{
-  const wasOn=SPK.on; SPK.on=true; primeSpeech();
+  const wasOn=SPK.on; SPK.on=true; primeSpeech(); unlockAudioEl();
   speakLines(chunk('Defense. They have the puck. Your job is to stay between him and the net.',{rate:0.95,pause:260}),
     ()=>{ SPK.on=wasOn; });
   if(IOS){
@@ -2889,9 +2939,20 @@ function toggleMcol(d){
   const wasOpen=d.classList.contains('open');
   d.parentElement.querySelectorAll('.mcol').forEach(c=>c.classList.remove('open'));
   if(!wasOpen) d.classList.add('open');
+  syncTapHints();
+}
+/* the hint has to agree with the state it is describing */
+function syncTapHints(){
+  document.querySelectorAll('#menucols .mcol').forEach(c=>{
+    const h=c.querySelector('.mtaphint');
+    if(h) h.textContent=c.classList.contains('open')?' \u00b7 tap to close':' \u00b7 tap to open';
+  });
 }
 function buildMenu(){
-  const cols=$('menucols'); cols.innerHTML='';
+  const cols=$('menucols');
+  /* keep whatever the kid had open - a rebuild must not slam their section shut */
+  const wasOpen=[...cols.querySelectorAll('.mcol')].findIndex(c=>c.classList.contains('open'));
+  cols.innerHTML='';
   const groups=[['D','they have the puck'],['T','it just changed hands'],['O','we have the puck']];
   groups.forEach(([ph,sub])=>{
     const p=PHASE[ph];
@@ -2933,7 +2994,10 @@ function buildMenu(){
     else cols.style.gridTemplateColumns='';
   } else if(window.matchMedia('(min-width:1001px)').matches) cols.style.gridTemplateColumns='repeat(3,1fr)';
   else cols.style.gridTemplateColumns='';
-  const first=cols.querySelector('.mcol'); if(first) first.classList.add('open');
+  const all=cols.querySelectorAll('.mcol');
+  const keep=all[wasOpen>=0?wasOpen:0];
+  if(keep) keep.classList.add('open');
+  syncTapHints();
   renderExamples();
 }
 
@@ -3790,8 +3854,19 @@ step('render', ()=>render());
 step('screen', ()=>showScreen('menu'));
 step('install',()=>{ initInstallButton(); playCount(); syncSheet(); });
 step('resize', ()=>{
-  window.addEventListener('resize',()=>{ try{ syncSheet(); render(); buildMenu(); }catch(e){} });
-  window.addEventListener('orientationchange',()=>setTimeout(()=>{ try{ syncSheet(); render(); buildMenu(); }catch(e){} },250));
+  /* iOS fires resize constantly - URL bar collapsing on scroll, keyboard opening on the
+     coach input. The menu only needs rebuilding when the phone/desktop breakpoint is
+     actually crossed, never on those. */
+  let wasWide=window.matchMedia('(min-width:1001px)').matches;
+  const onResize=()=>{
+    try{
+      syncSheet(); render();
+      const isWide=window.matchMedia('(min-width:1001px)').matches;
+      if(isWide!==wasWide){ wasWide=isWide; buildMenu(); }
+    }catch(e){}
+  };
+  window.addEventListener('resize',onResize);
+  window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
 });
 step('buttons',()=>{
   $('bootcopy').onclick=()=>{ try{ navigator.clipboard.writeText($('bootmsg').textContent); }catch(e){} };
