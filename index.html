@@ -71,8 +71,12 @@ select,input{touch-action:manipulation}
   border-radius:14px;padding:14px}
 .mcol h3{font-size:14px;letter-spacing:.09em;text-transform:uppercase}
 .mcol .mq{font-size:12.5px;color:var(--dim);margin:3px 0 11px}
+.mhead{display:block;width:100%;background:none;border:0;padding:0;text-align:left;cursor:default}
+.mchev{display:none}
+.mtaphint{display:none}
 .mitem{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--line);
-  border-radius:11px;padding:11px 13px;margin-bottom:8px;transition:.12s}
+  border-radius:11px;padding:11px 13px;transition:.12s}
+.mrow{display:flex;flex-direction:column;gap:8px}
 @media (hover:hover){.mitem:hover{border-color:#5a79ad;background:#243457;transform:translateY(-1px)}}
 .mitem b{display:block;font-size:15.5px;font-weight:650}
 .mitem span{display:block;font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.35}
@@ -87,7 +91,7 @@ select,input{touch-action:manipulation}
   border-bottom:1px solid var(--line);background:var(--bg2);flex:0 0 auto}
 .tbtn{background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600}
 @media (hover:hover){.tbtn:hover{border-color:#5a79ad}}
-.tbtn.round{width:32px;height:32px;padding:0;font-size:14px;font-weight:800}
+.tbtn.round{width:32px;height:32px;padding:0;font-size:14px;font-weight:800;flex:0 0 auto}
 .tbtn.speaking{background:var(--hi);border-color:var(--hi);color:#231603}
 .pill{font-size:12px;font-weight:850;letter-spacing:.1em;color:#1a1206;border-radius:7px;padding:5px 11px;background:var(--def)}
 .tbtitle{min-width:0;display:flex;flex-direction:column;line-height:1.2}
@@ -127,7 +131,7 @@ input[type=range]{accent-color:var(--us2)}
 .nextbtn{background:var(--bg3);border:1px solid #5a79ad;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:650}
 .nextbtn.hot{background:var(--tra);border-color:var(--tra);color:#241202}
 .chk{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer;flex:0 0 auto}
-.chk input{accent-color:var(--us2);width:15px;height:15px;margin:0}
+.chk input{accent-color:var(--us2);width:20px;height:20px;margin:0}
 
 /* ======== right rail ======== */
 .railwrap{flex:0 0 372px;border-left:1px solid var(--line);background:var(--bg2);
@@ -240,8 +244,23 @@ input[type=range]{accent-color:var(--us2)}
 .chanlist a{color:#8fb4e8;text-decoration:none}
 
 /* ======== coach prompt ======== */
-.coachbox{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:16px;text-align:left}
+.coachbox{background:var(--bg2);border:1px solid var(--line);border-top:4px solid var(--hi);
+  border-radius:14px;padding:16px;margin:16px 0 0;text-align:left}
+.coachhead{margin-bottom:12px}
+.coachhead h3{font-size:15px;letter-spacing:.02em;color:var(--hi)}
+.coachhead p{margin:4px 0 0;font-size:13px;color:var(--dim);line-height:1.4}
 .coachrow{display:flex;gap:8px;align-items:center}
+/* a little voice waveform instead of an emoji - reads as "speak" at any size */
+.tbtn.round.mic{display:flex;align-items:center;justify-content:center;gap:2px}
+.wave{display:flex;align-items:center;gap:2px;height:15px}
+.wave i{display:block;width:2px;border-radius:2px;background:currentColor;opacity:.9}
+.wave i:nth-child(1){height:7px}
+.wave i:nth-child(2){height:15px}
+.wave i:nth-child(3){height:10px}
+#cmic.mic-on .wave i{animation:wv .7s ease-in-out infinite alternate}
+#cmic.mic-on .wave i:nth-child(2){animation-delay:.12s}
+#cmic.mic-on .wave i:nth-child(3){animation-delay:.24s}
+@keyframes wv{from{transform:scaleY(.45)}to{transform:scaleY(1)}}
 .cinput{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--line);border-radius:11px;
   padding:12px 14px;font:inherit;font-size:14.5px;color:var(--ink)}
 .cinput:focus{outline:0;border-color:#5a79ad}
@@ -277,17 +296,26 @@ input[type=range]{accent-color:var(--us2)}
 #p-more{display:none}
 
 @media (max-width:1000px){
-  /* stack it: rink on top, coaching in a sheet you pull up */
-  .body{flex-direction:column;min-height:0}
-  .stage{padding:8px 10px;gap:7px}
-  .railwrap{flex:0 0 auto;border-left:0;border-top:1px solid var(--line);
-    border-radius:16px 16px 0 0;max-height:var(--peek,146px);
+  /* stack it: rink on top, coaching in a sheet that floats OVER the ice instead of
+     squeezing it - the ice is the thing he is looking at */
+  .body{flex-direction:column;min-height:0;position:relative}
+  .stage{padding:8px 10px calc(var(--peek,138px) + 6px);gap:7px}
+  .railwrap{position:absolute;left:0;right:0;bottom:0;z-index:20;
+    flex:0 0 auto;border-left:0;border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;max-height:var(--peek,138px);
+    box-shadow:0 -16px 34px -14px rgba(0,0,0,.6);
     transition:max-height .22s ease;overflow:hidden}
-  .railwrap.open{max-height:var(--sheet,52dvh)}
-  .grab{display:flex}
+  .railwrap.open{max-height:var(--sheet,64dvh)}
+  .grab{display:flex;min-height:44px}
   .rail{padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
-  .rinkwrap{aspect-ratio:auto!important;width:100%;min-height:120px}
+  .rinkwrap{aspect-ratio:auto!important;width:100%;min-height:150px}
   .rail .spacer{display:none}
+  /* variations: one swipeable row, never two stacked rows */
+  .varrow{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;padding-bottom:1px}
+  .varrow::-webkit-scrollbar{display:none}
+  /* the scrub bar is a 16px-tall target on a phone; the step buttons do the same job */
+  #scrub{display:none}
 
   /* one row of positions, letters only - thumbs, not mice */
   .posrow{grid-template-columns:repeat(6,1fr);gap:5px}
@@ -295,7 +323,8 @@ input[type=range]{accent-color:var(--us2)}
   .pbtn .ab{font-size:15px}
   .pbtn .nm{display:none}
 
-  .topbar{gap:8px;padding-bottom:8px}
+  .topbar{gap:8px;padding-top:calc(7px + env(safe-area-inset-top));padding-bottom:7px}
+  .topbar .tbtn{min-height:40px;display:flex;align-items:center;justify-content:center}
   #p-watch,#p-coach,#p-set,#p-help{display:none}
   #p-more{display:flex}
   .tbtitle b{font-size:14px}
@@ -303,19 +332,38 @@ input[type=range]{accent-color:var(--us2)}
   .qprog{display:none}
 
   .cue{padding:9px 12px;border-radius:10px}
-  .cue .t{font-size:14.5px}
+  .cue .t{font-size:15.5px}
   .ctrl{gap:6px}
-  .ctrl button{padding:11px 13px;min-height:44px}
+  .ctrl button{padding:11px 13px;min-height:44px;min-width:52px}
   .ctrl button.primary{min-width:96px}
   .ctrl label{display:none}
   .nextbar{padding:8px 11px}
   .nextbar .nlbl{display:none}
   .chk{font-size:11.5px}
 
-  .menucols{grid-template-columns:1fr;gap:10px}
+  .menucols{grid-template-columns:1fr;gap:12px}
+  /* a plain vertical stack inside each phase card - no scroll affordance to explain */
+  .mcol{padding:0 0 0}
+  .mhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px;min-height:44px;cursor:pointer}
+  .mhead .mheadl{min-width:0}
+  .mcol h3,.mcol .mq{padding:0}
+  .mcol .mq{margin:2px 0 0}
+  .mchev{display:block;flex:0 0 auto;font-size:11px;color:var(--dim);transition:transform .18s}
+  .mcol.open .mchev{transform:rotate(180deg)}
+  .mrow{display:none;gap:8px;padding:0 14px 14px}
+  .mcol.open .mrow{display:flex}
+  .mrow .mitem{min-height:56px}
+  .mtaphint{display:inline}
+  .coachbox{padding:14px;margin-top:14px}
+  .coachhead h3{font-size:14.5px}
+  .coachrow{flex-wrap:wrap}
+  .cinput{flex:1 1 100%;order:1}
+  #cmic{order:2;flex:0 0 auto;width:46px;height:46px}
+  #cgo{order:3;flex:1;min-height:46px}
   .menuwrap h1{font-size:25px}
   .lede{font-size:14px;margin-bottom:16px}
-  .mcol{padding:12px}
+  .mcol{padding:0}
   .mitem{padding:13px;min-height:52px}
   .menufoot{gap:8px}
   .mbtn{padding:13px 18px}
@@ -330,7 +378,7 @@ input[type=range]{accent-color:var(--us2)}
   .opt{padding:14px;min-height:48px}
   .bigbtn{padding:14px;min-height:50px}
   .tab{padding:10px 4px;min-height:42px}
-  .chip{padding:8px 14px;min-height:38px}
+  .chip{padding:8px 14px;min-height:44px;display:flex;align-items:center;flex:0 0 auto}
   .qtext{font-size:16px}
 }
 
@@ -344,8 +392,36 @@ input[type=range]{accent-color:var(--us2)}
   .varrow{display:none!important}
   .cue{padding:7px 11px}
   .cue .t{font-size:13.5px}
-  .ctrl button{padding:8px 11px;min-height:38px}
+  .ctrl button{padding:8px 11px;min-height:38px;min-width:46px}
   .nextbar{display:none!important}
+}
+
+/* wider than tall - landscape phone or a small window - so use the two-column layout
+   instead of stacking, which is what wasted 400px of width before */
+@media (max-width:1000px) and (min-aspect-ratio:1/1){
+  .body{flex-direction:row}
+  .stage{padding:8px 10px!important}
+  .railwrap{position:static;flex:0 0 clamp(232px,34%,320px);max-height:none;
+    border-top:0;border-left:1px solid var(--line);border-radius:0;box-shadow:none}
+  .railwrap.open{max-height:none}
+  .grab{display:none}
+  .rinkwrap{min-height:0}
+  .rail{padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
+  .rail .spacer{display:block}
+}
+
+/* short phone: the peek has to give some back so the controls still fit above it */
+@media (max-width:1000px) and (max-height:700px) and (max-aspect-ratio:1/1){
+  .railwrap{--peek:104px}
+  .stage{padding-bottom:110px!important}
+}
+
+/* tall tablet (iPad portrait): plenty of room, so the job card stays readable
+   without pulling the sheet up at all */
+@media (min-width:700px) and (max-width:1000px) and (min-height:860px){
+  .railwrap{--peek:32dvh}
+  .stage{padding-bottom:calc(32dvh + 6px)}
+  .rinkwrap{min-height:40dvh}
 }
 
 /* small phone */
@@ -354,7 +430,7 @@ input[type=range]{accent-color:var(--us2)}
   .pill{font-size:10.5px;padding:4px 8px;letter-spacing:.06em}
   .tbtn{padding:8px 10px;font-size:12.5px}
   .tbtn.round{width:34px;height:34px}
-  .stage{padding:7px 8px}
+  .stage{padding:7px 8px calc(var(--peek,138px) + 6px)}
   .cue .n{display:none}
 }
 </style>
@@ -387,17 +463,24 @@ input[type=range]{accent-color:var(--us2)}
   <div class="menuwrap">
     <h1>Hockey IQ Rink</h1>
     <p class="lede">Everything on the ice is one of three things. Pick what is happening.</p>
+    <div class="menucols" id="menucols"></div>
+
     <div class="coachbox">
+      <div class="coachhead">
+        <h3>Create your own play</h3>
+        <p>Say it or type it the way you would say it to the team, and it goes on the ice.</p>
+      </div>
       <div class="coachrow">
         <input id="cprompt" class="cinput" type="text" autocomplete="off"
-          placeholder="Coach: say the play you want. &quot;1-2-2 forecheck, my kid is F1&quot; or &quot;build me a 1-3-1 power play&quot;">
-        <button class="tbtn round" id="cmic" title="Speak it">&#127908;</button>
+          placeholder="e.g. 1-2-2 forecheck, my kid is F1">
+        <button class="tbtn round mic" id="cmic" title="Speak it" aria-label="Speak it">
+          <span class="wave"><i></i><i></i><i></i></span>
+        </button>
         <button class="mbtn hot" id="cgo">Run it</button>
       </div>
       <div class="cex" id="cex"></div>
       <div class="cout" id="cout"></div>
     </div>
-    <div class="menucols" id="menucols"></div>
     <div class="menufoot">
       <button class="mbtn hot" id="m-howto">How to read the rink</button>
       <button class="mbtn" id="m-quizall">Quiz me on everything</button>
@@ -2004,6 +2087,9 @@ const svg=$('rink');
 function el(tag,attrs,text){
   const n=document.createElementNS(SVGNS,tag);
   if(attrs)for(const k in attrs)n.setAttribute(k,attrs[k]);
+  /* when the rink is stood up for a portrait phone, every word stays upright */
+  if(tag==='text'&&typeof S!=='undefined'&&S.rot&&attrs&&attrs.x!=null&&attrs.y!=null)
+    n.setAttribute('transform','rotate(90 '+attrs.x+' '+attrs.y+')');
   if(text!=null)n.textContent=text;
   return n;
 }
@@ -2017,6 +2103,16 @@ const S={
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:false,zoom:true,flip:false}
 };
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
+/* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
+   that line. Everything falls back to on-device speech when it's missing, so shipping
+   with an empty manifest is always safe. */
+const AUDIO={base:'audio/',have:{},loaded:false};
+function loadAudioManifest(){
+  fetch(AUDIO.base+'manifest.json').then(r=>r.ok?r.json():[]).then(list=>{
+    (list||[]).forEach(id=>AUDIO.have[id]=true); AUDIO.loaded=true;
+  }).catch(()=>{ AUDIO.loaded=true; });
+}
+loadAudioManifest();
 const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false};
 let CUSTOM=[];
 
@@ -2131,12 +2227,25 @@ function eff(k){
 function render(){
   const t=S.t, sit=S.sit, v=variant();
   const vb=(S.opt.zoom?(v.focus||sit.focus):FULLVIEW);
-  svg.setAttribute('viewBox',vb.join(' '));
+  S.vb=vb;
   const wrap=svg.parentElement;
+  const b=wrap?wrap.getBoundingClientRect():null;
+  const bw=(b&&b.width)||760, bh=(b&&b.height)||300;
+  /* the ice is 2.2:1; a phone held upright is 1:2.2. Work out which way round draws
+     the ice bigger in the panel we actually have, and stand the rink up if that wins
+     - their net at the top, ours at the bottom. */
+  const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
+  const rot = isPhone() && perV > perH*1.05;
+  S.rot=rot;
+  svg.setAttribute('viewBox', rot ? [vb[1],-(vb[0]+vb[2]),vb[3],vb[2]].join(' ') : vb.join(' '));
+  [...svg.children].forEach(n=>{
+    if(n.tagName==='defs')return;
+    if(rot) n.setAttribute('transform','rotate(-90)'); else n.removeAttribute('transform');
+  });
   if(wrap){
     // on a wide screen the panel hugs the rink; on a phone it just fills the space
     wrap.style.aspectRatio = isPhone() ? '' : (vb[2]/vb[3]).toFixed(3);
-    const w=wrap.getBoundingClientRect().width||760;
+    const w=(rot?perV:perH)*vb[2];       // how wide the ice actually draws, in px
     S.fs = w<360?1.5 : w<440?1.36 : w<560?1.24 : w<700?1.1 : 1;
   }
   ['labels','lanes','trail','pass','space','ghost','tok','look','puck'].forEach(k=>layer(k).innerHTML='');
@@ -2272,17 +2381,23 @@ function render(){
   pg.appendChild(pgrp);
 
   const fi=frameIdx(t);
-  $('cuen').textContent='Step '+(fi+1)+' / '+frames().length;
-  $('cuetext').textContent=frames()[fi].cue;
+  paintCue();
   $('scrub').value=Math.round(t*1000);
   renderTopbar(); renderNext();
 }
 function drawLabels(){
-  const g=layer('labels'), vb=svg.getAttribute('viewBox').split(' ').map(Number);
-  const x0=vb[0],x1=vb[0]+vb[2];
+  const g=layer('labels'), vb=S.vb||FULLVIEW;
+  const x0=vb[0],x1=vb[0]+vb[2],y0=vb[1],y1=vb[1]+vb[3];
   const put=(x,y,size0,txt)=>{
     const size=FS(size0), w=txt.length*size*0.66+2.4, h=size*1.5;
-    g.appendChild(el('rect',{x:x-w/2,y:y-h*0.78,width:w,height:h,rx:h/2,ry:h/2,fill:'#f4f8fd','fill-opacity':0.86}));
+    if(S.rot){
+      /* the rink is stood up but the words are not, so the pill lies across the ice
+         and the word has to be kept clear of the boards */
+      y=Math.max(y0+w/2+1,Math.min(y1-w/2-1,y));
+      g.appendChild(el('rect',{x:x-h*0.24,y:y-w/2,width:h,height:w,rx:h/2,ry:h/2,fill:'#f4f8fd','fill-opacity':0.86}));
+    } else {
+      g.appendChild(el('rect',{x:x-w/2,y:y-h*0.78,width:w,height:h,rx:h/2,ry:h/2,fill:'#f4f8fd','fill-opacity':0.86}));
+    }
     g.appendChild(el('text',{x,y,'font-size':size,fill:'#6b7b93','text-anchor':'middle','font-weight':700,'letter-spacing':0.3},txt));
   };
   [[0,75,'OUR ZONE'],[75,125,'NEUTRAL ZONE'],[125,200,'THEIR ZONE']].forEach(([a,b,txt])=>{
@@ -2341,6 +2456,19 @@ function segDist(p,a,b){
 }
 
 /* ---------------- topbar + next ---------------- */
+/* the strip under the ice: normally the step cue, but on a phone in a quiz it carries
+   the question, because a question hidden inside the sheet is a question he cannot read */
+function paintCue(){
+  const q=(TEST.active&&!TEST.done)?TEST.qs[TEST.i]:null;
+  if(q&&isPhone()){
+    $('cuen').textContent='Q '+(TEST.i+1)+'/'+TEST.qs.length;
+    $('cuetext').textContent=(q.type==='mc'?q.q:q.ask);
+    return;
+  }
+  const fi=frameIdx(S.t);
+  $('cuen').textContent='Step '+(fi+1)+' / '+frames().length;
+  $('cuetext').textContent=frames()[fi].cue;
+}
 function renderTopbar(){
   const p=PHASE[phaseAt(S.t)];
   $('p-phase').textContent=p.label; $('p-phase').style.background=p.col;
@@ -2352,6 +2480,8 @@ function nextOf(){ return (NEXTSTEP[S.sit.id]||{})[variant().id]||null; }
 function renderNext(){
   const n=nextOf(), bar=$('nextbar');
   if(!n||S.mode!=='learn'){ bar.style.display='none'; return; }
+  /* on a phone this bar is 75px the ice needs - it turns up when the play is done */
+  if(isPhone()&&S.t<0.999){ bar.style.display='none'; return; }
   bar.style.display='flex';
   const tgt=sitById(n.sit), ph=PHASE[tgt.phase];
   $('nexttext').innerHTML=esc(n.label)+' <b style="color:'+ph.col+'">'+ph.label+': '+esc(tgt.name)+'</b>';
@@ -2380,14 +2510,22 @@ function loadSituation(sitId,varId,keepPos){
 
 const IOS=/iP(hone|ad|od)/.test(navigator.platform||'')||
   (/Mac/.test(navigator.platform||'')&&navigator.maxTouchPoints>1)||/iPhone|iPad|iPod/.test(navigator.userAgent);
-/* iOS will not speak unless the engine was first woken inside a real tap */
+/* iOS will not speak - or play audio - unless the engine was first woken inside a real tap */
 let spkPrimed=false;
 function primeSpeech(){
-  if(spkPrimed||!SPK.ok)return; spkPrimed=true;
-  try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){}
+  if(spkPrimed)return; spkPrimed=true;
+  if(SPK.ok){ try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){} }
+  try{ const a=new Audio(); a.volume=0; a.src='data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'; a.play().catch(()=>{}); }catch(e){}
 }
 ['pointerdown','touchstart','keydown'].forEach(ev=>
   document.addEventListener(ev,primeSpeech,{once:true,passive:true}));
+/* iOS stops the synthesiser dead if the app backgrounds mid-sentence, and the unlock
+   goes stale with it. Treat every return to the foreground as a fresh start. */
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  spkPrimed=false; setSpeakUI(false);
+});
 
 /* ---- 1. voices ---------------------------------------------------- */
 function voiceScore(v){
@@ -2455,6 +2593,14 @@ if(SPK.ok){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
 
 /* ---- 2. make the text speakable ----------------------------------- */
 const NUMWORD=['zero','one','two','three','four','five','six','seven','eight','nine'];
+/* a stable id for a spoken line's exact final text - same text always gets the same id,
+   whether it's produced live or by the export script below, so a dev never has to hand-map
+   filenames to call sites */
+function audioId(t){
+  let h=0; for(let i=0;i<t.length;i++){ h=(h*31+t.charCodeAt(i))|0; }
+  const slug=t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
+  return (slug||'line')+'-'+(h>>>0).toString(36);
+}
 function sayable(txt){
   let s=String(txt).replace(/<[^>]+>/g,' ');
   s=s.replace(/\bLD\b/g,'left D').replace(/\bRD\b/g,'right D')
@@ -2482,7 +2628,7 @@ function chunk(txt,opt){
   raws.forEach(raw=>{
     const t=sayable(raw); if(!t) return;
     const shout=/\b[A-Z]{3,}\b/.test(raw);      // a shouted word on screen gets weight in the voice
-    out.push({t:t,
+    out.push({t:t, id:audioId(t),
       r:(opt.rate||1)*(shout?0.93:1),
       p:(opt.pitch||1)+(shout?0.06:0),
       pause:(opt.pause==null?170:opt.pause)+(shout?90:0)});
@@ -2495,32 +2641,113 @@ function chunk(txt,opt){
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function setSpeakUI(on){ const b=$('p-listen'); if(b) b.classList.toggle('speaking',!!on); }
 function hush(){ if(SPK.ok){ try{speechSynthesis.cancel();}catch(e){} } setSpeakUI(false); }
+/* iOS restarts its audio session for every single utterance - that is what clips the
+   first syllable, ragges the gaps and now and then drops a line entirely. So on iOS we
+   hand it ONE utterance per press and let punctuation do the breathing. */
+function joinForIOS(lines){
+  const t=lines.map(L=>{
+    let s=String(L.t).trim();
+    if(!/[.!?,]$/.test(s)) s+='.';
+    return s+((L.pause||0)>=300?'..':'');
+  }).join(' ');
+  return [{t:t,r:1,p:1,pause:0}];
+}
+/* a baked audio file, once it exists, breaks up the queue on its own the same way a
+   pause does - so only the STRETCHES between audio files need the iOS multi-utterance
+   workaround, not the whole queue */
+function buildQueue(lines){
+  const out=[]; let buf=[];
+  const flush=()=>{
+    if(!buf.length)return;
+    (IOS?joinForIOS(buf):buf).forEach(L=>out.push(Object.assign({kind:'tts'},L)));
+    buf=[];
+  };
+  lines.forEach(L=>{
+    if(AUDIO.have[L.id]){ flush(); out.push({kind:'audio',id:L.id,t:L.t,r:L.r,pause:L.pause}); }
+    else buf.push(L);
+  });
+  flush();
+  return out;
+}
 function speakLines(lines,done){
   if(!SPK.on||!SPK.ok||!lines||!lines.length){ if(done)done(); return S.gen; }
   const gen=++S.gen;
+  const q=buildQueue(lines);
   try{ speechSynthesis.cancel(); }catch(e){}
   let i=0;
-  const next=()=>{
-    if(gen!==S.gen) return;
-    if(i>=lines.length){ setSpeakUI(false); if(done)done(); return; }
-    const L=lines[i++];
+  const speakOne=(L,go)=>{
     const u=new SpeechSynthesisUtterance(L.t);
     if(SPK.voice) u.voice=SPK.voice;
-    u.rate=clamp(SPK.rate*(L.r||1),0.5,1.7);
-    u.pitch=clamp(L.p||1,0.6,1.5);
+    /* the basic iOS voices smear below 1.0, and their pitch shifting sounds synthetic */
+    u.rate=IOS?clamp(SPK.rate+0.12,1,1.4):clamp(SPK.rate*(L.r||1),0.5,1.7);
+    u.pitch=IOS?1:clamp(L.p||1,0.6,1.5);
     u.volume=1;
     let moved=false;
-    const go=()=>{ if(moved)return; moved=true;
-      if(gen!==S.gen)return;
-      L.pause?setTimeout(next,L.pause):next(); };
-    u.onend=go; u.onerror=go;
-    try{ speechSynthesis.speak(u); }catch(e){ go(); }
+    const done1=()=>{ if(moved)return; moved=true; go(); };
+    u.onend=done1; u.onerror=done1;
+    const est=1600+L.t.length*(IOS?64:58)/Math.max(0.6,u.rate);
+    setTimeout(()=>{ if(moved)return; try{ if(speechSynthesis.speaking)return; }catch(e){} done1(); },est);
+    try{ speechSynthesis.speak(u); }catch(e){ done1(); }
   };
-  setSpeakUI(true); next();
+  const playOne=(L,go)=>{
+    const a=new Audio(AUDIO.base+L.id+'.mp3');
+    a.playbackRate=clamp(SPK.rate*(L.r||1),0.5,2);
+    let moved=false;
+    const done1=()=>{ if(moved)return; moved=true; go(); };
+    a.onended=done1;
+    a.onerror=()=>{ if(moved)return; speakOne(L,done1); };  // 404 or codec miss - fall back for this line only
+    a.play().catch(()=>{ if(!moved) speakOne(L,done1); });
+  };
+  const next=()=>{
+    if(gen!==S.gen) return;
+    if(i>=q.length){ setSpeakUI(false); if(done)done(); return; }
+    const L=q[i++];
+    const go=()=>{ if(gen!==S.gen)return; L.pause?setTimeout(next,L.pause):next(); };
+    if(L.kind==='audio') playOne(L,go); else speakOne(L,go);
+  };
+  setSpeakUI(true);
+  /* cancel() followed immediately by speak() is silent on iOS - give it a tick */
+  if(IOS) setTimeout(next,240); else next();
   return gen;
 }
 /* kept for the simple one-liner call sites */
 function sayThen(text,done){ return speakLines(chunk(text,{rate:0.98}),done); }
+
+/* ---- dev tool: exhaustively enumerate every STATIC bakeable line, using the exact
+   same chunk()/sayable() pipeline speech uses, so id and text always match runtime.
+   Not linked from any UI - call window.__exportAudioScript() from a console. Lines
+   built from a runtime value (measured distances, live scores) are not enumerable
+   here on purpose; those stay on-device speech forever. */
+function enumerateAudioScript(){
+  const seen={};
+  const add=lines=>(lines||[]).forEach(L=>{ if(L.t&&!seen[L.id]) seen[L.id]=L.t; });
+  ['D','T','O'].forEach(k=>add(chunk(PHASE[k].say)));
+  SITUATIONS.forEach(s=>{
+    s.variants.forEach(v=>{
+      add(chunk('This one is '+s.name+'. '+v.name+'.'));
+      v.frames.forEach(f=>add(chunk(f.cue)));
+    });
+    Object.keys(s.coach||{}).forEach(pos=>{ const c=s.coach[pos]; if(c&&c.job) add(chunk('Your job. '+c.job)); });
+  });
+  Object.keys(POSNAMES).forEach(pos=>{
+    add(chunk('You are the '+POSNAMES[pos]+'.'));
+    add(chunk('Put yourself where the '+POSNAMES[pos]+' belongs.'));
+  });
+  for(let i=1;i<=9;i++) add(chunk('Step '+NUMWORD[i]+'.'));
+  Object.keys(TESTS).forEach(sid=>(TESTS[sid]||[]).forEach(q=>{
+    add(chunk(q.q)); add(chunk(q.why));
+    (q.o||[]).forEach((o,i)=>{ add(chunk('Option '+NUMWORD[i+1]+'.')); add(chunk(o+'.')); });
+  }));
+  Object.keys(PLACEQ).forEach(sid=>(PLACEQ[sid]||[]).forEach(q=>add(chunk(q.ask))));
+  ['That is it.','Not this time.','There it is.','Bang on.','Good spot.','Still not it.','Not quite.',
+   'Have another go.','That is a kid who knows where to be.',
+   'Solid. Go back to the ones you missed and watch them again.',
+   'Good start. Hit Listen in Learn mode and walk through it once more.',
+   'Defense. They have the puck. Your job is to stay between him and the net.'
+  ].forEach(s=>add(chunk(s)));
+  return seen;
+}
+window.__exportAudioScript=enumerateAudioScript;
 
 /* ---- what it actually says ---------------------------------------- */
 function introLines(){
@@ -2543,6 +2770,7 @@ function stepLines(i){
 function speakIntro(done){ if(!SPK.on){ if(done)done(); return; } return speakLines(introLines(),done); }
 $('p-listen').onclick=()=>{
   if(!SPK.ok){ note('off','This browser cannot read out loud. Try Chrome, Edge or Safari.'); return; }
+  primeSpeech();                       // unlock inside THIS tap, not on some earlier one
   if($('p-listen').classList.contains('speaking')){ stop(); return; }   // tap again to shush it
   if(!SPK.on){ SPK.on=true; $('t-speak').checked=true; saveVoicePrefs(); speakNote(); }
   speakLines(introLines());
@@ -2572,9 +2800,14 @@ $('voicesel').onchange=e=>{
   if(v){ SPK.voice=v; saveVoicePrefs(); }
 };
 $('voicetest').onclick=()=>{
-  const wasOn=SPK.on; SPK.on=true;
+  const wasOn=SPK.on; SPK.on=true; primeSpeech();
   speakLines(chunk('Defense. They have the puck. Your job is to stay between him and the net.',{rate:0.95,pause:260}),
     ()=>{ SPK.on=wasOn; });
+  if(IOS){
+    const h=$('voicehint');
+    if(h&&!h.dataset.mutehint){ h.dataset.mutehint='1';
+      h.innerHTML+=' <b style="color:#f7c46c">Heard nothing just now?</b> Flip the side ring switch off silent and turn the volume up - iOS mutes web speech with no warning.'; }
+  }
 };
 
 /* ---------------- playback ---------------- */
@@ -2650,6 +2883,13 @@ $('mo-help').onclick=()=>{ mask('more',false); mask('help',true); };
 $('p-watch').onclick=()=>openVideos();
 
 /* ---------------- menu ---------------- */
+/* on a phone each phase is a closed accordion by default - three headers fit on
+   screen at once instead of one long list pushing the others off it */
+function toggleMcol(d){
+  const wasOpen=d.classList.contains('open');
+  d.parentElement.querySelectorAll('.mcol').forEach(c=>c.classList.remove('open'));
+  if(!wasOpen) d.classList.add('open');
+}
 function buildMenu(){
   const cols=$('menucols'); cols.innerHTML='';
   const groups=[['D','they have the puck'],['T','it just changed hands'],['O','we have the puck']];
@@ -2657,29 +2897,43 @@ function buildMenu(){
     const p=PHASE[ph];
     const d=document.createElement('div');
     d.className='mcol'; d.style.borderTopColor=p.col;
-    d.innerHTML='<h3 style="color:'+p.col+'">'+p.label+'</h3><div class="mq">'+p.sub+'</div>';
+    const head=document.createElement('button'); head.className='mhead'; head.type='button';
+    head.innerHTML='<span class="mheadl"><h3 style="color:'+p.col+'">'+p.label+'</h3><div class="mq">'+p.sub+
+      '<span class="mtaphint"> &middot; tap to open</span></div></span><span class="mchev">&#9662;</span>';
+    head.onclick=()=>toggleMcol(d);
+    d.appendChild(head);
+    const row=document.createElement('div'); row.className='mrow';
     SITUATIONS.filter(s=>s.phase===ph).forEach(s=>{
       const b=document.createElement('button');
       b.className='mitem'; b.innerHTML='<b>'+esc(s.name)+'</b><span>'+esc(s.about)+'</span>';
       b.onclick=()=>{ loadSituation(s.id,s.variants[0].id); showScreen('play'); setMode('learn'); if(SPK.on)speakIntro(); };
-      d.appendChild(b);
+      row.appendChild(b);
     });
+    d.appendChild(row);
     cols.appendChild(d);
   });
   if(CUSTOM.length){
     const d=document.createElement('div');
     d.className='mcol'; d.style.borderTopColor='#f5a524';
-    d.innerHTML='<h3 style="color:#f5a524">YOUR PLAYS</h3><div class="mq">built by the coach</div>';
+    const head=document.createElement('button'); head.className='mhead'; head.type='button';
+    head.innerHTML='<span class="mheadl"><h3 style="color:#f5a524">YOUR PLAYS</h3><div class="mq">built by the coach<span class="mtaphint"> &middot; tap to open</span></div></span><span class="mchev">&#9662;</span>';
+    head.onclick=()=>toggleMcol(d);
+    d.appendChild(head);
+    const row=document.createElement('div'); row.className='mrow';
     CUSTOM.forEach(s=>{
       const b=document.createElement('button');
       b.className='mitem';
       b.innerHTML='<b>'+esc(s.name)+'</b><span>'+PHASE[s.phase].label+' &middot; '+s.variants[0].frames.length+' step(s)</span>';
       b.onclick=()=>{ loadSituation(s.id,s.variants[0].id); showScreen('play'); setMode('learn'); };
-      d.appendChild(b);
+      row.appendChild(b);
     });
+    d.appendChild(row);
     cols.appendChild(d);
-    cols.style.gridTemplateColumns='repeat(4,1fr)';
-  } else cols.style.gridTemplateColumns='repeat(3,1fr)';
+    if(window.matchMedia('(min-width:1001px)').matches) cols.style.gridTemplateColumns='repeat(4,1fr)';
+    else cols.style.gridTemplateColumns='';
+  } else if(window.matchMedia('(min-width:1001px)').matches) cols.style.gridTemplateColumns='repeat(3,1fr)';
+  else cols.style.gridTemplateColumns='';
+  const first=cols.querySelector('.mcol'); if(first) first.classList.add('open');
   renderExamples();
 }
 
@@ -2793,7 +3047,8 @@ $('voicerate').onchange=()=>saveVoicePrefs();
 /* ---------------- dragging ---------------- */
 let drag=null, dragMoved=false;
 function toRink(evt){
-  const m=svg.getScreenCTM().inverse();
+  const base=layer('tok')||svg;            // carries the portrait rotation, if any
+  const m=base.getScreenCTM().inverse();
   const p=new DOMPoint(evt.clientX,evt.clientY).matrixTransform(m);
   return [p.x,p.y];
 }
@@ -2911,6 +3166,9 @@ function showQuestion(){
   } else S.t=frames()[0].t;
   $('p-prog').textContent='Question '+(TEST.i+1)+' of '+TEST.qs.length+'  -  '+TEST.right+' right';
   railQuiz(); render();
+  /* multiple choice needs the answers, so open the sheet; a placement question needs
+     the ice, so leave it shut - the question sits under the rink either way */
+  if(isPhone()) setSheet(q.type==='mc');
   if(SPK.on){
     let L=chunk(q.type==='mc'?q.q:q.ask,{rate:0.94,pause:220,tail:420});
     if(q.type==='mc') q.o.forEach((o,i)=>{
@@ -2928,10 +3186,12 @@ function railQuiz(){
     h+='<span class="qtype mc">Pick the right answer</span><div class="qtext">'+esc(q.q)+'</div><div id="opts">'+
        q.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div>';
   } else {
-    h+='<span class="qtype place">Put yourself in the right spot</span><div class="qtext">'+esc(q.ask)+'</div>'+
+    const ask='<span class="qtype place">Put yourself in the right spot</span><div class="qtext">'+esc(q.ask)+'</div>'+
        '<p style="font-size:13px;color:#93a3bd;margin:0 0 12px">You are the <b>'+POSNAMES[q.pos]+
-       '</b>. Drag the amber <b>YOU</b> on the ice, then check it. The arrows and the ghost stay hidden until you commit.</p>'+
-       '<button class="bigbtn blue" id="checkspot" style="width:100%">Check my spot</button>';
+       '</b>. Drag the amber <b>YOU</b> on the ice, then check it. The arrows and the ghost stay hidden until you commit.</p>';
+    const btn='<button class="bigbtn blue" id="checkspot" style="width:100%">Check my spot</button>';
+    /* on a phone the question is already under the ice, so the button gets the peek */
+    h+= isPhone() ? btn+'<div style="height:10px"></div>'+ask : ask+btn;
   }
   h+='<div id="whybox"></div><div class="spacer"></div>'+
      '<button class="bigbtn plain" id="quitquiz">Stop the quiz</button>';
@@ -3530,8 +3790,8 @@ step('render', ()=>render());
 step('screen', ()=>showScreen('menu'));
 step('install',()=>{ initInstallButton(); playCount(); syncSheet(); });
 step('resize', ()=>{
-  window.addEventListener('resize',()=>{ try{ syncSheet(); render(); }catch(e){} });
-  window.addEventListener('orientationchange',()=>setTimeout(()=>{ try{ syncSheet(); render(); }catch(e){} },250));
+  window.addEventListener('resize',()=>{ try{ syncSheet(); render(); buildMenu(); }catch(e){} });
+  window.addEventListener('orientationchange',()=>setTimeout(()=>{ try{ syncSheet(); render(); buildMenu(); }catch(e){} },250));
 });
 step('buttons',()=>{
   $('bootcopy').onclick=()=>{ try{ navigator.clipboard.writeText($('bootmsg').textContent); }catch(e){} };
