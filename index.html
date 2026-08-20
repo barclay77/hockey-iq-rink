@@ -31,6 +31,7 @@ window.addEventListener('error',function(ev){
   --ink:#eaf0f9; --dim:#93a3bd;
   --us:#1f6feb; --us2:#4f9bff; --them:#e0364e; --hi:#f5a524;
   --def:#a78bfa; --tra:#fb923c; --off:#34d399;
+  --you:#22c55e;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;
@@ -106,10 +107,28 @@ select,input{touch-action:manipulation}
 @media (hover:hover){.chip:hover{border-color:#5a79ad}}
 .chip.on{background:var(--hi);border-color:var(--hi);color:#231603;font-weight:700}
 
-.rinkwrap{flex:1;min-height:0;width:auto;max-width:100%;margin:0 auto;
+.rinkwrap{flex:1;min-height:0;width:auto;max-width:100%;margin:0 auto;position:relative;
   background:var(--bg2);border:1px solid var(--line);
   border-radius:13px;overflow:hidden;display:flex}
 svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none}
+
+/* ======== setting the stage: what is happening, then who you are ======== */
+.stageover{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(6,11,20,.82)}
+.stageover.on{display:flex}
+.stagecard{width:100%;max-width:460px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:12px}
+.stagecard h2{font-size:26px;line-height:1.15}
+.stagecard .stagewhat{margin:0;font-size:17px;line-height:1.4;color:#dbe6f5;max-width:34ch}
+.stagecard .stagesay{margin:0;font-size:14.5px;line-height:1.4;color:var(--dim);max-width:36ch}
+.stagebtn{background:var(--you);color:#04240f;border-radius:12px;padding:15px 26px;
+  font-size:16.5px;font-weight:750;min-height:52px}
+.posgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;margin-top:2px}
+.posbig{background:var(--bg3);border:1px solid #3a4c73;border-radius:12px;padding:12px 6px;
+  min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.posbig b{font-size:20px;font-weight:800}
+.posbig span{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+@media (hover:hover){.posbig:hover{border-color:var(--you);background:#1e3a2c}}
 
 .cue{display:flex;gap:11px;align-items:center;flex:0 0 auto;padding:10px 14px;
   background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--hi);border-radius:11px}
@@ -120,6 +139,9 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .ctrl button{background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:8px 14px;font-size:13.5px}
 @media (hover:hover){.ctrl button:hover{border-color:#5a79ad}}
 .ctrl button.primary{background:var(--us);border-color:var(--us2);font-weight:700;min-width:104px}
+.ctrl button:disabled{opacity:.42;cursor:default}
+.ctrl button.primary.live{background:var(--bg3);border-color:var(--line);color:var(--dim);opacity:1}
+#pause .lbl{font-weight:600}
 .ctrl label{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px}
 input[type=range]{accent-color:var(--us2)}
 #scrub{flex:1;min-width:90px}
@@ -152,8 +174,8 @@ input[type=range]{accent-color:var(--us2)}
 .pbtn .ab{display:block;font-size:16px;font-weight:800}
 .pbtn .nm{display:block;font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
 @media (hover:hover){.pbtn:hover{border-color:#5a79ad;background:#243457}}
-.pbtn.on{background:var(--hi);border-color:#ffca6e;color:#231603}
-.pbtn.on .nm{color:#5c3d05}
+.pbtn.on{background:var(--you);border-color:#5ee9a0;color:#04240f}
+.pbtn.on .nm{color:#0b3d22}
 .pbtn.off{opacity:.3}
 
 .jobcard{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -217,11 +239,13 @@ input[type=range]{accent-color:var(--us2)}
 .keyrow{display:flex;align-items:center;gap:9px;font-size:13px;color:#ccd8ea}
 .sw{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:800;color:#fff}
 .sw.us{background:var(--us)} .sw.them{background:var(--them)}
-.sw.me{background:var(--hi);color:#231603;box-shadow:0 0 0 3px rgba(245,165,36,.22)}
+.sw.me{background:var(--you);color:#04240f;box-shadow:0 0 0 3px rgba(34,197,94,.22)}
 .sw.puck{background:#0b0b0b;border:2px solid #fff;width:15px;height:15px;margin:0 3px}
 .sw.ghost{background:transparent;border:2px dashed #9fb0c8}
 .sw.dot{background:#cf2b3c;width:9px;height:9px;margin:0 6px}
 .sw.look{background:var(--hi);color:#231603;width:18px;height:18px;margin:0 2px}
+.sw.vis{background:linear-gradient(90deg,rgba(245,165,36,.85),rgba(245,165,36,.12));border-radius:3px;
+  width:24px;height:14px}
 .sw.gap{background:transparent;border-top:2px dashed var(--us2);border-radius:0;height:0;width:22px}
 .toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .help{font-size:12.5px;color:var(--dim);line-height:1.5}
@@ -325,6 +349,8 @@ input[type=range]{accent-color:var(--us2)}
 
   .topbar{gap:8px;padding-top:calc(7px + env(safe-area-inset-top));padding-bottom:7px}
   .topbar .tbtn{min-height:40px;display:flex;align-items:center;justify-content:center}
+  /* the only route to Settings, Watch, Coach and Help on a phone - it gets the full 44 */
+  .topbar .tbtn.round{width:44px;height:44px;min-height:44px;font-size:16px}
   #p-watch,#p-coach,#p-set,#p-help{display:none}
   #p-more{display:flex}
   .tbtitle b{font-size:14px}
@@ -335,6 +361,7 @@ input[type=range]{accent-color:var(--us2)}
   .cue .t{font-size:15.5px}
   .ctrl{gap:6px}
   .ctrl button{padding:11px 13px;min-height:44px;min-width:52px}
+  .ctrl button.primary{min-width:92px}
   .ctrl button.primary{min-width:96px}
   .ctrl label{display:none}
   .nextbar{padding:8px 11px}
@@ -430,7 +457,10 @@ input[type=range]{accent-color:var(--us2)}
   .pill{font-size:10.5px;padding:4px 8px;letter-spacing:.06em}
   .tbtn{padding:8px 10px;font-size:12.5px}
   .tbtn.round{width:34px;height:34px}
+  .topbar .tbtn.round{width:44px;height:44px}
   .stage{padding:7px 8px calc(var(--peek,138px) + 6px)}
+  /* only here is the row genuinely tight enough to drop the word */
+  #pause .lbl{display:none}
   .cue .n{display:none}
 }
 </style>
@@ -511,10 +541,12 @@ input[type=range]{accent-color:var(--us2)}
       <div class="varrow" id="varrow"></div>
       <div class="rinkwrap">
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
+        <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
       </div>
       <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span></div>
       <div class="ctrl" id="ctrlrow">
         <button class="primary" id="play">Play &#9654;</button>
+        <button id="pause"><span class="ic">&#9646;&#9646;</span><span class="lbl"> Pause</span></button>
         <button id="back">&#9664;</button>
         <button id="fwd">&#9654;</button>
         <button id="reset">Reset</button>
@@ -567,12 +599,12 @@ input[type=range]{accent-color:var(--us2)}
     <h4>2. What the circles mean</h4>
     <div class="keygrid">
       <div class="keyrow"><span class="sw us">LW</span><span><b>Blue = your team.</b> The letters are positions: C, LW, RW, LD, RD, G.</span></div>
-      <div class="keyrow"><span class="sw me">YOU</span><span><b>Amber = you.</b> Change which position you are on the right.</span></div>
+      <div class="keyrow"><span class="sw me">YOU</span><span><b>Green = you.</b> Change which position you are on the right.</span></div>
       <div class="keyrow"><span class="sw them">3</span><span><b>Red = the other team.</b> The numbers 1 to 5 are only name tags so you can tell them apart. They are <i>not</i> positions.</span></div>
       <div class="keyrow"><span class="sw puck"></span><span><b>Black dot = the puck.</b> Sitting on a player means that player has it.</span></div>
       <div class="keyrow"><span class="sw dot"></span><span><b>Tiny red dots and thin red circles = paint on the ice.</b> Faceoff dots and faceoff circles. Not players.</span></div>
       <div class="keyrow"><span class="sw ghost"></span><span><b>Dashed grey circle = where you should be.</b> It shows up when you drag somebody.</span></div>
-      <div class="keyrow"><span class="sw look">1</span><span><b>Numbered arrows = what to look at, in order.</b> 1 first, then 2, then 3.</span></div>
+      <div class="keyrow"><span class="sw vis"></span><span><b>Amber beam = your vision.</b> Where your eyes go. The brightest, widest beam is what you look at first. Turn it off in Settings.</span></div>
       <div class="keyrow"><span class="sw gap"></span><span><b>Blue dashed line = feet to your closest teammate.</b> Too close means you are stacked up.</span></div>
     </div>
     <div class="help" style="margin-top:9px">The red players have a small word under them - <i>net front</i>, <i>slot</i>, <i>their D</i> - so you always know who is who.</div>
@@ -618,7 +650,7 @@ input[type=range]{accent-color:var(--us2)}
     <div class="toggles">
       <label class="chk"><input type="checkbox" id="t-roles" checked> Label the other team</label>
       <label class="chk"><input type="checkbox" id="t-ghost" checked> Correct spot (ghost)</label>
-      <label class="chk"><input type="checkbox" id="t-look" checked> Where to look</label>
+      <label class="chk"><input type="checkbox" id="t-look" checked> Vision (where to look)</label>
       <label class="chk"><input type="checkbox" id="t-space" checked> Spacing in feet</label>
       <label class="chk"><input type="checkbox" id="t-pass"> Passing options</label>
       <label class="chk"><input type="checkbox" id="t-lanes"> The three lanes</label>
@@ -2196,7 +2228,7 @@ const layer=id=>$('g-'+id);
 const isPhone=()=>window.matchMedia('(max-width:1000px)').matches;
 /* on a phone the rink is physically small, so scale the on-ice type up */
 const FS=n=>+(n*S.fs).toFixed(2);
-const TR=()=>+(3*Math.min(1.22,S.fs)).toFixed(2);
+const TR=()=>+(2.45*Math.min(1.18,S.fs)).toFixed(2);
 /* on a phone the long role words collide, so use short ones */
 const SHORTROLE={'in the corner':'corner','net front':'net','in the slot':'slot','on the wall':'wall',
   'their centre':'their C','back-checker':'checker','carrying it':'has puck','their wing':'their W',
@@ -2247,7 +2279,6 @@ function landmark(key,t){
 }
 function eff(k){
   if(S.mode==='build') return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
-  if(k==='look'&&S.mode==='learn'&&S.tab!=='look') return false;
   if(TEST.active&&!TEST.done){
     const q=TEST.qs[TEST.i];
     if(q&&q.type==='place'&&!TEST.answered&&['ghost','look','space','trail','pass'].includes(k))return false;
@@ -2299,7 +2330,7 @@ function render(){
     sit.roster.filter(p=>p!=='G').forEach(id=>{
       const s=series('us',id); if(s.length<2)return;
       g.appendChild(el('polyline',{points:s.map(x=>disp(x.p).join(',')).join(' '),fill:'none',
-        stroke:id===S.pos?'#f5a524':'#4f9bff','stroke-width':0.5,
+        stroke:id===S.pos?'#22c55e':'#4f9bff','stroke-width':0.5,
         'stroke-opacity':id===S.pos?0.9:0.32,'stroke-dasharray':'1.6 1.6'}));
     });
   }
@@ -2334,18 +2365,25 @@ function render(){
   const cc=(sit.coach||{})[S.pos];
   if(eff('look')&&cc&&cc.look&&sit.roster.includes(S.pos)){
     const g=layer('look'), me=disp(shown(S.pos,t)), cols=['#f5a524','#f7c46c','#f9dcae'];
+    /* vision: where his eyes go, drawn as a beam out of the player. First look is the
+       brightest and widest, so the order reads without numbers on the ice. */
+    const opa=[0.30,0.19,0.12], half=[13,11,9];
     cc.look.forEach((lk,i)=>{
       const tp=landmark(lk.to,t); if(!tp)return;
-      const b=disp(tp),dx=b[0]-me[0],dy=b[1]-me[1],L=Math.hypot(dx,dy)||1;
-      let ex,ey,line=true;
-      if(L<2.6){ const a=(-125+i*42)*Math.PI/180; ex=me[0]+Math.cos(a)*5.2; ey=me[1]+Math.sin(a)*5.2; line=false; }
-      else if(L>=9){ ex=b[0]-dx/L*7.2; ey=b[1]-dy/L*7.2; }
-      else { ex=(me[0]+b[0])/2-dy/L*3.6; ey=(me[1]+b[1])/2+dx/L*3.6; }
-      if(line)g.appendChild(el('line',{x1:me[0],y1:me[1],x2:ex,y2:ey,stroke:cols[i]||'#f9dcae',
-        'stroke-width':0.45,'stroke-dasharray':'2 1.6','stroke-opacity':0.95,'marker-end':'url(#arrow)'}));
-      g.appendChild(el('circle',{cx:ex,cy:ey,r:FS(2.5),fill:'#fff','fill-opacity':0.92}));
-      g.appendChild(el('circle',{cx:ex,cy:ey,r:FS(1.95),fill:cols[i]||'#f9dcae'}));
-      g.appendChild(el('text',{x:ex,y:ey+0.9,'font-size':FS(2.7),'font-weight':800,fill:'#231603','text-anchor':'middle'},String(lk.n)));
+      const b=disp(tp), dx=b[0]-me[0], dy=b[1]-me[1], L=Math.hypot(dx,dy)||1;
+      const col=cols[i]||'#f9dcae';
+      const a0=Math.atan2(dy,dx);
+      const start=TR()*1.15, len=Math.max(9,Math.min(L,46));
+      const w=(half[i]||9)*Math.PI/180;
+      const px=me[0]+Math.cos(a0)*start, py=me[1]+Math.sin(a0)*start;
+      const x1=me[0]+Math.cos(a0-w)*len, y1=me[1]+Math.sin(a0-w)*len;
+      const x2=me[0]+Math.cos(a0+w)*len, y2=me[1]+Math.sin(a0+w)*len;
+      g.appendChild(el('path',{d:'M'+px+','+py+' L'+x1+','+y1+' A'+len+','+len+' 0 0 1 '+x2+','+y2+' Z',
+        fill:col,'fill-opacity':opa[i]||0.12,stroke:col,'stroke-width':0.22,'stroke-opacity':0.5,
+        'clip-path':'url(#rinkclip)'}));
+      // and a light ring on the thing he is meant to be seeing
+      if(L>start+2) g.appendChild(el('circle',{cx:b[0],cy:b[1],r:TR()*1.5,fill:'none',
+        stroke:col,'stroke-width':0.3,'stroke-opacity':0.75,'stroke-dasharray':'1.4 1.2'}));
     });
   }
 
@@ -2466,14 +2504,14 @@ function roleSpot(p,pts){
 }
 function token(id,p,kind,label,role,pts){
   const g=el('g',{class:'tok','data-id':id,style:'cursor:grab'});
-  const fill=kind==='them'?'#e0364e':(kind==='me'?'#f5a524':'#1f6feb');
+  const fill=kind==='them'?'#e0364e':(kind==='me'?'#22c55e':'#1f6feb');
   const r=TR();
-  // an invisible pad so a fingertip can grab it
-  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:Math.max(6,r*2),fill:'transparent','pointer-events':'all'}));
-  if(kind==='me')g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r*1.55,fill:'#f5a524','fill-opacity':0.22}));
-  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r,fill,stroke:kind==='me'?'#fff':'rgba(255,255,255,.65)','stroke-width':kind==='me'?0.6:0.4}));
-  g.appendChild(el('text',{x:p[0],y:p[1]+r*0.35,'font-size':FS(kind==='me'?2.5:2.6),'font-weight':800,
-    fill:kind==='me'?'#231603':'#fff','text-anchor':'middle','pointer-events':'none'},kind==='me'?'YOU':label));
+  // an invisible pad so a fingertip can grab it even though the dot is small
+  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:Math.max(7,r*2.2),fill:'transparent','pointer-events':'all'}));
+  if(kind==='me')g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r*1.6,fill:'#22c55e','fill-opacity':0.24}));
+  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r,fill,stroke:kind==='me'?'#fff':'rgba(255,255,255,.65)','stroke-width':kind==='me'?0.55:0.4}));
+  g.appendChild(el('text',{x:p[0],y:p[1]+r*0.35,'font-size':FS(kind==='me'?2.1:2.25),'font-weight':800,
+    fill:kind==='me'?'#04240f':'#fff','text-anchor':'middle','pointer-events':'none'},kind==='me'?'YOU':label));
   if(role){
     const c=roleSpot(p,pts||[]);
     g.appendChild(el('text',{x:c[0],y:c[1],'font-size':FS(2.1),'text-anchor':'middle','font-weight':700,
@@ -2494,6 +2532,11 @@ function segDist(p,a,b){
 /* the strip under the ice: normally the step cue, but on a phone in a quiz it carries
    the question, because a question hidden inside the sheet is a question he cannot read */
 function paintCue(){
+  if(typeof STAGE!=='undefined' && STAGE.active){
+    $('cuen').textContent=STAGE.label||'Setup';
+    $('cuetext').textContent=STAGE.cue||'';
+    return;
+  }
   const q=(TEST.active&&!TEST.done)?TEST.qs[TEST.i]:null;
   if(q&&isPhone()){
     $('cuen').textContent='Q '+(TEST.i+1)+'/'+TEST.qs.length;
@@ -2514,6 +2557,7 @@ function renderTopbar(){
 function nextOf(){ return (NEXTSTEP[S.sit.id]||{})[variant().id]||null; }
 function renderNext(){
   const n=nextOf(), bar=$('nextbar');
+  if(typeof STAGE!=='undefined' && STAGE.active){ bar.style.display='none'; return; }
   if(!n||S.mode!=='learn'){ bar.style.display='none'; return; }
   /* on a phone this bar is 75px the ice needs - it turns up when the play is done */
   if(isPhone()&&S.t<0.999){ bar.style.display='none'; return; }
@@ -2772,6 +2816,8 @@ function enumerateAudioScript(){
   const add=lines=>(lines||[]).forEach(L=>{ if(L.t&&!seen[L.id]) seen[L.id]=L.t; });
   ['D','T','O'].forEach(k=>add(chunk(PHASE[k].say)));
   SITUATIONS.forEach(s=>{
+    add(chunk('This one is '+s.name+'.'));
+    add(chunk(s.about));
     s.variants.forEach(v=>{
       add(chunk('This one is '+s.name+'. '+v.name+'.'));
       v.frames.forEach(f=>add(chunk(f.cue)));
@@ -2792,7 +2838,9 @@ function enumerateAudioScript(){
    'Have another go.','That is a kid who knows where to be.',
    'Solid. Go back to the ones you missed and watch them again.',
    'Good start. Hit Listen in Learn mode and walk through it once more.',
-   'Defense. They have the puck. Your job is to stay between him and the net.'
+   'Defense. They have the puck. Your job is to stay between him and the net.',
+   'Now let us dive into what you do by position.','Which one are you?',
+   'Tap the position you play.','Here we go. Step one.'
   ].forEach(s=>add(chunk(s)));
   return seen;
 }
@@ -2861,11 +2909,18 @@ $('voicetest').onclick=()=>{
 };
 
 /* ---------------- playback ---------------- */
-function setPlayBtn(on){ $('play').innerHTML=on?'Pause &#9647;&#9647;':'Play &#9654;'; }
+/* separate Play and Pause, not one button that changes meaning under your thumb -
+   whichever action is unavailable right now is the dimmed one */
+function setPlayBtn(on){
+  const p=$('play'), q=$('pause');
+  if(p){ p.disabled=!!on; p.classList.toggle('live',!!on); }
+  if(q){ q.disabled=!on; }
+}
 function stop(){ S.playing=false; S.gen++; if(S.raf)cancelAnimationFrame(S.raf); S.raf=null; S.lastTs=null; setPlayBtn(false); hush(); }
 function hardReset(){ stop(); S.t=0; S.manual={}; note(null); }
 function startPlay(target){
   S.target=Math.min(1,target); if(S.t>=S.target-1e-4)return;
+  if(S.raf) cancelAnimationFrame(S.raf);        // never run two loops at once
   S.playing=true; S.lastTs=null; setPlayBtn(true);
   S.raf=requestAnimationFrame(tick);
 }
@@ -2896,12 +2951,68 @@ function onPlayEnd(){
   renderNext();
   if($('t-follow').checked) setTimeout(()=>{ if(!S.playing)goNext(true); },SPK.on?300:900);
 }
-$('play').onclick=()=>{ if(S.playing){stop();return;} if(S.t>=0.999)S.t=0; startPlay(1); };
+$('play').onclick=()=>{ if(S.playing)return; if(S.t>=0.999)S.t=0; startPlay(1); };
+$('pause').onclick=()=>{ stop(); };
 $('fwd').onclick=()=>{ const n=frames().find(x=>x.t>S.t+1e-3); stop(); startPlay(n?n.t:1); };
 $('back').onclick=()=>{ const p=frames().slice().reverse().find(x=>x.t<S.t-1e-3); stop(); S.t=p?p.t:0; render(); };
 $('reset').onclick=()=>{ hardReset(); render(); };
 $('scrub').oninput=e=>{ stop(); S.t=e.target.value/1000; render(); };
 $('nextbtn').onclick=()=>goNext(true);
+
+/* ---------------- setting the stage ----------------
+   A kid opening a situation used to get narration over a rink that was not moving, with
+   no idea who he was. So: first what is happening, then which player you are, and only
+   then the steps. */
+const STAGE={active:false,step:null,cue:null,label:null};
+function setStageUI(on){
+  STAGE.active=!!on;
+  $('stageover').classList.toggle('on',!!on);
+  $('ctrlrow').style.display = on ? 'none' : (S.mode==='quiz'?'none':'flex');
+  $('varrow').style.display = on ? 'none' : '';
+  if(!on){ buildVars(); renderNext(); }
+  else { $('nextbar').style.display='none'; }
+}
+function clearStage(){ STAGE.step=null; STAGE.cue=null; setStageUI(false); }
+function stageSituation(){
+  const p=PHASE[S.sit.phase];
+  STAGE.step='situation'; STAGE.label='The situation'; STAGE.cue=S.sit.about;
+  $('stagecard').innerHTML=
+    '<span class="pill" style="background:'+p.col+'">'+p.label+'</span>'+
+    '<h2>'+esc(S.sit.name)+'</h2>'+
+    '<p class="stagewhat">'+esc(S.sit.about)+'</p>'+
+    '<p class="stagesay">'+esc(p.say)+'</p>'+
+    '<button class="stagebtn" id="stagego">Next: pick my spot &#9654;</button>';
+  setStageUI(true); paintCue();
+  $('stagego').onclick=()=>stagePositions();
+  const L=chunk(p.say,{rate:0.95,pause:280,tail:340})
+    .concat(chunk('This one is '+S.sit.name+'.',{rate:0.96,pause:240}))
+    .concat(chunk(S.sit.about,{rate:0.94,pause:260,tail:380}))
+    .concat(chunk('Now let us dive into what you do by position.',{rate:0.94,pause:200}));
+  if(SPK.on) speakLines(L,()=>{ if(STAGE.step==='situation') stagePositions(); });
+}
+function stagePositions(){
+  STAGE.step='position'; STAGE.label='Your spot'; STAGE.cue='Tap the position you play.';
+  const roster=OURPOS.concat(['G']).filter(p=>S.sit.roster.includes(p));
+  $('stagecard').innerHTML=
+    '<h2>Which one are you?</h2>'+
+    '<p class="stagewhat">Tap the position you play. On the ice, <b style="color:#22c55e">green</b> is always you.</p>'+
+    '<div class="posgrid">'+roster.map(p=>'<button class="posbig" data-p="'+p+'"><b>'+p+'</b><span>'+
+      esc(POSNAMES[p])+'</span></button>').join('')+'</div>';
+  setStageUI(true); paintCue();
+  $('stagecard').querySelectorAll('.posbig').forEach(b=>b.onclick=()=>pickStagePos(b.dataset.p));
+  if(SPK.on) speakLines(chunk('Which one are you?',{rate:0.94,pause:260})
+    .concat(chunk('Tap the position you play.',{rate:0.94,pause:200})));
+}
+function pickStagePos(pos){
+  S.pos=pos; clearStage();
+  hardReset(); paintRail(); render();
+  const c=(S.sit.coach||{})[pos];
+  let L=chunk('You are the '+POSNAMES[pos]+'.',{rate:0.95,pause:250});
+  if(c&&c.job) L=L.concat(chunk('Your job. '+c.job,{rate:0.9,pause:200,tail:380}));
+  L=L.concat(chunk('Here we go. Step one.',{rate:0.95,pause:230}))
+     .concat(chunk(frames()[0].cue,{rate:0.93,pause:190}));
+  if(SPK.on) speakLines(L,()=>{ startPlay(1); });
+}
 
 /* ---------------- screens ---------------- */
 function showScreen(name){
@@ -2911,6 +3022,7 @@ function showScreen(name){
   if(name==='menu') buildMenu();
 }
 $('p-back').onclick=()=>{
+  clearStage(); stop();
   if(S.mode==='quiz'||S.mode==='build'){ setMode('learn'); return; }
   showScreen('menu');
 };
@@ -2948,6 +3060,14 @@ function syncTapHints(){
     if(h) h.textContent=c.classList.contains('open')?' \u00b7 tap to close':' \u00b7 tap to open';
   });
 }
+/* opening a situation from the menu always starts with the stage - and it is a real tap,
+   so this is where the audio gets unlocked */
+function openSituation(s){
+  loadSituation(s.id,s.variants[0].id);
+  showScreen('play'); setMode('learn');
+  primeSpeech(); unlockAudioEl();
+  stageSituation();
+}
 function buildMenu(){
   const cols=$('menucols');
   /* keep whatever the kid had open - a rebuild must not slam their section shut */
@@ -2967,7 +3087,7 @@ function buildMenu(){
     SITUATIONS.filter(s=>s.phase===ph).forEach(s=>{
       const b=document.createElement('button');
       b.className='mitem'; b.innerHTML='<b>'+esc(s.name)+'</b><span>'+esc(s.about)+'</span>';
-      b.onclick=()=>{ loadSituation(s.id,s.variants[0].id); showScreen('play'); setMode('learn'); if(SPK.on)speakIntro(); };
+      b.onclick=()=>openSituation(s);
       row.appendChild(b);
     });
     d.appendChild(row);
@@ -2985,7 +3105,7 @@ function buildMenu(){
       const b=document.createElement('button');
       b.className='mitem';
       b.innerHTML='<b>'+esc(s.name)+'</b><span>'+PHASE[s.phase].label+' &middot; '+s.variants[0].frames.length+' step(s)</span>';
-      b.onclick=()=>{ loadSituation(s.id,s.variants[0].id); showScreen('play'); setMode('learn'); };
+      b.onclick=()=>openSituation(s);
       row.appendChild(b);
     });
     d.appendChild(row);
@@ -3181,8 +3301,9 @@ function tapToken(id){
 
 /* ---------------- modes ---------------- */
 function setMode(m){
+  if(m!=='learn') clearStage();
   S.mode=m; TEST.active=(m==='quiz');
-  $('ctrlrow').style.display=(m==='quiz')?'none':'flex';
+  $('ctrlrow').style.display=(m==='quiz'||STAGE.active)?'none':'flex';
   $('p-back').innerHTML=(m==='learn')?'&#8249; Menu':'&#8249; Learn';
   $('p-watch').style.display=(m==='learn')?'':'none';
   $('p-prog').textContent='';
@@ -3336,7 +3457,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
   if(e.key==='Escape'){ ['help','set','vid','coach','more'].forEach(k=>mask(k,false)); return; }
   if(S.screen!=='play')return;
-  if(e.code==='Space'){ e.preventDefault(); if(S.mode!=='quiz')$('play').click(); }
+  if(e.code==='Space'){ e.preventDefault(); if(S.mode!=='quiz') (S.playing?$('pause'):$('play')).click(); }
   else if(e.key==='ArrowRight'){ if(S.mode!=='quiz')$('fwd').click(); }
   else if(e.key==='ArrowLeft'){ if(S.mode!=='quiz')$('back').click(); }
   else if(e.key==='r'||e.key==='R'){ if(S.mode!=='quiz')$('reset').click(); }
