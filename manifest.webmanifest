@@ -7,8 +7,8 @@
   "scope": ".",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
-  "background_color": "#0d1524",
-  "theme_color": "#0d1524",
+  "background_color": "#080c24",
+  "theme_color": "#080c24",
   "orientation": "any",
   "categories": ["sports", "education"],
   "icons": [
