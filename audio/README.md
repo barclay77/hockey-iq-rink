@@ -1,6 +1,6 @@
 # Voice pack for Hockey IQ Rink
 
-The app speaks 558 fixed lines (situation intros, step cues, job descriptions, quiz
+The app speaks 579 fixed lines (situation intros, step cues, job descriptions, quiz
 questions/options/why-text, feedback phrases) plus a handful of lines built from a
 live number (a measured distance in feet, a live quiz score) that can't be
 pre-recorded and will always use on-device speech synthesis. This pack covers the 558
@@ -38,11 +38,19 @@ sentence-cased for speech, so no need to shout those either.
 
 ## Format notes for whoever wires it up
 
-- `lines.json`: flat object, `{ "<id>": "<text to speak>" }`. 558 entries.
+- `lines.json`: flat object, `{ "<id>": "<text to speak>" }`. 579 entries.
 - The app already contains the player and the manifest check - nothing else to
   build. It plays `audio/<id>.mp3` when the id is listed in the manifest, and
   falls back to speechSynthesis, per line, if the id is missing or the file
   errors (so a typo'd filename degrades to speech instead of silence).
+- Playback uses ONE persistent `<audio>` element, unlocked inside the Listen tap.
+  iOS grants playback permission per element, so constructing a new `Audio()` per
+  clip is always locked - do not "optimise" it back into per-clip elements.
+- When a line falls back, it logs why, and the reason is specific:
+  `[hiq audio] LOCKED` = the element was never unlocked in a real tap (permissions,
+  not your files); `[hiq audio] MISSING` = the file 404'd or isn't a valid mp3.
+  Running totals are on `AUDIO.fails` ({locked, missing, other}) and the last one
+  on `AUDIO.lastFail`, both readable from the console on a device.
 - Re-run this export any time the copy in the app changes - regenerating
   `lines.json` is: open the app, then in the console call
   `window.__exportAudioScript()`. It always reflects whatever is in
