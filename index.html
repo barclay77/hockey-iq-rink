@@ -72,6 +72,12 @@ select,input{touch-action:manipulation}
 .menuwrap h1{font-size:30px;margin:0}
 @media (max-width:430px){ .brandmark{width:38px;height:38px} .menuwrap h1{font-size:25px} }
 .lede{color:var(--dim);font-size:15px;margin:0 0 22px}
+.agebar{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;align-items:center;margin:0 0 18px}
+.agebar .agelab{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin-right:3px}
+.agebar .chip{min-height:38px;display:inline-flex;align-items:center;font-weight:650}
+.agebar .agecount{flex:0 0 100%;text-align:center;font-size:12.5px;color:var(--dim);margin-top:3px}
+.mcol .mnone{font-size:12.5px;color:var(--dim);padding:2px 2px 6px;line-height:1.4}
 .menucols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;text-align:left}
 .mcol{background:var(--bg2);border:1px solid var(--line);border-top:4px solid var(--def);
   border-radius:14px;padding:14px}
@@ -541,6 +547,7 @@ input[type=range]{accent-color:var(--us2)}
   <div class="menuwrap">
     <div class="brand"><img class="brandmark" src="icons/icon-192.png" alt="" width="46" height="46"><h1>Hockey IQ Rink</h1></div>
     <p class="lede">Everything on the ice is one of three things. Pick what is happening.</p>
+    <div class="agebar" id="agebar"></div>
     <div class="menucols" id="menucols"></div>
 
     <div class="coachbox" style="display:none">
@@ -793,74 +800,9 @@ const POSNAMES = {C:'Center', LW:'Left Wing', RW:'Right Wing', LD:'Left D', RD:'
    by direct fetch. Nothing here is guessed.
    ============================================================ */
 
-const SEARCHQ = {
-  dzone:'hockey defensive zone coverage',
-  breakout:'hockey defensive zone breakout',
-  forecheck:'hockey forecheck F1 F2 F3',
-  ozone:'hockey offensive zone cycle low to high',
-  entry:'hockey offensive zone entry',
-  neutral:'hockey neutral zone regroup gap control',
-  pp:'hockey power play 1-3-1 umbrella',
-  pk:'hockey penalty kill box',
-  faceoff:'hockey faceoff positioning'
-};
+const SEARCHQ={};
 
-const VIDEOS = {
-  dzone:[
-    {id:'yRWi6vbPUbM', t:'Defensive Zone Coverage - The House in Hockey (Beginner)', c:'Coach K', w:'Best starting point - teaches "the house," the ice you never give up.'},
-    {id:'IVImTLlzFv8', t:'Defensive Zone Positioning & Net Front Coverage', c:'Secret Sauce Hockey', w:'Exactly the RD net-front job: box out, stick in the lane.'},
-    {id:'cCjmKSmz4Ss', t:'D Zone Coverage Basics', c:'Hockey Coach Vision', w:'Animated basics. Pause it and match it to the rink above.'},
-    {id:'A3S5Df9o2Y8', t:'How to Collapse the D-Zone', c:'Francis Hockey Development', w:'The low-zone layer once the box makes sense.'},
-    {id:'h131UnupxtQ', t:'Glen Gulutzan - 3 Types of NHL Defensive Zone Coverage', c:'The Coaches Site', w:'Man vs zone vs hybrid. For the parent, not the kid.'}
-  ],
-  breakout:[
-    {id:'-5RhWjixABU', t:'Hockey 101: Defensive Zone Breakouts', c:'Off the Wall Hockey', w:'The whole shape in one video, including wingers on the walls.'},
-    {id:'91349oj2Q6U', t:'Breakout Options: D-to-D, Strong-Side Winger, Centre Pass', c:'Coach K', w:'The three options animated above, explained on video.'},
-    {id:'_nimsPFq0IQ', t:'Strong-Side Breakout Fundamentals', c:'HockeyShare', w:'Wall breakout mechanics - drillable at practice as-is.'}
-  ],
-  forecheck:[
-    {id:'-skgropbRuI', t:'The Roles of F1, F2 and F3 in Forechecking', c:'Rink Tactics', w:'Watch this one FIRST, before any system name.'},
-    {id:'G-_LNRd_fDo', t:'1-2-2 Forechecking System', c:'Weiss Tech Hockey', w:'Matches the 1-2-2 variant on the rink above.'},
-    {id:'gku-uLmPx_g', t:'2-1-2 Forecheck Explanation', c:'Weiss Tech Hockey', w:'Matches the 2-1-2 variant. Same coach, same vocabulary.'},
-    {id:'wb6MwBW-zJ0', t:'How to Teach Hockey Angling Skills From the Basics', c:'Hockey Extreme', w:'Angling is the whole F1 job. This teaches it from zero.'},
-    {id:'TRGkGVUdTNA', t:'David Urquhart - Angling and How to Teach It', c:'Hockey Eastern Ontario', w:'Minor-hockey angling progression you can run in the driveway.'},
-    {id:'fTa7uBiEDQM', t:'Teaching Forechecking Fundamentals - Greg Cronin', c:'The Coaches Site', w:'Fundamentals-first framing for coaches.'}
-  ],
-  ozone:[
-    {id:'dr3ECi9N2-E', t:'Cycling Basics in the Offensive Zone', c:'Evolution Hockey', w:'Right vocabulary level for U10. Start here.'},
-    {id:'Bi5yWL5TT6I', t:'Offensive Concept: "The Cycle" Pt. 1', c:'Coach Matt', w:'Why you turn back down low instead of forcing it up the wall.'},
-    {id:'kWaketBZWrg', t:'How To Utilize The Cycle In The Offensive Zone - Billy Jaffe', c:'NESN', w:'Broadcast-quality visuals. Great on a big screen.'},
-    {id:'S4qpRDAnq9s', t:'Offensive Zone Strategy: Attacking the Net', c:'TaiwanHockey', w:'Net-front presence - the "stop at the net" habit.'}
-  ],
-  entry:[
-    {id:'LjF2rB1VuH4', t:'Hockey, Explained: Zone Entries - Wide Drive', c:'BCHockey_Source', w:'This is the wide-with-speed variant, on video.'},
-    {id:'DPPwhH29V_c', t:'Hockey, Explained: Zone Entries - Wide Entry Low Delay', c:'BCHockey_Source', w:'The delay. The most under-taught play in youth hockey.'},
-    {id:'8sxlQ50f1R4', t:'Hockey, Explained: Zone Entries - High Delay', c:'BCHockey_Source', w:'The high version of the same idea.'}
-  ],
-  neutral:[
-    {id:'FrdwCJ6c2LM', t:'Understanding Neutral Zone Regroups', c:'PowerTech Hockey', w:'Why you bring it back instead of dumping it in.'},
-    {id:'hLwcEyma7L8', t:'Gap Control for Defense in Hockey', c:'Train 2.0 Hockey', w:'The core D habit. Short gap, feet moving.'},
-    {id:'eAp5CrhyNeU', t:'Stop Getting Beat Wide - Gap Control Explained (Full Lesson)', c:'STL Hockey Training', w:'Fixes the single most common U10 defensive error.'},
-    {id:'0A0clGq1FZs', t:'Neutral Zone Regroup - D-to-D Drill', c:'Sean Johnson', w:'An actual drill you can ask his coach to run.'}
-  ],
-  pp:[
-    {id:'8k7cfM4U-FI', t:'Power Play Basics: Umbrella (1-3-1) Setup', c:'PowerTech Hockey', w:'The same five spots as the rink above.'},
-    {id:'y63cHxYlMRw', t:'Hockey Power Play: Umbrella', c:'Weiss Tech Hockey', w:'Coach-facing breakdown of the shape.'},
-    {id:'tL5uUN8am1o', t:'The Most Dangerous Spot on the Ice: The Bumper Explained', c:'Weiss Tech Hockey', w:'If he plays the middle on the PP, watch this twice.'}
-  ],
-  pk:[
-    {id:'XeNryUEVlI8', t:'Hockey Penalty Kill: Simple Box', c:'Weiss Tech Hockey', w:'"Simple box" is the right first penalty kill at this age.'},
-    {id:'b-FuFHEAsoA', t:'Penalty Kill: Box vs. Diamond Formation', c:'Rink Tactics', w:'Side-by-side of the two shapes he will hear about.'},
-    {id:'CS5rJEhOu8A', t:'Diamond PK: Defending the Bumper and Net Front', c:'Webb Human Performance', w:'For later - how the box changes against a 1-3-1.'},
-    {id:'0Hspvnyt_Nc', t:'Aggressive Box-to-Diamond Penalty Kill Rotation', c:'Langdon Lamp Lighter Hockey', w:'Advanced. Save this one for a couple years from now.'}
-  ],
-  faceoff:[
-    {id:'VhKwoN9m_VU', t:'Hockey Faceoff Positions For Beginners (U8)', c:'Samantha Hilde', w:'The simplest possible version. Watch this first.'},
-    {id:'pPpRW8GK-Gg', t:'Hockey D-Zone Face-Off Pt. 1', c:'Coach Matt', w:'Defensive zone draw assignments, position by position.'},
-    {id:'NRHedJxSB-s', t:'Offensive Zone Face-off Setup - 3 Plays', c:'Coach K', w:'Three real O-zone set plays off the draw.'},
-    {id:'oeG_5mNKzMg', t:'Steve Spott - Defensive Zone Faceoff Options', c:'The Coaches Site', w:'Pro-level option tree. Parent reference.'}
-  ]
-};
+const VIDEOS={};
 
 const CHANNELS = [
   {n:'Ice Hockey Systems', u:'https://www.youtube.com/@icehockeydrills'},
@@ -892,190 +834,22 @@ const PHASE={
 };
 
 /* phase of each frame, per situation, per variant */
-const PHASEFRAMES={
-  dzone:{corner:['D','D','D','T','T'], behind:['D','D','D','T'], point:['D','D','D','T']},
-  forecheck:{'122':['D','D','D','T','O'], '212':['D','D','T','O'], f2:['D','D','T','O']},
-  rush:{gap:['D','D','D','D']},
-  pk:{box:['D','D','D','D','D']},
-  breakout:{wall:['T','T','T','T','T'], dtod:['T','T','T','T','T']},
-  regroup:{regroup:['T','T','T','T','T']},
-  entry:{wide:['T','O','O','O','O'], delay:['T','T','O','O']},
-  faceoff:{dzone:['T','T','T','T'], ozone:['T','O','O','O']},
-  ozone:{cycle:['O','O','O','O','O'], drive:['O','O','O','O']},
-  pp:{'131':['O','O','O','O','O']}
-};
+const PHASEFRAMES={};
 
 /* where the play goes next - this is the chain that makes it a game
    and not a set of flashcards */
-const NEXTSTEP={
-  dzone:{
-    corner:{sit:'breakout',v:'wall',label:'We knocked it down - the puck is ours. Now get out of our own end.'},
-    behind:{sit:'breakout',v:'wall',label:'We won the wall race. Now get out of our own end.'},
-    point:{sit:'breakout',v:'wall',label:'Rebound is covered. Now get out of our own end.'}},
-  forecheck:{
-    '122':{sit:'ozone',v:'cycle',label:'We stole it below their circles. Now hang on to it.'},
-    '212':{sit:'ozone',v:'drive',label:'We have it in the slot with speed. Go to the net.'},
-    f2:{sit:'ozone',v:'cycle',label:'You won the wall. Now play offense down low.'}},
-  rush:{gap:{sit:'dzone',v:'corner',label:'They got it in deep on us. Now it is defensive zone coverage.'}},
-  pk:{},
-  breakout:{
-    wall:{sit:'entry',v:'wide',label:'We are out and moving. Now attack their blue line.'},
-    dtod:{sit:'entry',v:'wide',label:'Out clean. Now attack their blue line.'}},
-  regroup:{regroup:{sit:'entry',v:'wide',label:'Three lanes, full speed. Now attack their blue line.'}},
-  entry:{
-    wide:{sit:'ozone',v:'cycle',label:'We are in with the puck. Now keep it and work it low.'},
-    delay:{sit:'ozone',v:'cycle',label:'Clean entry with three players. Now keep it.'}},
-  faceoff:{
-    dzone:{sit:'breakout',v:'wall',label:'We won the draw back. Now break out.'},
-    ozone:{sit:'ozone',v:'cycle',label:'We won the draw in their end. Now go to work.'}},
-  ozone:{
-    cycle:{sit:'rush',v:'gap',label:'They blocked it and took off. Now they are coming at us.'},
-    drive:{sit:'rush',v:'gap',label:'They got the rebound out. Now they are coming at us.'}},
-  pp:{}
-};
+const NEXTSTEP={};
 
 /* short labels under the red players so a kid knows who is who */
-const ROLES={
-  dzone:{X1:'in the corner',X2:'net front',X3:'slot',X4:'their D',X5:'their D'},
-  forecheck:{X1:'their D',X2:'their D',X3:'their wing',X4:'their wing',X5:'their centre',XG:'goalie'},
-  rush:{X1:'carrying it',X2:'their wing',X3:'their wing',X4:'their D',X5:'their D'},
-  pk:{X1:'point',X2:'half wall',X3:'half wall',X4:'bumper',X5:'net front'},
-  breakout:{X1:'their F1',X2:'their F2',X3:'their F3',X4:'their D',X5:'their D'},
-  regroup:{X1:'their F1',X2:'their F2',X3:'their F2',X4:'their D',X5:'their D'},
-  entry:{X1:'back-checker',X2:'their D',X3:'their D',X4:'their wing',X5:'their wing'},
-  faceoff:{X1:'their centre',X2:'their wing',X3:'their wing',X4:'their D',X5:'their D',XG:'goalie'},
-  ozone:{X1:'on the wall',X2:'net front',X3:'in the slot',X4:'their D',X5:'their D',XG:'goalie'},
-  pp:{X1:'killer',X2:'killer',X3:'killer',X4:'killer',XG:'goalie'}
-};
+const ROLES={};
 
 /* ============================================================
    TEST BANK - multiple choice
    ============================================================ */
-const TESTS={
- dzone:[
-  {q:'They have the puck in the corner and your D is going to pressure him. You are the centre. What do you do?',
-   o:['Go help your D in the corner - two on one','Stay just off your D and cover the next man in the middle',
-      'Go stand in front of your own net','Take off up the ice looking for a breakaway'],a:1,
-   why:'Two of you on one puck leaves the middle empty, and the middle is where they score from. Support your D and take the next man.'},
-  {q:'You are the wing on the far side from the puck. Where do you belong?',
-   o:['Hugging the far boards','Down in the corner helping out','Sagging toward the middle, above your man','Behind your own net'],a:2,
-   why:'The weak-side wing is the insurance policy for the high slot. Cheat to the middle and stay above your man.'},
-  {q:'You are the D in front of your own net. The puck is in the corner. What is the worst mistake you can make?',
-   o:['Watching the puck and losing your man','Talking to your goalie','Keeping your stick on the ice','Boxing your man out'],a:0,
-   why:'Watch the puck and your man slips to the back door for a tap-in. Puck, man, puck, man.'}],
- forecheck:[
-  {q:'You are F1 - first man in. Their D has the puck behind the net. How do you skate at him?',
-   o:['Straight at his chest as fast as you can','At his outside shoulder so his only option is the boards',
-      'Stop at the top of the circle and wait','Loop around behind the net the other way'],a:1,
-   why:'F1 does not have to win the puck. F1 takes away half the ice. Angle him to the wall and let F2 win it.'},
-  {q:'You are F3, high in the middle. They throw the puck up the boards. What do you do?',
-   o:['Race to the corner to help','Hold the middle and stay above the puck','Go to the front of their net','Skate back to our end'],a:1,
-   why:'F3 is the reason a mistake does not turn into a breakaway against us. Nothing gets behind you.'},
-  {q:'Your winger got there first, so today you are F2. What tells you where to go?',
-   o:['Where the goalie is looking','Which way F1 forced the puck','Where our D are standing','Wherever there is open ice'],a:1,
-   why:'F2 reads F1. If F1 forced it up the top wall, you attack the top wall - above and inside your man.'}],
- rush:[
-  {q:'They are coming at you with the puck. You and your partner are the two D. What is a good gap?',
-   o:['Ten or fifteen feet so you have room to react','About a stick length, and both of you at the same depth',
-      'Right in his face at the red line','All the way back to your own goal line'],a:1,
-   why:'A short, even gap gives him nowhere to go. Backing all the way in hands them the whole zone for free.'},
-  {q:'You are the centre coming back through the neutral zone. Where do you skate?',
-   o:['To the boards to help your winger','Straight to the front of our net',
-      'On the puck carrier’s inside hip, in the middle lane','Stay at their blue line in case we get it back'],a:2,
-   why:'The middle lane is yours in both directions. Track back on his inside hip so nobody gets a free ride up the gut.'}],
- pk:[
-  {q:'You are killing a penalty. The puck goes to their player on the half wall on your side. Now what?',
-   o:['Everybody attacks the puck','The whole box slides that way together',
-      'Everybody collapses to the front of the net','Two chase, two stay'],a:1,
-   why:'The box moves like it is tied together with string. When the box breaks, they score through the hole.'},
-  {q:'The puck comes loose right beside you on the penalty kill. Best play?',
-   o:['Stickhandle up the ice and try to score','Pass to a teammate in the middle',
-      'Get it out - off the glass and down the ice','Freeze it and wait for a whistle'],a:2,
-   why:'On a penalty kill, boring is beautiful. Any clear is a good clear.'}],
- breakout:[
-  {q:'Your D has the puck behind our net. You are the centre. Where do you go?',
-   o:['Stand at the blue line and wait for a long pass','Swing low, then come back through the middle with your feet moving',
-      'Go to the front of our own net','Follow your D behind the net'],a:1,
-   why:'Your D needs a short option who is already moving. Standing still - or floating too high - forces him to throw it away.'},
-  {q:'You are the wing on the boards for the breakout. What do your feet do?',
-   o:['Skate up ice and look back for the pass','Stop at the hash marks, face the puck, stick on the ice',
-      'Keep circling so nobody can cover you','Go into the corner to help'],a:1,
-   why:'Be a target, not a moving target. Stop, face the puck, blade on the ice - then go.'},
-  {q:'A forechecker is right on your D and the wall is covered. Right play?',
-   o:['Force it up the boards anyway','D-to-D behind the net and start again',
-      'Throw it up the middle and hope','Blast it off the glass blind'],a:1,
-   why:'D-to-D makes the forechecker skate all the way around. Patience beats pressure.'}],
- regroup:[
-  {q:'The play died at their blue line but we still have the puck. Smart play?',
-   o:['Dump it in and chase','Bring it back, reset, and come again with speed',
-      'Everybody stop and wait for a whistle','Try to beat all five of them yourself'],a:1,
-   why:'A regroup turns a dead play into a fresh rush. Wings wide, centre in the middle, and come again.'},
-  {q:'On a regroup, where do the wings go?',
-   o:['Into the middle next to the centre','Wide, almost on the boards','Back to help the D','To the front of their net'],a:1,
-   why:'Wide wings stretch their team out and open the middle. Three players in three different lanes.'}],
- entry:[
-  {q:'You have the puck at their blue line and nobody has caught up to you yet. What do you do?',
-   o:['Skate straight into their two D','Delay - curl back and buy two seconds for help',
-      'Shoot it from the blue line','Pass it back to our goalie'],a:1,
-   why:'Two seconds of patience buys you your whole team. Skating into traffic alone is a turnover and a rush against.'},
-  {q:'Your winger is carrying it wide into the zone. You are the centre. When should you arrive in the middle?',
-   o:['First, so you are ready','At the exact same time','A beat late, with speed','Not at all - hold the blue line'],a:2,
-   why:'Arriving early means arriving covered. The trailer who comes late into the slot is the hardest player to defend.'},
-  {q:'You are the far-side wing on a rush and you know you are not getting the puck. What do you do?',
-   o:['Ease up at the top of the circle','Drive hard to the net anyway','Stop at the blue line','Cut over to the puck side'],a:1,
-   why:'Your drive pushes their D backward and opens the middle for everybody else. No drive, no threat.'}],
- faceoff:[
-  {q:'Faceoff in our own end. When do you decide what you are doing with the puck?',
-   o:['After you see where it goes','Before you bend down for the draw','When your coach yells','You do not need a plan'],a:1,
-   why:'Know your play before the puck drops. The two seconds right after a draw is when most faceoff goals happen.'},
-  {q:'You are a wing on a defensive-zone faceoff. First job?',
-   o:['Watch the puck drop','Get your body and stick on the man across from you',
-      'Skate to the front of the net','Head up ice for a breakaway'],a:1,
-   why:'Your man is your job. Beat him to any loose puck and the draw does not even matter.'}],
- ozone:[
-  {q:'You have the puck low on the wall in their end and you are getting pressured. What do you do?',
-   o:['Force it up the boards into a shin pad','Cycle back down low, away from the pressure',
-      'Fire it at the net from the corner','Cut into the middle through two guys'],a:1,
-   why:'Cycling low keeps the puck. Forcing it up the wall into a defender is a turnover and a rush the other way.'},
-  {q:'You get the puck low in their end. Where do you look FIRST?',
-   o:['The net','Your D at the point','The referee','Back at your own end'],a:1,
-   why:'Low to high. Get it up to the point, THEN go to the net for the rebound - do not stand and admire your own pass.'},
-  {q:'At your age, where do almost all the goals get scored from?',
-   o:['The blue line','Inside five feet of the net','The corner','Centre ice'],a:1,
-   why:'That is exactly why the net drive matters. Stop at the net, stick on the ice, be ready for something ugly.'}],
- pp:[
-  {q:'You are the bumper - the player in the middle on the power play. How do you get open?',
-   o:['Skate around looking for space','Stand still in the seam and show your stick blade',
-      'Go to the front of the net','Drop back to the point'],a:1,
-   why:'In the middle you get open by being in the right spot with your blade on the ice, not by skating around.'},
-  {q:'On a power play, what should move faster - the players or the puck?',
-   o:['The players','The puck','Both the same','Neither - hold on to it'],a:1,
-   why:'The puck moves, the players hold their spots. Make the box slide until it breaks.'}]
-};
+const TESTS={};
 
 /* placement questions - "put yourself where you belong" */
-const PLACEQ={
- dzone:[{pos:'C',fr:0,ask:'They just got the puck in the corner. Drag YOU to where the centre belongs right now.'},
-        {pos:'RD',fr:0,ask:'Now you are the D who is NOT pressuring the puck. Where do you stand?'}],
- forecheck:[{pos:'C',fr:0,ask:'You are F1 going in on their D. Where do you start your angle from?'},
-            {pos:'RW',fr:1,ask:'You are F3, the high forward. Put yourself where F3 belongs.'}],
- rush:[{pos:'C',fr:1,ask:'They are coming at us. Put the centre where he belongs on the way back.'},
-       {pos:'LD',fr:1,ask:'Put the left D at the right gap on this rush.'}],
- pk:[{pos:'C',fr:1,ask:'The puck went to the top-side half wall. Where does your corner of the box slide to?'},
-     {pos:'LD',fr:0,ask:'Put the low D in his corner of the box.'}],
- breakout:[{pos:'LW',fr:0,ask:'Your D has it behind the net. Where does the strong-side wing wait?'},
-           {pos:'C',fr:1,ask:'Put the centre in his breakout support spot.'}],
- regroup:[{pos:'LW',fr:1,ask:'We are regrouping. Where does the wing go?'},
-          {pos:'C',fr:2,ask:'Put the centre in his lane on the regroup.'}],
- entry:[{pos:'C',fr:2,ask:'Your winger is wide with the puck. Where is the centre as the trailer?'},
-        {pos:'RW',fr:1,ask:'Where is the far-side wing on this rush?'}],
- faceoff:[{pos:'C',fr:0,ask:'Set up for the draw. Where is the centre?'},
-          {pos:'RD',fr:0,ask:'Where does the net-side D start on this draw?'}],
- ozone:[{pos:'C',fr:3,ask:'The puck just went up to your D at the point. Where should the centre be?'},
-        {pos:'RW',fr:0,ask:'Where does the weak-side wing set up in the offensive zone?'}],
- pp:[{pos:'C',fr:0,ask:'Set up the 1-3-1. Where does the bumper stand?'},
-     {pos:'LD',fr:0,ask:'Where does the point man set up?'}]
-};
+const PLACEQ={};
 
 /* ============================================================
    RESTRUCTURE: split the old "neutral zone" situation into a
@@ -1083,138 +857,142 @@ const PLACEQ={
    tag every situation with its phase, and reorder the list so the
    left-hand nav reads Defense, then Transition, then Offense.
    ============================================================ */
-(function restructure(){
-  const byId={}; SITUATIONS.forEach(s=>byId[s.id]=s);
-  const nz=byId.neutral;
-
-  const regroup={
-    id:'regroup', name:'Regroup', phase:'T', ages:(nz.ages||[]).slice(),
-    about:'The play died. Reset and come again with speed.',
-    focus:nz.focus, roster:nz.roster, coach:nz.coach,
-    variants:[Object.assign({},nz.variants[0],{id:'regroup',name:'Bring it back and reset'})]
-  };
-  const rush={
-    id:'rush', name:'Defending the rush', phase:'D', ages:(nz.ages||[]).slice(),
-    about:'They are carrying it at us. Squeeze them at the line.',
-    focus:nz.focus, roster:nz.roster,
-    variants:[Object.assign({},nz.variants[1],{id:'gap',name:'Gap control'})],
-    coach:{
-      C:{job:'Track back through the middle and stay on the puck carrier’s inside hip.',
-        look:[{n:1,label:'The puck carrier',to:'puck'},
-              {n:2,label:'The middle lane behind you',to:[70,42]},
-              {n:3,label:'Your D - do not skate past them',to:'LD'}],
-        do:['Turn and go the instant we lose the puck. First three strides decide everything.',
-            'Skate to his inside hip, between him and the middle of the ice.',
-            'Never let a puck carrier come up the middle untouched.',
-            'Stay above the puck. If you end up below it, you are no help to anyone.'],
-        mistake:'Coasting back, or drifting to the boards where your winger already is, so the middle of the ice is a free lane.',
-        remember:'Turn, go, inside hip.'},
-      LW:{job:'Pick up their winger on your side and stay above him.',
-        look:[{n:1,label:'Your man on your side',to:'X2'},{n:2,label:'The puck',to:'puck'},
-              {n:3,label:'Your own blue line',to:[75,14]}],
-        do:['Find your man early, not when the puck is already there.',
-            'Stay above him so nothing gets behind you.',
-            'Take away the pass to the wall with your stick.',
-            'If they turn it over, you are the first outlet - be ready to go.'],
-        mistake:'Watching the puck all the way back so their winger walks in behind you.'},
-      RW:{job:'Same job on your side. Your man is the winger closest to you.',
-        look:[{n:1,label:'Your man on your side',to:'X3'},{n:2,label:'The puck',to:'puck'},
-              {n:3,label:'The middle of the ice',to:[80,42]}],
-        do:['Match your winger stride for stride and stay above him.',
-            'Do not cross into the middle - that is your centre’s lane.',
-            'Stick in the passing lane, body between him and our net.',
-            'The second we win it, sprint wide. Odd-man rushes start here.'],
-        mistake:'Cutting into the middle to chase the puck and leaving your man wide open on the wall.'},
-      LD:{job:'Control the gap. Short, even, and skating backward with your partner.',
-        look:[{n:1,label:'The puck carrier',to:'puck'},
-              {n:2,label:'Your partner - same depth as you',to:'RD'},
-              {n:3,label:'The boards - where you want to send him',to:[70,10]}],
-        do:['Keep the gap about a stick length. Close enough to touch him.',
-            'Skate backward hard so you never get flat-footed and beaten wide.',
-            'Angle him toward the boards. The middle is where they score from.',
-            'Step up at the blue line when you can - killing it there is worth a lot.'],
-        mistake:'Backing all the way in to your own goal line. You just gave them the entire zone for free.',
-        remember:'Short gap. Feet moving. Boards, not middle.'},
-      RD:{job:'Stay tied to your partner so there is no hole to pass through.',
-        look:[{n:1,label:'Your partner',to:'LD'},{n:2,label:'The puck carrier',to:'puck'},
-              {n:3,label:'The far side in case it goes across',to:[80,66]}],
-        do:['Mirror your partner - same depth, same speed, side by side.',
-            'Talk: "I got him", "switch", "step up".',
-            'Watch for the pass across. That is their best play against two D.',
-            'Keep your head up so you never turn your back on the puck.'],
-        mistake:'Drifting to a different depth than your partner, which opens a lane straight between you.'},
-      G:{job:'Read the rush and be set early.',
-        look:[{n:1,label:'The puck',to:'puck'},{n:2,label:'The far side for a pass across',to:'X3'}],
-        do:['Be set before he crosses the blue line.','Call out odd-man rushes to your D.','Play the shooter and trust your D to take the pass.'],
-        mistake:'Still moving across when the shot comes.'}
-    }
-  };
-
-  Object.assign(byId.dzone,   {phase:'D', about:'They have it in our end. Five jobs, and nobody chases.'});
-  Object.assign(byId.forecheck,{phase:'D',about:'They have it in their end. We go get it back.'});
-  Object.assign(byId.pk,      {phase:'D', about:'Down a man. Four players, one box.'});
-  Object.assign(byId.breakout,{phase:'T', about:'We just won it. Now get out of our own end.'});
-  Object.assign(byId.entry,   {phase:'T', about:'Crossing their blue line with the puck.'});
-  Object.assign(byId.faceoff, {phase:'T', about:'The puck belongs to nobody yet.'});
-  Object.assign(byId.ozone,   {phase:'O', about:'We have it in their end. Keep it and score.'});
-  Object.assign(byId.pp,      {phase:'O', about:'One extra man. Hold your spot, move the puck.'});
-
-  byId.regroup=regroup; byId.rush=rush;
-  const order=['dzone','forecheck','rush','pk','breakout','regroup','entry','faceoff','ozone','pp'];
-  SITUATIONS.length=0;
-  order.forEach(id=>{ const s=byId[id]; s.group=s.phase; SITUATIONS.push(s); });
+/* Every per-situation lookup is built FROM the data. Adding a situation to
+   situations.js is the whole job - nothing here names one, so nothing can be
+   forgotten (which is exactly how offsides shipped invisible). */
+(function normalize(){
+  SITUATIONS.forEach(x=>{ if(!x.group) x.group=x.phase; });
+  SITUATIONS.sort((x,y)=>(x.order==null?9999:x.order)-(y.order==null?9999:y.order));
 })();
 
-/* videos + search terms for the two situations that came out of the split */
-VIDEOS.regroup=[VIDEOS.neutral[0],VIDEOS.neutral[3]];
-VIDEOS.rush   =[VIDEOS.neutral[1],VIDEOS.neutral[2]];
-SEARCHQ.regroup='hockey neutral zone regroup';
-SEARCHQ.rush='hockey gap control defending the rush';
+/* videos, search terms, quiz banks, roles and keywords all arrive from situations.js */
 
 /* ============================================================
    COACH PROMPT - keyword index so a typed or spoken request can
    be matched to a situation + variation + position, offline.
    ============================================================ */
-const KEYS={
-  dzone:{ base:['d zone','dzone','d-zone','defensive zone','defending our zone','coverage','low zone',
-                'the house','our end','our zone','defend','collapse','net front','box out','defensive coverage'],
-    v:{corner:['corner','wall','down low','below the dots','low'],
-       behind:['behind the net','behind our net','wrap','wrap around','goal line','below the goal line'],
-       point:['point','from the point','shot from the point','block shots','shot lane','high slot','walk the line']}},
-  forecheck:{ base:['forecheck','fore check','forechecking','pressure them','f1','f2','f3','angle','angling',
-                'their end','their zone','pressure in their end','get it back','chase'],
-    v:{'122':['1-2-2','122','one two two','contain','passive','one in','conservative'],
-       '212':['2-1-2','212','two one two','aggressive','send two','two in','heavy'],
-       f2:['f2','second man','second man in','support man','read the forecheck']}},
-  rush:{ base:['gap','gap control','defend the rush','defending the rush','rush against','back check','backcheck',
-                'coming at us','neutral zone defence','neutral zone defense','odd man','2 on 1','two on one',
-                '3 on 2','three on two','beat wide','track back'],
-    v:{gap:['gap','tight gap','stand up','blue line']}},
-  pk:{ base:['penalty kill','pk','short handed','shorthanded','man down','down a man','4 on 5','four on five',
-                'kill the penalty','box','penalty killing'],
-    v:{box:['box','simple box','slide','clear it']}},
-  breakout:{ base:['breakout','break out','get out of our zone','retrieval','outlet','wheel','hash marks',
-                'exit','leaving our zone','first pass'],
-    v:{wall:['wall','strong side','hash','clean','winger on the wall'],
-       dtod:['d to d','d-to-d','dtod','under pressure','reverse','behind the net','pressured']}},
-  regroup:{ base:['regroup','re group','reset','come again','swing','stretch','neutral zone offence',
-                'neutral zone offense','turn back','back it up'],
-    v:{regroup:['regroup','reset','d to d','wide wings']}},
-  entry:{ base:['zone entry','entry','entries','carry it in','blue line','gain the line','rush','attack the line',
-                'offensive zone entry','crossing the line'],
-    v:{wide:['wide','wide drive','drive the net','speed','outside','trailer','slot'],
-       delay:['delay','curl','curl back','hold up','wait for help','swing back','high delay','low delay']}},
-  faceoff:{ base:['faceoff','face off','face-off','draw','the dot','set play','off the draw','circle'],
-    v:{dzone:['defensive','d zone','dzone','our end','defend','our own end'],
-       ozone:['offensive','o zone','ozone','their end','attack','their zone']}},
-  ozone:{ base:['offensive zone','o zone','ozone','their end','cycle','cycling','low to high','possession',
-                'work the puck','down low','net front','sustain','keep it in their end','o zone play'],
-    v:{cycle:['cycle','cycling','low to high','wall','spin','possession','protect the puck'],
-       drive:['net drive','drive the net','back door','rebound','attack the net','straight to the net']}},
-  pp:{ base:['power play','powerplay','pp','5 on 4','five on four','man advantage','up a man','1-3-1','131',
-                'umbrella','bumper','half wall','seam','one three one'],
-    v:{'131':['1-3-1','131','one three one','umbrella','bumper','seam']}}
-};
+const KEYS={};
+
+/* Fill every per-situation lookup FROM the data, once all of them exist. Adding a
+   situation to situations.js is the whole job - nothing here names one, so nothing
+   can be forgotten (which is exactly how offsides shipped invisible). */
+/* The runtime extension point. A generated play can be injected without touching
+   situations.js: addSituation(obj) validates the same rules validate-situations.mjs
+   enforces, registers it in every lookup, and returns {ok} or {ok:false,errors}. */
+const AGEBANDS=['8U','10U','12U','14U','16U','18U'];
+function checkSituation(x){
+  const e=[], ours=OURPOS.concat(['G']), theirs=THEMIDS;
+  const num=v=>typeof v==='number'&&isFinite(v);
+  const str=v=>typeof v==='string'&&v.length>0;
+  const pt=v=>Array.isArray(v)&&num(v[0])&&num(v[1]);
+  if(!x||typeof x!=='object') return ['not an object'];
+  if(!str(x.id)||!/^[a-z][a-z0-9]*$/.test(x.id)) e.push('id must be lowercase letters/digits');
+  if(allSits().some(s=>s.id===x.id)) e.push('id "'+x.id+'" is already taken');
+  if(!str(x.name)) e.push('name is required');
+  if(!str(x.about)) e.push('about is required');
+  if(['D','T','O'].indexOf(x.phase)<0) e.push('phase must be D, T or O');
+  if(!num(x.order)) e.push('order must be a number');
+  if(!Array.isArray(x.ages)||!x.ages.length) e.push('ages must be a non-empty array');
+  else x.ages.forEach(a=>{ if(AGEBANDS.indexOf(a)<0) e.push('illegal age band '+a); });
+  if(!Array.isArray(x.focus)||x.focus.length!==4||!x.focus.every(num)) e.push('focus must be [x,y,w,h]');
+  if(!Array.isArray(x.roster)||!x.roster.length) e.push('roster must be a non-empty array');
+  else x.roster.forEach(p=>{ if(ours.indexOf(p)<0) e.push('unknown roster code '+p); });
+  if(!Array.isArray(x.variants)||!x.variants.length) e.push('variants must be a non-empty array');
+  else {
+    if(!x.variants.some(v=>!v.wrong)) e.push('every variant is wrong:true - nothing correct to compare to');
+    x.variants.forEach(v=>{
+      if(!str(v.id)) e.push('variant id required');
+      if(!Array.isArray(v.frames)||v.frames.length<2) { e.push('variant '+v.id+' needs 2+ frames'); return; }
+      if(v.frames[0].t!==0) e.push('variant '+v.id+' first frame t must be 0');
+      if(v.frames[v.frames.length-1].t!==1) e.push('variant '+v.id+' last frame t must be 1');
+      const last={};
+      v.frames.forEach((f,i)=>{
+        if(!str(f.cue)) e.push(v.id+' frame '+i+' needs a cue');
+        if(i&&!(f.t>v.frames[i-1].t)) e.push(v.id+' frame '+i+' t is not ascending');
+        ['us','them'].forEach(side=>Object.keys(f[side]||{}).forEach(id=>{
+          const legal=side==='us'?ours:theirs;
+          if(legal.indexOf(id)<0) e.push(v.id+' frame '+i+' unknown '+side+' code '+id);
+          const p=f[side][id];
+          if(!pt(p)) { e.push(v.id+' frame '+i+' '+id+' is not [x,y]'); return; }
+          if(p[0]<-6||p[0]>206||p[1]<-6||p[1]>91) e.push(v.id+' frame '+i+' '+id+' is off the rink');
+          if(last[id]&&dist(last[id],p)>95) e.push(v.id+' frame '+i+' '+id+' jumps over 95 ft');
+          last[id]=p;
+        }));
+        if(!pt(f.puck)) e.push(v.id+' frame '+i+' puck must be [x,y] or [x,y,OWNER]');
+        else if(f.puck[2]!=null&&!last[f.puck[2]]) e.push(v.id+' frame '+i+' puck owner '+f.puck[2]+' has no position');
+      });
+    });
+  }
+  if(!x.coach||typeof x.coach!=='object') e.push('coach is required');
+  else Object.keys(x.coach).forEach(p=>{
+    if(ours.indexOf(p)<0) e.push('coach has unknown code '+p);
+    const c=x.coach[p];
+    if(!str(c.job)) e.push('coach.'+p+'.job is required');
+    /* the job tabs render c.look / c.do / c.oops directly, so a missing array is a crash */
+    if(!Array.isArray(c.look)||!c.look.length) e.push('coach.'+p+'.look must be a non-empty array');
+    if(!Array.isArray(c.do)||!c.do.length) e.push('coach.'+p+'.do must be a non-empty array');
+    (c.look||[]).forEach(l=>{
+      if(!str(l.label)) e.push('coach.'+p+'.look entry needs a label');
+      const to=l.to, okTo=to==='puck'||to==='ourNet'||to==='theirNet'||
+        ours.indexOf(to)>=0||theirs.indexOf(to)>=0||pt(to);
+      if(!okTo) e.push('coach.'+p+'.look "to" is not a player, landmark or [x,y]');
+    });
+  });
+  const vids=(x.variants||[]).map(v=>v.id);
+  const anyWrong=(x.variants||[]).some(v=>v.wrong);
+  /* a situation with no quiz makes "Quiz me on this" ask about OTHER situations */
+  if(!Array.isArray(x.tests)||!x.tests.length) e.push('tests is required - without it the quiz falls through to other situations');
+  (x.tests||[]).forEach(q=>{
+    if(!str(q.q)) e.push('a test is missing its question');
+    if(!Array.isArray(q.o)||q.o.length<2) e.push('a test needs at least 2 options');
+    else if(!num(q.a)||q.a<0||q.a>=q.o.length) e.push('test answer index '+q.a+' is out of range');
+  });
+  (x.placeq||[]).forEach(q=>{
+    if(ours.indexOf(q.pos)<0) e.push('placeq pos '+q.pos+' is not a player code');
+    else if(x.roster&&x.roster.indexOf(q.pos)<0) e.push('placeq pos '+q.pos+' is not on the roster');
+    if(!str(q.ask)) e.push('a placeq is missing its ask text');
+    if(anyWrong&&!q.v) e.push('placeq must pin a variant with v: - this situation has a wrong:true variant');
+    const v=q.v?(x.variants||[]).filter(z=>z.id===q.v)[0]:(x.variants||[])[0];
+    if(q.v&&!v) e.push('placeq pins variant '+q.v+', which does not exist');
+    if(v&&v.wrong) e.push('placeq is pinned to '+v.id+', which is wrong:true - no answer key there');
+    if(v&&(!num(q.fr)||q.fr<0||q.fr>=v.frames.length)) e.push('placeq fr='+q.fr+' is out of range');
+  });
+  Object.keys(x.next||{}).forEach(k=>{
+    if(vids.indexOf(k)<0) e.push('next names variant '+k+', which does not exist');
+    const n=x.next[k], t=allSits().filter(z=>z.id===n.sit)[0];
+    if(!t) e.push('next.'+k+' points at situation '+n.sit+', which does not exist');
+    else if(n.v&&!t.variants.some(z=>z.id===n.v)) e.push('next.'+k+' points at '+n.sit+'/'+n.v+', which does not exist');
+  });
+  Object.keys(x.phases||{}).forEach(k=>{
+    if(vids.indexOf(k)<0) { e.push('phases names variant '+k+', which does not exist'); return; }
+    const v=(x.variants||[]).filter(z=>z.id===k)[0];
+    if(Array.isArray(x.phases[k])&&v&&x.phases[k].length!==v.frames.length)
+      e.push('phases.'+k+' has '+x.phases[k].length+' entries for '+v.frames.length+' frames');
+  });
+  Object.keys((x.keys||{}).v||{}).forEach(k=>{ if(vids.indexOf(k)<0) e.push('keys.v names variant '+k+', which does not exist'); });
+  return e;
+}
+function addSituation(x){
+  const e=checkSituation(x);
+  if(e.length) return {ok:false,errors:e};
+  SITUATIONS.push(x);
+  SITUATIONS.sort((a,b)=>(a.order==null?9999:a.order)-(b.order==null?9999:b.order));
+  if(!x.group) x.group=x.phase;
+  const TABLE={phases:PHASEFRAMES,next:NEXTSTEP,roles:ROLES,tests:TESTS,
+               placeq:PLACEQ,videos:VIDEOS,searchq:SEARCHQ,keys:KEYS};
+  Object.keys(TABLE).forEach(k=>{ if(x[k]!=null) TABLE[k][x.id]=x[k]; });
+  buildMenu();
+  return {ok:true,id:x.id};
+}
+window.addSituation=addSituation;
+
+(function wireTables(){
+  const TABLE={phases:PHASEFRAMES,next:NEXTSTEP,roles:ROLES,tests:TESTS,
+               placeq:PLACEQ,videos:VIDEOS,searchq:SEARCHQ,keys:KEYS};
+  SITUATIONS.forEach(x=>{
+    Object.keys(TABLE).forEach(k=>{ if(x[k]!=null) TABLE[k][x.id]=x[k]; });
+  });
+})();
 
 const POSKEYS=[
   ['C',['centre','center','the c','at centre','at center','pivot','my centre','my center']],
@@ -1375,10 +1153,10 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const S={
   sit:SITUATIONS[0], varIdx:0, pos:'C',
   t:0, target:1, playing:false, raf:null, lastTs:null, gen:0,
-  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true,
+  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.38';
+const BUILD='2026-08-21.51';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1526,6 +1304,13 @@ function correct(id,t){
   const side=(OURPOS.includes(id)||id==='G')?'us':'them';
   return at(series(side,id),t);
 }
+/* the answer key. Every grading path uses this - ghost, distance readout, quiz,
+   clue words, Try mode - so a wrong-demo variant can never become the target. */
+function target(id,t){
+  const v=variant();
+  if(v&&v.wrong) return null;
+  return correct(id,t);
+}
 /* A manual drop normally freezes a player. In Try mode his own man still skates the
    route the play asks for - just offset by however wrong his starting spot was. That is
    what makes the failure happen where it would really happen. */
@@ -1596,7 +1381,7 @@ function placeQ(){
    never need authoring. Deliberately flip-safe: no top/bottom/left/right, only
    hockey ideas a 10-year-old already has - our end, the boards, the puck. */
 function clueWords(q){
-  const c=correct(q.pos,S.t); if(!c) return '';
+  const c=target(q.pos,S.t); if(!c) return '';
   const p=puckAt(S.t).p, bits=[];
   bits.push(c[0]<75?'in OUR OWN end':(c[0]<=125?'around the MIDDLE of the ice':'in THEIR end'));
   if(c[1]<22||c[1]>63) bits.push('close to the BOARDS');
@@ -1615,7 +1400,7 @@ function clueWords(q){
    the follow-camera spotlight, so it reads as "the answer is in the light part".
    Sits under the tokens, so the dot he is dragging stays crisp. */
 function drawClueZone(q,level){
-  const c=correct(q.pos,S.t); if(!c) return;
+  const c=target(q.pos,S.t); if(!c) return;
   const b=disp(c), r=level>=2?9:18, g=layer('ghost'), mid='cluehole';
   const defs=el('defs'), mk=el('mask',{id:mid,maskUnits:'userSpaceOnUse',x:0,y:0,width:200,height:85});
   mk.appendChild(el('rect',{x:0,y:0,width:200,height:85,fill:'#fff'}));
@@ -1654,11 +1439,17 @@ function passMeantForHim(i){
 }
 function tryEval(i){
   const f=frames(); if(!f[i]) return null;
-  const t=f[i].t, me=shown(S.pos,t), auth=correct(S.pos,t);
+  const t=f[i].t, me=shown(S.pos,t), auth=target(S.pos,t);
   if(!me||!auth) return null;
   const puck=puckAt(t).p;
 
-  /* 1. a pass with his name on it - fatal, the play stops */
+  /* 1. the blue line. Fatal: in real hockey this is a whistle, not a bad habit. */
+  if(me[0]>125&&puck[0]<125&&auth[0]<=125)
+    return {fatal:true,at:[Math.min(196,me[0]),me[1]],msg:'OFFSIDE',
+      why:'You crossed their blue line before the puck did. The whistle goes and the rush is dead.',
+      say:'You crossed the blue line before the puck.'};
+
+  /* 2. a pass with his name on it - fatal, the play stops */
   if(passMeantForHim(i)){
     const from=puckAt(f[i-1].t).p;
     /* The PLAY's own pass sets the standard. A real pass threads past sticks, so an
@@ -1691,7 +1482,7 @@ function tryEval(i){
     let owner=null, od=99;
     S.sit.roster.forEach(rid=>{                       // whose man is he, by the book?
       if(rid==='G') return;
-      const a=correct(rid,t); if(!a) return;
+      const a=target(rid,t); if(!a) return;
       const d=dist(a,p); if(d<od){ od=d; owner=rid; }
     });
     if(owner!==S.pos||od>14) return;
@@ -1954,7 +1745,7 @@ function render(){
 
   if(eff('ghost')) Object.keys(S.manual).forEach(id=>{
     if(id==='PUCK')return;
-    const c=correct(id,t); if(!c)return;
+    const c=target(id,t); if(!c)return;
     const a=disp(S.manual[id]),b=disp(c),d=dist(S.manual[id],c),g=layer('ghost');
     g.appendChild(el('circle',{cx:b[0],cy:b[1],r:TR(),fill:'none',stroke:'#9fb0c8','stroke-width':0.5,'stroke-dasharray':'1.6 1.4'}));
     g.appendChild(el('text',{x:b[0],y:b[1]+1,'font-size':FS(2.4),fill:'#9fb0c8','text-anchor':'middle','font-weight':700},id==='G'?'G':id));
@@ -1968,7 +1759,7 @@ function render(){
   if(TEST.active&&TEST.answered&&!TEST.done){
     const q=TEST.qs[TEST.i];
     if(q&&q.type==='place'){
-      const c=correct(q.pos,t);
+      const c=target(q.pos,t);
       if(c){
         const b=disp(c), g=layer('ghost');
         const col=TEST.lastRight?'#1b2a6b':'#bf1e2e';
@@ -2099,7 +1890,9 @@ function paintCue(){
   }
   const fi=frameIdx(S.t);
   $('cuen').textContent='Step '+(fi+1)+' / '+frames().length;
-  $('cuetext').textContent=frames()[fi].cue;
+  const wrongDemo=S.mode==='learn'&&!!variant().wrong;
+  $('cuetext').innerHTML=esc(frames()[fi].cue)+
+    (wrongDemo?' <b style="color:#ffd98a">This variation shows the mistake, so there is no right spot to compare to.</b>':'');
 }
 function renderTopbar(){
   const p=PHASE[phaseAt(S.t)];
@@ -2108,7 +1901,15 @@ function renderTopbar(){
   $('p-sub').textContent = S.mode==='build' ? 'Building your play'
     : (S.mode==='quiz' ? variant().name : variant().name+'  -  '+p.sub);
 }
-function nextOf(){ return (NEXTSTEP[S.sit.id]||{})[variant().id]||null; }
+function nextOf(){
+  let n=(NEXTSTEP[S.sit.id]||{})[variant().id]||null, hops=0;
+  while(n&&hops++<8){
+    const t=sitById(n.sit);
+    if(t&&ageOk(t)) return n;
+    n=(NEXTSTEP[n.sit]||{})[n.v]||null;   // skip past it to the next in-band link
+  }
+  return null;
+}
 function renderNext(){
   const n=nextOf(), bar=$('nextbar');
   if(typeof STAGE!=='undefined' && STAGE.active){ bar.style.display='none'; return; }
@@ -2420,6 +2221,7 @@ function enumerateAudioScript(){
    'The pass never got there because somebody was in the lane.',
    'You were too far away to be an option.','You left your man alone.',
    'You were on the wrong side of the puck.','You left the middle of the ice open.',
+   'You crossed the blue line before the puck.',
    'Have another go.','That is a kid who knows where to be.',
    'Solid. Go back to the ones you missed and watch them again.',
    'Good start. Hit Listen in Learn mode and walk through it once more.',
@@ -2645,6 +2447,10 @@ $('p-back').onclick=()=>{
 $('m-howto').onclick=()=>mask('help',true);
 $('p-help').onclick=()=>mask('help',true);
 $('m-quizall').onclick=()=>{ showScreen('play'); setMode('quiz'); startTest('all'); };
+function syncQuizAllLabel(){
+  const b=$('m-quizall');
+  if(b) b.textContent=S.age?('Quiz me on every '+S.age+' drill'):'Quiz me on everything';
+}
 function mask(which,on){ $('mask-'+which).classList.toggle('on',on); }
 $('closehelp').onclick=()=>{ mask('help',false); try{localStorage.setItem('hiq_seen','1');}catch(e){} };
 $('closeset').onclick=()=>mask('set',false);
@@ -2762,6 +2568,34 @@ function menuCard(sit,col,sub){
   b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'try':null);
   return b;
 }
+/* Bands come from situations.js and nowhere else - no list of ages lives in this file.
+   Order is derived by reading the number off each band, so adding 6U needs no code. */
+function ageBands(){
+  const seen={};
+  SITUATIONS.forEach(s=>(s.ages||[]).forEach(a=>{ seen[a]=1; }));
+  return Object.keys(seen).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
+}
+const ageOk=s=>!S.age||(s.ages||[]).indexOf(S.age)>=0;
+function loadAge(){
+  try{ const v=localStorage.getItem('hiq_age');
+    if(v&&ageBands().indexOf(v)>=0) S.age=v; }catch(e){}
+}
+function saveAge(){
+  try{ if(S.age) localStorage.setItem('hiq_age',S.age); else localStorage.removeItem('hiq_age'); }catch(e){}
+}
+function buildAgeBar(){
+  const bar=$('agebar'); if(!bar) return;
+  const shown=SITUATIONS.filter(ageOk).length, all=SITUATIONS.length;
+  bar.innerHTML='<span class="agelab">Age group</span>'+
+    '<button class="chip'+(S.age?'':' on')+'" data-age="">All ages</button>'+
+    ageBands().map(a=>'<button class="chip'+(S.age===a?' on':'')+'" data-age="'+a+'">'+a+'</button>').join('')+
+    '<div class="agecount">'+(S.age
+      ? shown+' of '+all+' situations are taught at '+S.age+' &middot; tap <b>All ages</b> for the rest'
+      : 'Showing all '+all+' situations')+'</div>';
+  bar.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+    S.age=b.dataset.age||null; saveAge(); buildAgeBar(); buildMenu(); syncQuizAllLabel();
+  });
+}
 function buildMenu(){
   const cols=$('menucols');
   /* keep whatever the kid had open - a rebuild must not slam their section shut */
@@ -2778,7 +2612,13 @@ function buildMenu(){
     head.onclick=()=>toggleMcol(d);
     d.appendChild(head);
     const row=document.createElement('div'); row.className='mrow';
-    SITUATIONS.filter(s=>s.phase===ph).forEach(s=>{ row.appendChild(menuCard(s,p.col,s.about||'')); });
+    const mine=SITUATIONS.filter(s=>s.phase===ph&&ageOk(s));
+    mine.forEach(s=>{ row.appendChild(menuCard(s,p.col,s.about||'')); });
+    if(!mine.length){
+      const n=document.createElement('div'); n.className='mnone';
+      n.innerHTML='Nothing here is taught at '+esc(S.age||'')+' yet.';
+      row.appendChild(n);
+    }
     d.appendChild(row);
     cols.appendChild(d);
   });
@@ -2867,13 +2707,17 @@ function tryReset(){
   stop(); TRY.running=false; TRY.fail=null; TRY.warn=null; TRY.first=null;
   const vb=$('tryverdict'); if(vb){ vb.style.display='none'; vb.innerHTML=''; }
   S.t=0; S.manual={};
-  const c=correct(S.pos,0);
+  const c=target(S.pos,0);
   if(c) S.manual[S.pos]=[c[0],c[1]];
 }
 function railLearn(){
   const tlbl=$('qgotry'); if(tlbl) tlbl.textContent='Try it \u25b6';
+  const wrongDemo=!!variant().wrong;
   const sit=S.sit, c=(sit.coach||{})[S.pos], p=PHASE[sit.phase];
-  let h='<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
+  let h=(wrongDemo?'<div class="feedback show off" style="margin:0 0 8px">'+
+        '<b>This one shows the mistake on purpose.</b> There is no right spot to measure against - '+
+        'switch to the other variation to see where you should have been.</div>':'')+
+        '<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
         '<div style="font-size:11.5px;color:#93a3bd" id="poshint"></div>'+
         '<div id="fb" class="feedback"></div>';
   if(!sit.roster.includes(S.pos)||!c){
@@ -2923,6 +2767,7 @@ function buildQuickPos(){
   });
 }
 function buildTabs(c){
+  if(!c||!Array.isArray(c[S.tab])) S.tab=['look','do','oops'].filter(k=>c&&Array.isArray(c[k]))[0]||'look';
   const tabs=[['look','Look'],['do','Do'],['oops','Oops']];
   $('tabs').innerHTML=tabs.map(([k,l])=>'<button class="tab'+(S.tab===k?' on':'')+'" data-k="'+k+'">'+l+'</button>').join('');
   $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.k; buildTabs(c); });
@@ -3011,7 +2856,7 @@ svg.addEventListener('pointerup',()=>{
   if(!dragMoved||!S.manual[id]){ tapToken(id); return; }
   if(S.mode==='build'){ markDirty(); return; }
   if(TEST.active&&!TEST.done)return;
-  const c=correct(id,S.t); if(!c)return;
+  const c=target(id,S.t); if(!c)return;
   const d=dist(S.manual[id],c), ours=OURPOS.includes(id)||id==='G';
   const who=POSNAMES[id]||('the other team #'+id.slice(1));
   if(!ours){ note('good','<b>You moved '+who+'.</b> Watch how the spacing numbers change - that is the read.'); return; }
@@ -3054,7 +2899,15 @@ function setMode(m){
   $('quickbar').style.display=((m!=='learn'&&m!=='try')||STAGE.active)?'none':'';
   /* stepping half-simulates in Try mode - everyone moves but him - so it stays a Learn tool */
   ['fwd','back','scrub'].forEach(k=>{ const e=$(k); if(e) e.style.display=(m==='try')?'none':''; });
-  if(m==='try') tryReset();
+  if(m==='try'){
+    /* the sim measures against the authored play, so it can never run on a variant
+       that exists to demonstrate the mistake - that grades the error as the target */
+    if(variant().wrong){
+      const i=S.sit.variants.findIndex(v=>!v.wrong);
+      if(i>=0){ S.varIdx=i; buildVars(); }
+    }
+    tryReset();
+  }
   $('p-back').innerHTML=(m==='learn')?'&#8249; Menu':'&#8249; Learn';
   $('p-watch').style.display=(m==='learn')?'':'none';
   $('p-prog').textContent='';
@@ -3074,18 +2927,30 @@ function startTest(scope){
   if(scope==='sit'){
     const sid=S.sit.id, vid=variant().id;
     const mc=shuffle((TESTS[sid]||[]).map(q=>Object.assign({type:'mc',sit:sid,v:vid},q)));
-    const pl=shuffle((PLACEQ[sid]||[]).map(q=>Object.assign({type:'place',sit:sid,v:vid},q)));
+    const wrongDemo=!!variant().wrong;
+    const pl=shuffle((PLACEQ[sid]||[])
+      .filter(q=>q.v||!wrongDemo)
+      .map(q=>Object.assign({type:'place',sit:sid,v:vid},q)));
     let a=0,b=0;
     while(a<mc.length||b<pl.length){ if(a<mc.length)qs.push(mc[a++]); if(b<pl.length)qs.push(pl[b++]); }
   }
-  if(!qs.length||scope==='all'){
+  if(scope==='all'){
+    /* the age band applies here too - a coach filtered to 10U should not be quizzed
+       on penalty-kill reads the menu just told them are not taught yet */
     const pool=[];
-    SITUATIONS.forEach(s=>{
+    SITUATIONS.filter(ageOk).forEach(s=>{
       const vid=s.variants[0].id;
       (TESTS[s.id]||[]).forEach(q=>pool.push(Object.assign({type:'mc',sit:s.id,v:vid},q)));
       (PLACEQ[s.id]||[]).forEach(q=>pool.push(Object.assign({type:'place',sit:s.id,v:vid},q)));
     });
     shuffle(pool); pool.slice(0,8).forEach(q=>qs.push(q));
+  }
+  if(!qs.length){
+    /* never quietly swap in other situations' questions - that is how a kid gets
+       quizzed on the penalty kill from the offsides screen */
+    TEST.active=false; setMode('learn');
+    note('off','No quiz questions written for this one yet.');
+    return;
   }
   TEST.qs=qs; TEST.active=true; showQuestion();
 }
@@ -3166,7 +3031,9 @@ function answerMC(i){
 function checkSpot(){
   if(TEST.answered)return; TEST.answered=true;
   const q=TEST.qs[TEST.i];
-  const mine=S.manual[q.pos]||[100,42.5], c=correct(q.pos,S.t), d=dist(mine,c);
+  const mine=S.manual[q.pos]||[100,42.5], c=target(q.pos,S.t);
+  if(!c){ TEST.answered=false; return; }
+  const d=dist(mine,c);
   const right=d<=10;
   TEST.lastRight=right;
   if(right&&!TEST.retried&&TEST.clue<2) TEST.right++;   // first try; the tight area costs the point
@@ -3742,7 +3609,7 @@ function step(label,fn){ try{ fn(); }catch(err){ console.error(label,err); fail(
 step('rink',   ()=>buildRink());
 step('storage',()=>{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); });
 step('saved',  ()=>{ loadCustom(); restoreVoicePrefs(); });
-step('menu',   ()=>buildMenu());
+step('menu',   ()=>{ loadAge(); buildAgeBar(); buildMenu(); syncQuizAllLabel(); });
 step('vars',   ()=>buildVars());
 step('mode',   ()=>setMode('learn'));
 step('voice',  ()=>speakNote());
