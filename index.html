@@ -769,6 +769,7 @@ input[type=range]{accent-color:var(--us2)}
     <button class="closebtn" id="closecoach">Close</button>
   </div>
 </div>
+<script src="situations.js"></script>
 <script>
 /* ============================================================
    HOCKEY IQ RINK - situation data
@@ -783,827 +784,7 @@ input[type=range]{accent-color:var(--us2)}
 
 const POSNAMES = {C:'Center', LW:'Left Wing', RW:'Right Wing', LD:'Left D', RD:'Right D', G:'Goalie'};
 
-const SITUATIONS = [
-
-/* ============================ 1. D-ZONE ============================ */
-{
-  id:'dzone', name:'Defensive zone coverage', group:'Defending',
-  about:'They have the puck in our end. Five jobs, no chasing.',
-  focus:[-5,-5,110,95],
-  roster:['G','LD','RD','C','LW','RW'],
-  variants:[
-    { id:'corner', name:'Puck in the corner',
-      note:'The most common thing that happens all game.',
-      frames:[
-        {t:0, cue:'They just got the puck in the corner. Nobody panics - everybody takes a job.',
-         us:{G:[13.5,42.5],LD:[24,15],RD:[18,47],C:[26,27],LW:[45,19],RW:[41,50]},
-         them:{X1:[19,11],X2:[21,41],X3:[30,38],X4:[69,22],X5:[69,60]},
-         puck:[19.5,11.5,'X1']},
-        {t:0.34, cue:'LD angles him into the boards. C seals the middle. Both wings stay ABOVE the puck on their points.',
-         us:{LD:[30,13],C:[31,25],LW:[43,15],RD:[18,45]},
-         them:{X1:[28,10],X2:[21,44],X3:[30,36]}, puck:[28.5,10.5,'X1']},
-        {t:0.62, cue:'Trapped on the wall, he throws it up the boards - and LW is standing right in that lane.',
-         us:{LD:[33,13],C:[33,26],LW:[42,13]}, them:{X1:[31,10],X3:[34,34]}, puck:[40,12]},
-        {t:0.82, cue:'LW knocks it down. Puck is ours, and nobody had to make a diving play.',
-         us:{LW:[42,12],C:[36,28],LD:[30,16],RD:[18,44]}, puck:[42,12.5,'LW']},
-        {t:1, cue:'Now C swings into the middle as the outlet and we break out. Good coverage turns into offense.',
-         us:{LW:[48,13],C:[45,31],LD:[34,20],RD:[20,44],RW:[50,56]},
-         them:{X1:[38,11],X3:[40,34],X2:[26,44]}, puck:[48,13.5,'LW']}
-      ]},
-    { id:'behind', name:'Puck behind our net',
-      note:'Do NOT all dive back there. Hold the posts and the slot.',
-      frames:[
-        {t:0, cue:'They wrapped it behind our net. Two of us can be down there - not four.',
-         us:{G:[13.5,42.5],LD:[15,36],RD:[11,52],C:[20,56],LW:[43,20],RW:[40,48]},
-         them:{X1:[6,49],X2:[20,42],X3:[26,60],X4:[69,22],X5:[69,60]}, puck:[6.5,49.5,'X1']},
-        {t:0.35, cue:'He tries to come out the bottom side. RD holds the post, C takes away the wall lane.',
-         us:{RD:[12,55],C:[22,62],LD:[15,38]}, them:{X1:[9,57],X3:[28,64]}, puck:[9.5,57.5,'X1']},
-        {t:0.62, cue:'No room anywhere. He throws it to the corner and C is first one there because he never left the middle-out lane.',
-         us:{C:[24,66],RD:[14,57]}, them:{X1:[13,62],X3:[30,66]}, puck:[24,70]},
-        {t:1, cue:'C wins the wall race, RD covers behind him, wings turn up ice. Out we go.',
-         us:{C:[26,70],RD:[16,58],LW:[44,26],RW:[46,56],LD:[16,42]},
-         them:{X3:[32,68],X1:[18,64]}, puck:[26,70,'C']}
-      ]},
-    { id:'point', name:'They are shooting from the point',
-      note:'Now it is about shot lanes and bodies at the net.',
-      frames:[
-        {t:0, cue:'Puck up to their D at the point. A shot is coming - this is about lanes and boxing out.',
-         us:{G:[13.5,42.5],LD:[24,26],RD:[18,44],C:[34,30],LW:[48,22],RW:[42,48]},
-         them:{X1:[66,24],X2:[21,42],X3:[34,36],X4:[66,60],X5:[48,12]}, puck:[66,25,'X1']},
-        {t:0.35, cue:'LW closes on the shooter with his stick in the lane. C picks up the man in the high slot.',
-         us:{LW:[56,23],C:[35,34],RD:[18,43],LD:[23,28]}, them:{X1:[62,28],X3:[36,38]}, puck:[62,29,'X1']},
-        {t:0.62, cue:'Shot. RD boxes out the net front, G sees it, everybody finds a body instead of a puck.',
-         us:{RD:[19,44],C:[31,36],LD:[22,30]}, them:{X2:[22,44]}, puck:[24,42]},
-        {t:1, cue:'Rebound covered, G leaves it in the corner, LD picks it up. Now we are the ones with the puck.',
-         us:{LD:[18,24],C:[28,44],LW:[46,20],RW:[44,52],RD:[20,44]}, them:{X3:[32,42]}, puck:[16,22]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Second man low on the puck side. You are your D\'s helper and the plug in the middle of the ice.',
-      look:[{n:1,label:'The puck - is your D winning it?',to:'puck'},
-            {n:2,label:'The man sneaking into the slot behind you',to:'X3'},
-            {n:3,label:'The wall - your outlet the second we win it',to:[45,13]}],
-      do:['Stay a stick or two off your D, on the goal side of the puck.',
-          'If your D wins it, you are the short pass - on the wall or in the middle.',
-          'If your D gets beat, YOU take the next man low. Never both chase the same guy.',
-          'Face the puck. Slide and skate backward - do not turn your back on it.'],
-      mistake:'Chasing the puck into the corner so three of you are on one puck and the middle is wide open. In our zone the middle is the dangerous ice, and it is yours.',
-      remember:'Puck side. Goal side. Middle protected.' },
-    LD:{ job:'Pressure the puck carrier. Take ice away - do not just skate at him.',
-      look:[{n:1,label:'His hands and his hips (not his eyes)',to:'X1'},
-            {n:2,label:'The boards - that is where you are sending him',to:[36,8]},
-            {n:3,label:'Your net - stay between the puck and it',to:'ourNet'}],
-      do:['Approach at his OUTSIDE shoulder so his only option is the wall.',
-          'Stick on the puck, body between him and the net.',
-          'Win it and move it fast. First look is your wing on the wall.',
-          'If you cannot win it, pin it. A pinned puck is a whistle or a change.'],
-      mistake:'Diving straight at him. He steps around you and the middle of the ice becomes a highway to our net.' },
-    RD:{ job:'Net front. Nothing gets to the paint alive.',
-      look:[{n:1,label:'Your man in front of the net',to:'X2'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The back door on your far side',to:[24,58]}],
-      do:['Stand on the far side of your man with your stick in the passing lane.',
-          'Box him out with your hips and body - it is not a hug, it is a wall.',
-          'Head on a swivel: puck, man, puck, man.',
-          'Do NOT leave the net to help in the corner. That is C\'s job, not yours.'],
-      mistake:'Watching the puck in the corner while your man slides to the back door for a tap-in.' },
-    LW:{ job:'Cover the strong-side point - their D at the top of the zone on your side.',
-      look:[{n:1,label:'Their D at the point on your side',to:'X4'},
-            {n:2,label:'The puck below you',to:'puck'},
-            {n:3,label:'The wall lane between you and the corner',to:[36,10]}],
-      do:['Stay ABOVE the puck. If the puck is below you, you are in the right place.',
-          'Stand in the lane up the boards - most of their passes go there.',
-          'Stick flat on the ice and in the lane, not up in the air.',
-          'Win a loose one and you are the breakout. Get your feet going up ice.'],
-      mistake:'Sliding down into the corner to help. Now their point man is free at the top of the circle for a clean shot.' },
-    RW:{ job:'Weak-side insurance. Cover their far point, but cheat toward the middle.',
-      look:[{n:1,label:'The high slot in the middle of the ice',to:[38,42]},
-            {n:2,label:'Their far-side D at the point',to:'X4'},
-            {n:3,label:'The puck',to:'puck'}],
-      do:['Sag toward the middle - you are the last layer in front of the high slot.',
-          'Stay above your check so nothing gets behind you.',
-          'If the puck comes to your side, THEN you close on their point.',
-          'When we win it, get to the far wall - you are the long option.'],
-      mistake:'Hugging the far boards doing nothing while the middle of the ice is empty.' },
-    G:{ job:'Track the puck, talk to your team, control your rebounds.',
-      look:[{n:1,label:'The puck',to:'puck'},{n:2,label:'Bodies in front of you',to:'X2'}],
-      do:['Square to the puck and stay on your feet as long as you can.','Tell your D where the puck is - you can see things they cannot.','Leave rebounds in the corner, not in the slot.'],
-      mistake:'Playing the puck and the screen at the same time. Pick the puck, and trust your D to move the body.' }
-  }
-},
-
-/* ============================ 2. BREAKOUT ============================ */
-{
-  id:'breakout', name:'Breakout', group:'Getting out of our zone',
-  about:'We won the puck in our end. Now five players get to five different spots.',
-  focus:[-5,-5,116,95],
-  roster:['G','LD','RD','C','LW','RW'],
-  variants:[
-    { id:'wall', name:'Clean wall breakout',
-      note:'The bread-and-butter play. Learn this one cold.',
-      frames:[
-        {t:0, cue:'Your D has it behind the net. Everybody get to your spot and give him a target.',
-         us:{G:[13.5,42.5],LD:[9,36],RD:[11,52],LW:[30,7],C:[24,40],RW:[46,74]},
-         them:{X1:[20,30],X2:[33,18],X3:[43,42],X4:[70,28],X5:[70,56]}, puck:[9,36.5,'LD']},
-        {t:0.3, cue:'LD comes out with SPEED - he never stops. LW is stopped on the wall at the hash marks with his stick on the ice.',
-         us:{LD:[20,25],C:[22,40],LW:[30,8],RW:[58,75]}, them:{X1:[24,26],X2:[33,16]}, puck:[20,25.5,'LD']},
-        {t:0.55, cue:'Pass to the wall. C is already moving through the middle - BEHIND the puck, not ahead of it.',
-         us:{LD:[30,20],C:[28,40],RW:[72,74]}, them:{X1:[28,24],X3:[46,42]}, puck:[30,9]},
-        {t:0.75, cue:'LW turns up ice with it. C is the middle option with speed, RW is stretching the far side.',
-         us:{LW:[40,11],C:[58,39],LD:[38,22],RW:[82,72]},
-         them:{X2:[40,20],X3:[56,44],X1:[34,26]}, puck:[40,11.5,'LW']},
-        {t:1, cue:'Puck to C in the middle lane at the blue line. Three of us moving forward - that is a breakout.',
-         us:{C:[70,38],LW:[56,13],RW:[92,70],LD:[50,24],RD:[38,52]},
-         them:{X3:[64,44],X2:[50,18],X4:[84,30],X5:[84,58]}, puck:[70,38.5,'C']}
-      ]},
-    { id:'dtod', name:'Under pressure - D to D',
-      note:'When the forechecker is right on top of your D.',
-      frames:[
-        {t:0, cue:'A forechecker is right on your D and the wall is covered. Do not force it.',
-         us:{G:[13.5,42.5],LD:[9,36],RD:[13,52],LW:[30,7],C:[23,42],RW:[46,74]},
-         them:{X1:[13,32],X2:[29,12],X3:[40,44],X4:[70,28],X5:[70,56]}, puck:[9,36.5,'LD']},
-        {t:0.3, cue:'LD goes behind the net and hands it to RD on the other side. Now the forechecker has to skate all the way around.',
-         us:{LD:[9,48],RD:[13,56],C:[24,50]}, them:{X1:[9,40]}, puck:[11,52]},
-        {t:0.55, cue:'RD has time and space. C swings low on the NEW side to be the short option - you follow the puck across.',
-         us:{RD:[19,60],LD:[11,44],C:[28,58],RW:[40,76],LW:[40,10]},
-         them:{X1:[13,50],X3:[40,52]}, puck:[19,60,'RD']},
-        {t:0.8, cue:'RD to RW on the wall. Exact same play, just the other side of the ice.',
-         us:{RW:[40,77],C:[44,54],RD:[28,62]}, them:{X3:[46,52],X1:[22,56]}, puck:[40,77]},
-        {t:1, cue:'Out clean. Patience beat pressure - and nobody made a risky pass through the middle.',
-         us:{RW:[52,76],C:[60,50],LW:[58,14],RD:[38,62],LD:[24,44]},
-         them:{X3:[54,50],X5:[76,60]}, puck:[52,76,'RW']}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Middle-lane support. Be the short option with your feet already moving.',
-      look:[{n:1,label:'Your D\'s eyes and the puck',to:'puck'},
-            {n:2,label:'The middle of the ice - is their F3 sitting there?',to:'X3'},
-            {n:3,label:'Your far wing for the long stretch pass',to:'RW'}],
-      do:['Swing low first, then curl toward the puck side - you should be MOVING when the pass comes.',
-          'Stay behind the puck until you have it. No support means no breakout.',
-          'Once you get it, look up the middle first, then the far wing.',
-          'If the puck goes D-to-D, you go across too. You follow the puck.'],
-      mistake:'Standing still, or floating up high past your own D. Then your D has nobody to pass to and has to throw it away.',
-      remember:'Low, then moving, then middle.' },
-    LD:{ job:'Retrieve, then move it. You have about two seconds - use them.',
-      look:[{n:1,label:'Over your shoulder BEFORE you get the puck',to:'X1'},
-            {n:2,label:'Your wing on the wall',to:'LW'},
-            {n:3,label:'Your partner for the D-to-D bail-out',to:'RD'}],
-      do:['Check over your shoulder before you touch it so you already know your play.',
-          'Skate out with speed - a moving D is very hard to forecheck.',
-          'Wall first, middle second, D-to-D third.',
-          'If nothing is there, put it high off the glass. That is a good play, not a bad one.'],
-      mistake:'Stopping behind the net with the puck. That is when you get hit and it ends up in our net.' },
-    RD:{ job:'Support your partner, then get up ice behind the play.',
-      look:[{n:1,label:'Your partner with the puck',to:'LD'},
-            {n:2,label:'The forechecker coming at him',to:'X1'},
-            {n:3,label:'The middle of the ice behind you',to:[30,42]}],
-      do:['Be on the other side of the net so D-to-D is always available.',
-          'Talk to your partner - tell him "time" or "pressure."',
-          'Once the puck is out, follow the play up ice. Do not stay parked.',
-          'You are the safety valve. Somebody has to be the last man back.'],
-      mistake:'Skating up the ice too early, so when the puck comes back your partner has no help.' },
-    LW:{ job:'Be a stationary target on the wall at the hash marks.',
-      look:[{n:1,label:'The puck and your D',to:'puck'},
-            {n:2,label:'Over your inside shoulder for the man on you',to:'X2'},
-            {n:3,label:'Up ice - where you are going next',to:[70,14]}],
-      do:['Get to the wall at the hash marks and STOP. Face the puck.',
-          'Stick flat on the ice, blade toward your D. That is his target.',
-          'Take the pass, take one step to the middle, then go up ice.',
-          'If you are covered, tell your D and give him a different look.'],
-      mistake:'Drifting up the boards so the pass has to be perfect, or skating away from the puck before you have it.' },
-    RW:{ job:'Far-side stretch. You are the long option and the one who beats their D up ice.',
-      look:[{n:1,label:'The puck across the ice',to:'puck'},
-            {n:2,label:'Their D - can you get behind him?',to:'X5'},
-            {n:3,label:'The far wall - your lane',to:[92,74]}],
-      do:['Get wide to your boards near the blue line and time your speed.',
-          'Look for the long pass, but do not leave the zone before the puck.',
-          'If they pass you the puck, go. If not, stay wide and stretch their D back.',
-          'On a D-to-D you become the near wing. Swap jobs with LW.'],
-      mistake:'Coming all the way back into the corner. Now all five of us are in one small box and there is nowhere to pass.' },
-    G:{ job:'Stop it, then start it. You are the sixth passer.',
-      look:[{n:1,label:'The puck',to:'puck'},{n:2,label:'Your D coming for it',to:'LD'}],
-      do:['Leave the puck where your D is going, not where he is.','Yell what you see: "behind you", "time", "wheel".','Stop the puck on the boards so it does not bounce out to the slot.'],
-      mistake:'Freezing pucks that could have been played, or leaving them in the middle of the ice.' }
-  }
-},
-
-/* ============================ 3. FORECHECK ============================ */
-{
-  id:'forecheck', name:'Forecheck', group:'Attacking their zone',
-  about:'They have the puck in their end. Three forwards, three jobs: F1, F2, F3.',
-  focus:[100,-5,107,95],
-  roster:['C','LW','RW','LD','RD'],
-  variants:[
-    { id:'122', name:'1-2-2 (one in, contain)',
-      note:'Safe and smart. One pressures, two support, two D hold the line.',
-      frames:[
-        {t:0, cue:'Their D has it behind the net. You are F1 - the first one in. Your job is to take away half the ice.',
-         us:{C:[178,32],LW:[168,18],RW:[158,44],LD:[140,24],RD:[140,60]},
-         them:{XG:[187,42.5],X1:[194,36],X2:[194,50],X3:[176,10],X4:[176,74],X5:[166,44]},
-         puck:[194,36.5,'X1']},
-        {t:0.32, cue:'C angles at his OUTSIDE shoulder. Not straight at him - you are herding him up the boards.',
-         us:{C:[186,26],LW:[172,14],RW:[160,42]}, them:{X1:[192,28],X3:[178,10]}, puck:[192,28.5,'X1']},
-        {t:0.55, cue:'He has one option left - the wall. He takes it. Now F2 attacks, and LW was already above and inside.',
-         us:{C:[188,22],LW:[176,12],RW:[162,40]}, them:{X1:[190,24],X3:[180,10],X5:[168,40]}, puck:[181,10]},
-        {t:0.78, cue:'LW arrives WITH the puck, not after it. C spins low as support, RW never left the middle.',
-         us:{LW:[180,11],C:[186,18],RW:[160,42],LD:[142,26],RD:[142,58]},
-         them:{X3:[184,12],X5:[170,38],X1:[188,22]}, puck:[180,11.5,'LW']},
-        {t:1, cue:'Turnover below their circles. That is the best offense in hockey - you did not even have to carry it in.',
-         us:{LW:[180,14],C:[180,24],RW:[166,44],LD:[136,28],RD:[136,56]},
-         them:{X3:[188,14],X5:[172,36],X2:[190,50]}, puck:[180,14.5,'LW']}
-      ]},
-    { id:'212', name:'2-1-2 (send two, aggressive)',
-      note:'More pressure, more risk. You need your D awake at the line.',
-      frames:[
-        {t:0, cue:'Coach wants pressure. Two of you go in hard, one stays high, D hold the line.',
-         us:{C:[178,56],LW:[178,30],RW:[158,42],LD:[138,26],RD:[138,60]},
-         them:{XG:[187,42.5],X1:[194,50],X2:[194,36],X3:[176,10],X4:[176,74],X5:[166,44]},
-         puck:[194,50.5,'X1']},
-        {t:0.32, cue:'C takes the puck carrier, LW takes the other D. There is no free outlet behind the net now.',
-         us:{C:[188,52],LW:[188,32],RW:[160,42]}, them:{X1:[193,54],X2:[192,32]}, puck:[193,54.5,'X1']},
-        {t:0.6, cue:'Panic pass up the middle - and RW is standing exactly there, because he stayed high like he was supposed to.',
-         us:{RW:[166,44],C:[188,56],LW:[186,30]}, them:{X5:[170,46],X1:[190,56]}, puck:[168,45]},
-        {t:1, cue:'RW has it in the slot with speed. That is what aggressive forechecking buys you - if your F3 is honest.',
-         us:{RW:[174,44],C:[184,52],LW:[184,30],LD:[140,30],RD:[140,56]},
-         them:{X5:[166,48],X3:[178,16]}, puck:[174,44.5,'RW']}
-      ]},
-    { id:'f2', name:'You are F2, not F1',
-      note:'The read that separates good centers from puck-chasers.',
-      frames:[
-        {t:0, cue:'Your winger got there first, so today you are F2. Your entire job is reading which way he forces the puck.',
-         us:{LW:[180,34],C:[170,22],RW:[158,50],LD:[140,26],RD:[140,60]},
-         them:{XG:[187,42.5],X1:[194,36],X2:[194,52],X3:[176,10],X4:[176,74],X5:[166,44]},
-         puck:[194,36.5,'X1']},
-        {t:0.3, cue:'LW forces him up the TOP side. That is your key - go to the top wall, above and inside your man.',
-         us:{LW:[188,28],C:[174,14],RW:[160,46]}, them:{X1:[192,28],X3:[178,10]}, puck:[192,28.5,'X1']},
-        {t:0.6, cue:'The pass goes to the wall and you meet it. Stick first, body second.',
-         us:{C:[178,11],LW:[188,24]}, them:{X3:[180,10]}, puck:[179,10.5]},
-        {t:1, cue:'You won the wall. LW becomes low support, RW never left the middle. Layers, not a pile.',
-         us:{C:[178,14],LW:[184,20],RW:[162,44],LD:[138,28],RD:[138,58]},
-         them:{X3:[184,10],X5:[168,42]}, puck:[178,14.5,'C']}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Usually F1 - the first man in. You do not win the puck, you take away options.',
-      look:[{n:1,label:'The puck carrier\'s hips - they tell you where he is going',to:'X1'},
-            {n:2,label:'The side you are taking away',to:[188,52]},
-            {n:3,label:'Your F2 - he is reading YOU',to:'LW'}],
-      do:['Skate at his outside shoulder, not at his chest. Give him one way to go: the boards.',
-          'Go hard but under control. Arriving out of gas is the same as not arriving.',
-          'Stick on the ice in front of you to take away the pass across.',
-          'If you get beat, do not stop - become the low support man immediately.'],
-      mistake:'Charging straight down the middle at him. He goes around you, you are behind the play, and now your D are outnumbered.',
-      remember:'Angle, do not chase. Take half the ice away.' },
-    LW:{ job:'F2 - the second man. Read where F1 forced the puck and attack that spot.',
-      look:[{n:1,label:'F1 - which way is he forcing it?',to:'C'},
-            {n:2,label:'The first pass option on your wall',to:'X3'},
-            {n:3,label:'Above and inside - do not get beat up ice',to:[160,20]}],
-      do:['Stay above and inside your man so he cannot go up the wall past you.',
-          'Time it: arrive when the puck arrives, not two seconds later.',
-          'If F1 forced it your way, you attack. If not, you hold and stay high.',
-          'Win the wall and the puck is ours in the best place on the ice.'],
-      mistake:'Going in at the same time as F1 so you both hit the same guy and their winger walks out the other side.' },
-    RW:{ job:'F3 - high in the middle. You are the reason a mistake does not become a breakaway.',
-      look:[{n:1,label:'The middle lane in front of you',to:[152,42]},
-            {n:2,label:'The puck below you',to:'puck'},
-            {n:3,label:'Their forward looking for the middle',to:'X5'}],
-      do:['Sit around the top of the circles, in the middle of the ice.',
-          'Stay ABOVE the puck. Nothing gets behind you.',
-          'Read for the puck that squirts out to the middle - that one is yours.',
-          'When we win it low, you are the one who is open in the slot.'],
-      mistake:'Diving in to make it three-on-one down low. Now the middle is empty and their team has a rush.' },
-    LD:{ job:'Hold the line, stay above the puck, keep the play in front of you.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Their winger sneaking behind you',to:'X3'},
-            {n:3,label:'Your partner - stay connected',to:'RD'}],
-      do:['Walk the blue line with the puck. Do not stand in one spot.',
-          'Keep everything in front of you - never let a man get behind you.',
-          'If the puck comes to you at the line, keep it in and shoot or move it low.',
-          'Talk with your partner so one of you is always higher.'],
-      mistake:'Chasing a loose puck into the corner and leaving the blue line wide open behind you.' },
-    RD:{ job:'The safety. You are the last one back and the play never gets past you.',
-      look:[{n:1,label:'Their fastest forward',to:'X4'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The middle of the neutral zone',to:[130,42]}],
-      do:['Stay a little higher than your partner. One of you is always the safety.',
-          'Skate backward and keep your feet moving so you never get flat-footed.',
-          'When we win it, jump up the ice - that is when you become an option.',
-          'When we lose it, you are already turned and going.'],
-      mistake:'Both D at the same depth. One bounce and it is two-on-one the other way.' }
-  }
-},
-
-/* ============================ 4. O-ZONE ============================ */
-{
-  id:'ozone', name:'Offensive zone play', group:'Attacking their zone',
-  about:'We have the puck in their end. Keep it, move it low-to-high, get to the net.',
-  focus:[117,-5,90,95],
-  roster:['C','LW','RW','LD','RD'],
-  variants:[
-    { id:'cycle', name:'Cycle low, then low-to-high',
-      note:'How you keep the puck for a full minute.',
-      frames:[
-        {t:0, cue:'We have it on the wall below the circle. Nobody stands still down here.',
-         us:{LW:[180,10],C:[172,26],RW:[180,56],LD:[132,28],RD:[132,58]},
-         them:{XG:[187,42.5],X1:[184,16],X2:[183,44],X3:[174,38],X4:[150,24],X5:[150,60]},
-         puck:[180,10.5,'LW']},
-        {t:0.32, cue:'Pressured, so LW cycles back DOWN toward the corner - away from trouble - and C comes to the wall to support.',
-         us:{LW:[184,16],C:[176,14],RW:[182,52]}, them:{X1:[186,20],X3:[176,34]}, puck:[184,16.5,'LW']},
-        {t:0.55, cue:'Puck to C on the wall. Your first look is NOT the net. It is your D at the point.',
-         us:{C:[176,13],LW:[184,20],RW:[183,50],LD:[133,26]}, them:{X1:[184,22],X3:[174,32]}, puck:[176,13.5,'C']},
-        {t:0.75, cue:'Low to high. C sends it up to LD, then TURNS AND DRIVES THE NET. That is the whole play.',
-         us:{C:[178,26],LD:[136,30],LW:[182,16],RW:[184,46]}, them:{X3:[172,34],X1:[180,20]}, puck:[136,30.5,'LD']},
-        {t:1, cue:'LD shoots through the lane. C is stopped at the net with his stick on the ice. Rebounds are goals.',
-         us:{C:[182,40],LD:[142,36],RW:[184,48],LW:[180,18],RD:[134,56]},
-         them:{X2:[184,44],X3:[168,38]}, puck:[178,43]}
-      ]},
-    { id:'drive', name:'Net drive off the wall',
-      note:'When their D gives you the inside, take it.',
-      frames:[
-        {t:0, cue:'Their D gave you the inside lane. Do not cycle - go.',
-         us:{LW:[178,12],C:[170,30],RW:[180,58],LD:[132,28],RD:[132,58]},
-         them:{XG:[187,42.5],X1:[180,20],X2:[183,46],X3:[168,36],X4:[150,24],X5:[150,60]},
-         puck:[178,12.5,'LW']},
-        {t:0.35, cue:'LW cuts to the net. C reads it and fills the spot LW just left - somebody is ALWAYS the high support man.',
-         us:{LW:[183,26],C:[174,18],RW:[183,52]}, them:{X1:[182,24],X3:[172,34]}, puck:[183,26.5,'LW']},
-        {t:0.65, cue:'Goalie stops the first one. RW is already at the far post because he did not watch - he went.',
-         us:{RW:[184,50],C:[178,22],LW:[184,36]}, them:{X2:[182,44]}, puck:[184,40]},
-        {t:1, cue:'Rebound on the back door. Almost every goal at your age happens within five feet of the net.',
-         us:{RW:[185,48],C:[180,30],LW:[183,38],LD:[136,30],RD:[134,56]},
-         them:{X2:[181,44],X3:[170,36]}, puck:[185,48]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Low support, then the net. You are the connector between the wall and the point.',
-      look:[{n:1,label:'The puck on the wall',to:'puck'},
-            {n:2,label:'Your D at the point - your first pass',to:'LD'},
-            {n:3,label:'The net - where you go the instant you pass it',to:'theirNet'}],
-      do:['Support the wall from below - give your winger an easy short pass out of trouble.',
-          'When you get it low, look UP first. Low-to-high beats forcing it to the net.',
-          'The second you pass it, drive the net. Stop AT the net, do not swing past it.',
-          'Stick on the ice, eyes on the puck, and be ready for an ugly rebound.'],
-      mistake:'Passing it up to the point and then coasting to watch the shot. The rebound is the whole reason you are down there.',
-      remember:'Get it, give it, GO to the net.' },
-    LW:{ job:'Win the wall, protect the puck, and cycle when you are stuck.',
-      look:[{n:1,label:'The man on you - which shoulder?',to:'X1'},
-            {n:2,label:'Your center below/behind you',to:'C'},
-            {n:3,label:'The point for the low-to-high',to:'LD'}],
-      do:['Feet always moving. A stopped player on the wall loses the puck.',
-          'When you are pressured, cycle back down low. Never force it up the wall into a shin pad.',
-          'Body between the puck and the defender, puck on your far side.',
-          'If you cut to the net, go all the way. Half a drive does nothing.'],
-      mistake:'Trying to beat two guys along the wall. That turnover becomes their breakaway.' },
-    RW:{ job:'Weak side. Be at the far post and in the shooting lane\'s rebound spot.',
-      look:[{n:1,label:'The puck across the ice',to:'puck'},
-            {n:2,label:'The back door post',to:'theirNet'},
-            {n:3,label:'Your D at the far point',to:'RD'}],
-      do:['Get to the far post on every shot. That is where the puck goes most often.',
-          'Stay a bit wide of the goalie so you are not in his way and he cannot see you.',
-          'Stick on the ice, blade flat, ready for a tip.',
-          'If the puck goes to your side, you become the wall guy and C supports you.'],
-      mistake:'Standing at the top of the circle admiring the play. Weak-side goals come from the paint.' },
-    LD:{ job:'Strong-side point. Walk the line, get shots through, and keep pucks in.',
-      look:[{n:1,label:'The puck below you',to:'puck'},
-            {n:2,label:'A shooting lane to the net',to:'theirNet'},
-            {n:3,label:'The blue line behind you',to:[125,28]}],
-      do:['Walk toward the middle before you shoot - that opens a lane.',
-          'Get it through and get it low. A blocked shot is a rush against.',
-          'Keep pucks in at the line. That single skill wins games.',
-          'Shoot for sticks and shin pads at the net, not for the top corner.'],
-      mistake:'One-timing it straight into the shin pads of the first guy, over and over.' },
-    RD:{ job:'Weak-side point and the safety. You are also the last man back.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Their forward getting ready to leave',to:'X3'},
-            {n:3,label:'The middle of the neutral zone behind you',to:[128,42]}],
-      do:['Stay a little higher than your partner. One D is always the safety.',
-          'Be a real option - if they get it to you, shoot or move it fast.',
-          'Read the turnover early. You should be turning before the puck is loose.',
-          'Never both D below the blue line at once.'],
-      mistake:'Sneaking down for a goal and getting caught. Now they are on a two-on-one.' }
-  }
-},
-
-/* ============================ 5. ENTRY ============================ */
-{
-  id:'entry', name:'Zone entry', group:'Attacking their zone',
-  about:'Crossing their blue line with the puck. Spacing decides whether this rush works.',
-  focus:[80,-5,122,95],
-  roster:['C','LW','RW','LD','RD'],
-  variants:[
-    { id:'wide', name:'Wide with speed, drive the net',
-      note:'One guy wide, one guy to the net, one guy late in the middle.',
-      frames:[
-        {t:0, cue:'We are crossing center with the puck. Now spacing is everything - wide, wide, and one in the middle.',
-         us:{LW:[112,12],C:[104,38],RW:[110,66],LD:[98,30],RD:[94,54]},
-         them:{X1:[118,44],X2:[140,28],X3:[140,58],X4:[128,16],X5:[128,70]}, puck:[112,12.5,'LW']},
-        {t:0.32, cue:'LW takes it wide and gains the line. RW drives HARD to the net - that pushes their D backward and opens the middle.',
-         us:{LW:[132,9],RW:[132,60],C:[116,38],LD:[108,30]},
-         them:{X2:[142,26],X3:[146,56],X1:[124,44]}, puck:[132,9.5,'LW']},
-        {t:0.6, cue:'C is late ON PURPOSE. You arrive in the slot as the trailer, right where their D just backed out of.',
-         us:{C:[136,36],LW:[146,10],RW:[160,52]},
-         them:{X2:[150,22],X3:[158,52],X1:[134,44]}, puck:[146,10.5,'LW']},
-        {t:0.85, cue:'Puck to the slot. Shoot it - you are inside the dots with your feet moving. That is the best shot in hockey.',
-         us:{C:[148,36],LW:[156,14],RW:[172,48]},
-         them:{X2:[156,24],X3:[166,50],X1:[142,42]}, puck:[148,36.5,'C']},
-        {t:1, cue:'Shot, and LW and RW both go straight to the net for the second chance.',
-         us:{C:[152,38],LW:[170,44],RW:[180,48],LD:[132,32],RD:[118,54]}, puck:[176,44]}
-      ]},
-    { id:'delay', name:'Delay - nobody is with you yet',
-      note:'The most under-taught play in youth hockey.',
-      frames:[
-        {t:0, cue:'You have the puck and you are all alone. Skating into three guys is a turnover. Delay instead.',
-         us:{C:[114,42],LW:[104,14],RW:[100,64],LD:[92,32],RD:[88,54]},
-         them:{X1:[126,42],X2:[140,30],X3:[140,56],X4:[120,20],X5:[120,66]}, puck:[114,42.5,'C']},
-        {t:0.35, cue:'C curls BACK toward his own end instead of forcing it. That buys two seconds - and two seconds is your whole team.',
-         us:{C:[106,34],LW:[116,12],RW:[112,66],LD:[104,34]},
-         them:{X1:[124,34],X2:[140,28]}, puck:[106,34.5,'C']},
-        {t:0.62, cue:'Now LW is beside you with speed. Hand it off and go to the net yourself.',
-         us:{C:[118,20],LW:[126,12],RW:[124,64],LD:[112,34]},
-         them:{X1:[122,30],X2:[142,26]}, puck:[126,12.5,'LW']},
-        {t:1, cue:'Clean entry, three players in with speed. Same rush, ten times better - just because you waited.',
-         us:{LW:[146,12],C:[140,34],RW:[148,58],LD:[122,32],RD:[112,54]},
-         them:{X2:[152,22],X3:[154,54],X1:[134,40]}, puck:[146,12.5,'LW']}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Middle lane. You are the late man - the trailer who arrives in the slot.',
-      look:[{n:1,label:'The puck carrier on the wall',to:'puck'},
-            {n:2,label:'The slot - the ice between the circles',to:[150,38]},
-            {n:3,label:'Their D - is he backing off?',to:'X2'}],
-      do:['Stay in the middle lane. Your wings own the boards; do not go there.',
-          'Enter the zone a beat LATE and with speed. Early means covered.',
-          'If you have it and you are alone, delay - curl back and wait for help.',
-          'When you get it in the slot, shoot. Do not look for one more pass.'],
-      mistake:'Racing into the zone first and standing still, or drifting onto the same wall as your winger so two of you are in one lane.',
-      remember:'Middle lane. Arrive late. Arrive fast.' },
-    LW:{ job:'Carry or attack wide. Gain the line, then make a play from the outside.',
-      look:[{n:1,label:'The blue line - do not go offside',to:[125,12]},
-            {n:2,label:'Their D and how much room he gives you',to:'X2'},
-            {n:3,label:'The slot for the trailer',to:'C'}],
-      do:['Gain the line WIDE with speed so their D has to respect the outside.',
-          'Once you are in, look back to the slot before you look at the net.',
-          'If you are covered, put it deep behind their D and go get it.',
-          'Do not carry it into two guys at the line. That is their best chance to score.'],
-      mistake:'Cutting to the middle right at the blue line, straight into their D and their center.' },
-    RW:{ job:'Drive the far side and go to the net whether you get the puck or not.',
-      look:[{n:1,label:'The net',to:'theirNet'},
-            {n:2,label:'Their D - can you get behind him?',to:'X3'},
-            {n:3,label:'The puck carrier',to:'puck'}],
-      do:['Drive HARD to the net every time. That is what makes room for everyone else.',
-          'Get to the far post, not the middle of the crease.',
-          'You are not decoration - you are the tip and the rebound.',
-          'Stay a step behind the puck so you are never offside.'],
-      mistake:'Slowing down at the top of the circle. Their D relaxes and now the whole rush has no threat.' },
-    LD:{ job:'Support the rush from behind. Be the late option and the first man back.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Open ice at the top of the zone',to:[132,26]},
-            {n:3,label:'Behind you - who is left?',to:'RD'}],
-      do:['Follow the play up to the blue line, not past it, unless it is clearly safe.',
-          'Be a real option for a drop pass or a puck back to the point.',
-          'The moment the puck turns over, turn and skate. Do not watch it.',
-          'Talk to your partner: one of you goes, one of you stays.'],
-      mistake:'Joining the rush as a fourth attacker with nobody covering behind you.' },
-    RD:{ job:'The safety. Nothing gets behind you, ever.',
-      look:[{n:1,label:'Their fastest forward',to:'X1'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The middle of the neutral zone',to:[110,42]}],
-      do:['Stay higher than your partner and in the middle of the ice.',
-          'Keep your feet moving so you can turn instantly.',
-          'You are allowed to be boring. Boring D win games.',
-          'If the puck is lost, you are already going the other way.'],
-      mistake:'Both D above the puck at the same depth. One turnover and it is an odd-man rush.' }
-  }
-},
-
-/* ============================ 6. NEUTRAL ZONE ============================ */
-{
-  id:'neutral', name:'Neutral zone', group:'The middle of the ice',
-  about:'Regrouping with the puck, and defending the rush coming back.',
-  focus:[46,-5,112,95],
-  roster:['C','LW','RW','LD','RD'],
-  variants:[
-    { id:'regroup', name:'Regroup - reset and come again',
-      note:'Better than dumping it in and hoping.',
-      frames:[
-        {t:0, cue:'The play died at their blue line. Bring it back, reset, and come again with speed.',
-         us:{LD:[70,32],RD:[70,54],LW:[86,10],C:[78,42],RW:[86,74]},
-         them:{X1:[86,44],X2:[100,22],X3:[100,64],X4:[114,34],X5:[114,54]}, puck:[70,32.5,'LD']},
-        {t:0.3, cue:'D-to-D behind the line. Wings get WIDE to the boards. C stays in the middle, behind the puck.',
-         us:{LD:[66,36],RD:[68,50],LW:[88,8],RW:[88,76],C:[62,44]}, them:{X1:[82,42]}, puck:[68,49,'RD']},
-        {t:0.58, cue:'Wings time it so they hit the line MOVING, not standing. C swings and turns up the middle lane.',
-         us:{RD:[74,54],LD:[66,40],LW:[96,8],RW:[96,76],C:[84,44]},
-         them:{X1:[86,48],X2:[102,20],X3:[102,66]}, puck:[74,54.5,'RD']},
-        {t:0.82, cue:'RD hits C in the middle - against a trap, the softest ice is right up the gut.',
-         us:{C:[94,44],RD:[80,54],LW:[106,10],RW:[106,74]},
-         them:{X2:[104,22],X3:[104,64],X4:[116,36]}, puck:[94,44.5,'C']},
-        {t:1, cue:'Three lanes filled, everyone moving forward. That is how you attack instead of throwing it away.',
-         us:{C:[112,44],LW:[122,12],RW:[122,72],LD:[96,36],RD:[92,52]},
-         them:{X4:[122,38],X5:[124,56]}, puck:[112,44.5,'C']}
-      ]},
-    { id:'gap', name:'They are coming at us - gap control',
-      note:'Tracking back through the middle is a center\'s hardest habit.',
-      frames:[
-        {t:0, cue:'They have it and they are coming. Now it is about gap and staying above the puck.',
-         us:{LD:[84,32],RD:[84,54],C:[96,44],LW:[104,16],RW:[104,68]},
-         them:{X1:[112,42],X2:[118,14],X3:[118,70],X4:[128,34],X5:[128,54]}, puck:[112,42.5,'X1']},
-        {t:0.32, cue:'D skate backward TOGETHER with a short gap - a stick length, not ten feet. C tracks back through the middle.',
-         us:{LD:[78,34],RD:[78,52],C:[88,44],LW:[96,16],RW:[96,68]},
-         them:{X1:[100,42],X2:[106,14],X3:[106,70]}, puck:[100,42.5,'X1']},
-        {t:0.6, cue:'C stays on the puck carrier\'s inside hip all the way back. Nobody gets a free ride through the middle.',
-         us:{C:[80,42],LD:[72,34],RD:[72,52],LW:[84,14],RW:[84,70]},
-         them:{X1:[86,42],X2:[92,14],X3:[92,70]}, puck:[86,42.5,'X1']},
-        {t:1, cue:'Squeezed at the blue line with nowhere to go but the boards. We win it back without a single big hit.',
-         us:{LD:[70,36],RD:[70,50],C:[76,42],LW:[78,12],RW:[78,72]},
-         them:{X1:[78,40],X2:[80,12],X3:[82,68]}, puck:[76,38]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Own the middle lane - going forward AND coming back.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'The middle lane in front of and behind you',to:[100,42]},
-            {n:3,label:'Your wings - are they wide?',to:'LW'}],
-      do:['Going forward: stay in the middle, behind the puck, moving.',
-          'Coming back: skate to the inside hip of the puck carrier and stay with him.',
-          'Never leave the middle lane to go help on the wall. Your winger has that.',
-          'On a regroup, swing low and come back with speed instead of standing at the line.'],
-      mistake:'Drifting to the boards where your winger already is. Now two of you are in one lane and the middle is empty.',
-      remember:'You live in the middle. Both directions.' },
-    LW:{ job:'Get wide, stay onside, and time your speed to the puck.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'The blue line',to:[125,12]},
-            {n:3,label:'The man who has to cover you',to:'X2'}],
-      do:['Wide means WIDE - within a couple feet of the boards.',
-          'Time your speed so you cross the line as the puck does.',
-          'Coming back, pick up their winger on your side. Stay above him.',
-          'Being wide stretches their team out. That alone creates room.'],
-      mistake:'Curling into the middle so all three forwards end up in one clump.' },
-    RW:{ job:'Same as LW on the other side. Wide, onside, and above your man.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Your lane along the boards',to:[122,72]},
-            {n:3,label:'Their winger on your side',to:'X3'}],
-      do:['Stretch their D by getting behind them when you can.',
-          'On the way back, your man is the winger on your side. Find him early.',
-          'Do not cross into the middle - that is your center\'s ice.',
-          'Stay onside. A great rush killed by offside is nothing.'],
-      mistake:'Watching the puck instead of your man on the way back, so their winger gets in free.' },
-    LD:{ job:'Move the puck on the regroup, and control the gap on the way back.',
-      look:[{n:1,label:'Your partner for D-to-D',to:'RD'},
-            {n:2,label:'The wide wings',to:'LW'},
-            {n:3,label:'The middle for your center',to:'C'}],
-      do:['D-to-D first if the middle is clogged. Making them shift is the point.',
-          'Coming back, keep a tight gap - close enough to touch him with your stick.',
-          'Skate backward with your partner, side by side, same speed.',
-          'Angle him toward the boards. The middle is where they score from.'],
-      mistake:'Backing in all the way to the goal line. You gave them the whole zone for free.' },
-    RD:{ job:'Stay connected to your partner. Two D moving as one unit.',
-      look:[{n:1,label:'Your partner',to:'LD'},
-            {n:2,label:'The puck carrier',to:'puck'},
-            {n:3,label:'The far side in case it goes across',to:[110,66]}],
-      do:['Mirror your partner. Same depth, same speed, a stick apart is too close.',
-          'Talk: "I got him", "switch", "step up".',
-          'Step up at the line when you can - killing the play there is worth a lot.',
-          'On the regroup, be a real option, not a place to hide the puck.'],
-      mistake:'Two D at completely different depths, so there is a huge hole to pass through between you.' }
-  }
-},
-
-/* ============================ 7. POWER PLAY ============================ */
-{
-  id:'pp', name:'Power play (5 on 4)', group:'Special teams',
-  about:'One extra man. Hold your spot and move the puck faster than they can slide.',
-  focus:[117,-5,90,95],
-  roster:['LD','LW','C','RW','RD'],
-  variants:[
-    { id:'131', name:'1-3-1: point, three across, net front',
-      note:'RD is playing the net-front spot here - your coach may use a forward there.',
-      frames:[
-        {t:0, cue:'Power play. Five spots, and if everybody holds theirs the puck does the work.',
-         us:{LD:[133,42.5],LW:[163,22],C:[167,42.5],RW:[163,63],RD:[183,42.5]},
-         them:{XG:[187,42.5],X1:[150,32],X2:[150,53],X3:[174,30],X4:[174,55]}, puck:[133,43,'LD']},
-        {t:0.3, cue:'Point to the half wall. The box HAS to shift - and shifting takes them time.',
-         us:{LW:[163,20],C:[167,42.5],LD:[134,42.5]},
-         them:{X1:[154,26],X3:[172,26],X2:[152,52]}, puck:[163,21,'LW']},
-        {t:0.55, cue:'Now the seam. C in the middle is open because all four of them slid toward the puck.',
-         us:{C:[166,42.5],RW:[164,64],RD:[183,44]}, them:{X3:[170,28],X1:[156,30]}, puck:[166,42.5,'C']},
-        {t:0.8, cue:'One touch to the far half wall, or one shot from the middle. Both are good - just do it in ONE touch.',
-         us:{RW:[164,62],C:[166,42.5]}, them:{X4:[170,56],X2:[156,50]}, puck:[164,62,'RW']},
-        {t:1, cue:'Shot from the far half wall, net-front man tips it. Move the puck faster than they can slide.',
-         us:{RD:[183,45],C:[172,42.5],LD:[136,42.5]}, them:{X4:[174,52]}, puck:[182,45]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'The bumper - the middle man. Hardest spot to cover and hardest spot to play.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'The seam - the gap between their two low men',to:[176,42.5]},
-            {n:3,label:'The net for a quick shot',to:'theirNet'}],
-      do:['Stay between the circles, around the dots, in the middle. Small movements only.',
-          'Show your stick blade to whoever has the puck. Give him a target.',
-          'One touch. Shoot it or move it - never hold it in the middle.',
-          'If they cover you, slide a few feet to a new window. Do not leave.'],
-      mistake:'Skating around trying to get open. In the middle you get open by standing still in the right spot and moving your stick, not your feet.',
-      remember:'Stay in the seam. One touch.' },
-    LD:{ job:'The point. You are the quarterback - you make them move.',
-      look:[{n:1,label:'Both half walls',to:'LW'},
-            {n:2,label:'The bumper in the middle',to:'C'},
-            {n:3,label:'The blue line behind you',to:[125,42.5]}],
-      do:['Walk the line side to side. A moving point man breaks the box.',
-          'Fake the shot to freeze them, then pass.',
-          'Get shots THROUGH. Low, hard, and to a stick at the net.',
-          'Number one job: keep the puck in the zone at the line.'],
-      mistake:'Standing in one spot and firing it into a shin pad every time. That is a clear and a fresh kill for them.' },
-    LW:{ job:'Half wall on your side. Catch, look, decide.',
-      look:[{n:1,label:'The bumper in the middle',to:'C'},
-            {n:2,label:'The net-front man',to:'RD'},
-            {n:3,label:'The point',to:'LD'}],
-      do:['Stay on the wall around the top of the circle. Do not drift.',
-          'Catch it with your feet already pointed where you want to go.',
-          'Look middle first - the seam pass is the best play on a power play.',
-          'Shoot for tips and rebounds, not for corners.'],
-      mistake:'Skating into the middle with it and turning it over. On a power play the puck moves, not the players.' },
-    RW:{ job:'Far half wall. Be ready, because the puck comes fast when the box over-shifts.',
-      look:[{n:1,label:'The puck across the ice',to:'puck'},
-            {n:2,label:'The middle',to:'C'},
-            {n:3,label:'The net-front man',to:'RD'}],
-      do:['Hold your spot on the wall even when the puck is nowhere near you.',
-          'Get your stick on the ice before the pass gets there.',
-          'A one-timer from the far half wall is a great power-play shot. Practice it.',
-          'When they collapse to you, the middle just opened. Look there first.'],
-      mistake:'Wandering low or high to "get involved" and leaving your side of the ice empty.' },
-    RD:{ job:'Net front. Screen, tip, and live in the blue paint.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'The goalie\'s eyes - block them',to:'theirNet'},
-            {n:3,label:'The rebound spot beside you',to:[184,50]}],
-      do:['Stand where the goalie cannot see through you, just off the top of the crease.',
-          'Stick on the ice, blade flat, ready to tip anything.',
-          'Do not turn to watch the shot. Watch the goalie and the puck.',
-          'Get the rebound before anyone else even reacts.'],
-      mistake:'Standing beside the net where you screen nobody, or getting pushed out and staying out.' }
-  }
-},
-
-/* ============================ 8. PENALTY KILL ============================ */
-{
-  id:'pk', name:'Penalty kill (4 on 5)', group:'Special teams',
-  about:'Down a man. Four players, one box, moving like it is tied together with string.',
-  focus:[-5,-5,100,95],
-  roster:['G','LD','RD','C','LW'],
-  variants:[
-    { id:'box', name:'The box - move as one unit',
-      note:'RW is on the bench. Four skaters only.',
-      frames:[
-        {t:0, cue:'Down a man. Four of you make a box, and the box slides as ONE piece.',
-         us:{G:[13.5,42.5],C:[40,32],LW:[40,53],LD:[24,32],RD:[24,53]},
-         them:{X1:[52,42.5],X2:[30,20],X3:[30,65],X4:[34,42.5],X5:[18,42.5]}, puck:[52,42.5,'X1']},
-        {t:0.3, cue:'Puck goes to the top-side half wall. The whole box slides that way together. Nobody freelances.',
-         us:{C:[38,26],LW:[38,48],LD:[24,27],RD:[24,48]}, them:{X2:[32,18]}, puck:[32,18.5,'X2']},
-        {t:0.55, cue:'NOW C can pressure - the puck is on his side and he can actually get there. Stick in the shot lane.',
-         us:{C:[33,22],LD:[23,26],LW:[36,46],RD:[24,46]}, them:{X2:[31,17],X4:[34,40]}, puck:[31,17.5,'X2']},
-        {t:0.8, cue:'Forced back to the point. Box resets to the middle. You just killed eight seconds - that is a win.',
-         us:{C:[38,32],LW:[38,52],LD:[24,32],RD:[24,52]}, them:{X2:[30,20]}, puck:[50,42.5,'X1']},
-        {t:1, cue:'Next puck near you, look for the clear. Off the glass and out is a perfect play - it does not have to be pretty.',
-         us:{C:[42,30],LD:[25,32],RD:[24,52],LW:[38,52]}, puck:[70,10]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Top of the box on your side. Pressure only when you can actually get there.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'The bumper in the middle behind you',to:'X4'},
-            {n:3,label:'Your partner up top - stay connected',to:'LW'}],
-      do:['Move with the box. If the puck slides, you slide - same distance, same time.',
-          'Pressure only when the puck is on your side and you can reach it in two strides.',
-          'Stick in the shot lane. Blocked shots are the whole job.',
-          'Any chance to clear it, take it. Glass and out is a great play.'],
-      mistake:'Running at the puck all over the zone. You get tired, the box breaks, and they score through the hole you left.',
-      remember:'Move as a unit. Sticks in lanes. Clear it when you can.' },
-    LW:{ job:'Other top corner of the box. You mirror your center exactly.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Their point man on your side',to:'X1'},
-            {n:3,label:'Your center - match him',to:'C'}],
-      do:['Mirror your center. Whatever he does, you do at the same time.',
-          'Take away the seam pass to the middle with your stick.',
-          'When the puck is not on your side, sag in toward the middle.',
-          'Sell out to block shots from your side.'],
-      mistake:'Both of you chasing the same puck. Now the whole top of the zone is open.' },
-    LD:{ job:'Bottom of the box on your side. The net and the low ice are yours.',
-      look:[{n:1,label:'The net-front man',to:'X5'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The back door across the crease',to:[20,52]}],
-      do:['Stay tight to the net. The box is small down low, wide up high.',
-          'Body on the net-front man, stick in the low passing lane.',
-          'Do not chase into the corner. Let them have the corner, never the slot.',
-          'Clear rebounds hard, out and away.'],
-      mistake:'Leaving the net front to pressure a puck in the corner. That is exactly what they want.' },
-    RD:{ job:'Other bottom corner. Take away the low seam and the back door.',
-      look:[{n:1,label:'The back door and far post',to:'X5'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'Your partner - stay tied together',to:'LD'}],
-      do:['Slide with your partner. The two of you protect one net together.',
-          'The pass across the low slot is their best play - kill it with your stick.',
-          'Block shots with your feet under you so you can recover.',
-          'Talk constantly. You are the eyes for the guy watching the puck.'],
-      mistake:'Watching the puck and losing the man behind you at the far post.' },
-    G:{ job:'See it, stop it, and kill the play dead.',
-      look:[{n:1,label:'The puck through the traffic',to:'puck'},{n:2,label:'The back door',to:'X5'}],
-      do:['Fight for sightlines - move your head, not just your body.','Freeze anything you can. A whistle is a killed penalty.','Talk loud about back-door men.'],
-      mistake:'Giving up rebounds into the slot when a freeze was available.' }
-  }
-},
-
-/* ============================ 9. FACEOFFS ============================ */
-{
-  id:'faceoff', name:'Faceoffs', group:'Set plays',
-  about:'The one moment where everybody knows exactly where to stand. Free offense or free defense.',
-  focus:[-5,-5,96,95],
-  roster:['G','LD','RD','C','LW','RW'],
-  variants:[
-    { id:'dzone', name:'Defensive zone draw',
-      note:'Know your man BEFORE the puck drops.',
-      frames:[
-        {t:0, cue:'D-zone draw on the top-side dot. Before the puck drops: know your man, and know where you go if we lose it.',
-         us:{G:[13.5,42.5],C:[29.5,20.5],LD:[23,11],RD:[19,35],LW:[38,12],RW:[36,30]},
-         them:{X1:[32.5,20.5],X2:[41,10],X3:[40,31],X4:[60,20],X5:[52,42]}, puck:[31,20.5]},
-        {t:0.3, cue:'C wins it back to the corner with a quick pull. Simple beats fancy every single time.',
-         us:{C:[30,22],LD:[22,13]}, puck:[22,12]},
-        {t:0.6, cue:'LD picks it up, LW seals his man on the wall, and the breakout is already on.',
-         us:{LD:[20,14],LW:[38,10],C:[28,28],RD:[18,38],RW:[38,34]},
-         them:{X2:[42,10],X1:[34,22]}, puck:[20,14.5,'LD']},
-        {t:1, cue:'Out of the zone straight off the draw. Faceoffs are free offense when everybody knows their spot.',
-         us:{LD:[28,16],LW:[44,10],C:[40,32],RW:[46,44],RD:[24,44]},
-         them:{X2:[46,12],X1:[40,24],X3:[46,36]}, puck:[28,16.5,'LD']}
-      ]},
-    { id:'ozone', name:'Offensive zone draw', focus:[117,-5,90,95],
-      note:'Win it back to the point and shoot before they set up.',
-      frames:[
-        {t:0, cue:'O-zone draw. The plan is simple: win it back to the point and get a shot before they can set up.',
-         us:{C:[167.5,20.5],LW:[176,11],RW:[174,31],LD:[157,14],RD:[152,34],G:[13.5,42.5]},
-         them:{XG:[187,42.5],X1:[170.5,20.5],X2:[161,12],X3:[162,30],X4:[180,14],X5:[180,34]},
-         puck:[169,20.5]},
-        {t:0.3, cue:'C wins it back to LD at the top of the circle. One clean pull, that is all it takes.',
-         us:{C:[168,22],LD:[157,15]}, puck:[157,15]},
-        {t:0.6, cue:'One-touch shot. C goes STRAIGHT to the net - do not stand and admire your own faceoff win.',
-         us:{LD:[158,16],C:[178,34],LW:[180,14],RW:[182,44]},
-         them:{X2:[162,14],X1:[172,24]}, puck:[176,38]},
-        {t:1, cue:'Traffic and a rebound in the paint. That is how faceoff wins turn into goals.',
-         us:{C:[182,40],LW:[183,30],RW:[184,48],LD:[150,20],RD:[148,40]},
-         them:{X1:[178,28],X4:[181,36]}, puck:[184,42]}
-      ]}
-  ],
-  coach:{
-    C:{ job:'Win the draw, or at least make sure they do not win it clean.',
-      look:[{n:1,label:'The linesman\'s hand and the puck',to:'puck'},
-            {n:2,label:'The other center\'s stick - which hand is he?',to:'X1'},
-            {n:3,label:'Your D - where are you sending it?',to:'LD'}],
-      do:['Decide your play BEFORE you bend down. Back to the corner is the safe one.',
-          'Get low, hands apart on the stick, feet wide.',
-          'If you cannot win it, tie up his stick so nobody wins it.',
-          'The instant it is won: in our zone, get to the middle. In their zone, go to the net.'],
-      mistake:'Standing up and watching after the draw. The two seconds right after a faceoff is when most goals off a draw happen.',
-      remember:'Know your play before you bend down.' },
-    LW:{ job:'Boards side. Your man is the winger across from you - beat him to the puck.',
-      look:[{n:1,label:'Your man across the circle',to:'X2'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The wall behind you',to:[38,6]}],
-      do:['Get your stick and body on your man immediately - do not watch the puck drop.',
-          'In our zone: seal him off the wall so he cannot get to the corner.',
-          'In their zone: go to the net or the wall depending on where it goes.',
-          'Loose puck on the wall is yours. Win it and the draw does not even matter.'],
-      mistake:'Watching the puck instead of your man, so he beats you to a loose puck you should have had.' },
-    RW:{ job:'Inside man. Protect the middle of the ice above the dot.',
-      look:[{n:1,label:'Your man on the inside',to:'X3'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'The middle of the ice behind you',to:[30,42]}],
-      do:['Take away the middle first. That is the dangerous ice.',
-          'Stay above the dot in our zone - nothing gets behind you.',
-          'If your center loses it back, you are the first layer of coverage.',
-          'In their zone, get to the net for the tip.'],
-      mistake:'Drifting toward the boards where your winger already is, leaving the middle open off the draw.' },
-    LD:{ job:'Boards side of the dot. Be ready for the puck your center pulls back.',
-      look:[{n:1,label:'The puck',to:'puck'},
-            {n:2,label:'Their winger on your side',to:'X2'},
-            {n:3,label:'Your breakout target on the wall',to:'LW'}],
-      do:['Set up where your center is actually going to put it - talk about it first.',
-          'Get there with your feet moving so you are not a sitting target.',
-          'Know your first pass before you touch it.',
-          'If they win it, get to the net or the corner - whichever is your job.'],
-      mistake:'Standing flat-footed and getting beaten to your own center\'s pull-back.' },
-    RD:{ job:'Net side. You are the insurance if the draw goes wrong.',
-      look:[{n:1,label:'The net-front area',to:'ourNet'},
-            {n:2,label:'The puck',to:'puck'},
-            {n:3,label:'Their high man',to:'X5'}],
-      do:['Start in front of the net, not out at the dot.',
-          'If they win it clean, you already have the most dangerous ice covered.',
-          'Talk to your goalie about who is where.',
-          'Once we have it, get to your breakout spot fast.'],
-      mistake:'Creeping out toward the circle for offense and leaving the front of your own net empty.' },
-    G:{ job:'Be set before the puck drops.',
-      look:[{n:1,label:'The puck',to:'puck'},{n:2,label:'The high man for a quick shot',to:'X5'}],
-      do:['Set your feet and be square to the dot before the drop.','Call out who is uncovered.','Expect a shot right off the draw.'],
-      mistake:'Still shuffling into position when the puck drops.' }
-  }
-}
-
-];
+/* SITUATIONS lives in situations.js, loaded before this script. */
 
 /* ============================================================
    VIDEO LIBRARY
@@ -1907,13 +1088,13 @@ const PLACEQ={
   const nz=byId.neutral;
 
   const regroup={
-    id:'regroup', name:'Regroup', phase:'T',
+    id:'regroup', name:'Regroup', phase:'T', ages:(nz.ages||[]).slice(),
     about:'The play died. Reset and come again with speed.',
     focus:nz.focus, roster:nz.roster, coach:nz.coach,
     variants:[Object.assign({},nz.variants[0],{id:'regroup',name:'Bring it back and reset'})]
   };
   const rush={
-    id:'rush', name:'Defending the rush', phase:'D',
+    id:'rush', name:'Defending the rush', phase:'D', ages:(nz.ages||[]).slice(),
     about:'They are carrying it at us. Squeeze them at the line.',
     focus:nz.focus, roster:nz.roster,
     variants:[Object.assign({},nz.variants[1],{id:'gap',name:'Gap control'})],
@@ -2197,7 +1378,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.35';
+const BUILD='2026-08-21.38';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2550,12 +1731,25 @@ function drawTry(t){
     dur:'1.5s',repeatCount:'indefinite'}));
   ring.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0.1;0.95',dur:'1.5s',repeatCount:'indefinite'}));
   g.appendChild(ring);
-  const lh=FS(4.4), lw=FS(c.msg.length*1.62+3.4);
-  const ly=b[1]<22?b[1]+FS(8.4):b[1]-FS(6);
-  const lx=Math.max(lw/2+2,Math.min(198-lw/2,b[0]));
-  g.appendChild(el('rect',{x:lx-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,fill:col,'fill-opacity':0.96}));
-  g.appendChild(el('text',{x:lx,y:ly,'font-size':FS(2.9),'text-anchor':'middle','font-weight':850,
-    fill:'#fff','letter-spacing':0.3},c.msg));
+  /* measure the real glyph run - a per-character estimate runs short on bold caps
+     with letter-spacing, and the words spilled out past the pill */
+  /* clamp to the CAMERA box, not the sheet - the viewBox is one zone in Try mode, and
+     .rinkwrap clips, so sheet-relative maths drew the explanation off screen */
+  const vb=S.vb||FULLVIEW;
+  const vx0=vb[0], vx1=vb[0]+vb[2], vy0=vb[1], vy1=vb[1]+vb[3];
+  const lh=FS(4.4);
+  const txt=el('text',{x:0,y:0,'font-size':FS(2.9),'text-anchor':'middle','font-weight':850,
+    fill:'#fff','letter-spacing':0.3},c.msg);
+  g.appendChild(txt);
+  let tw=0; try{ tw=txt.getComputedTextLength(); }catch(e){}
+  if(!tw) tw=c.msg.length*FS(2.9)*0.68;
+  const lw=Math.min(Math.max(8,vb[2]-2),tw+FS(3.6));
+  const lx=Math.max(vx0+lw/2+1,Math.min(vx1-lw/2-1,b[0]));
+  const above=b[1]-FS(6), below=b[1]+FS(8.4);
+  const ly=Math.max(vy0+lh*0.9,Math.min(vy1-lh*0.3,(above-lh<vy0)?below:above));
+  txt.setAttribute('x',lx); txt.setAttribute('y',ly);
+  g.insertBefore(el('rect',{x:lx-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
+    fill:col,'fill-opacity':0.96}),txt);
   const cn=$('cuen'), ct=$('cuetext');
   if(cn&&ct){ cn.textContent=c.fatal?'It broke':'Careful'; ct.innerHTML='<b>'+esc(c.msg)+'</b> '+esc(c.why); }
 }
@@ -3126,49 +2320,62 @@ function buildQueue(lines){
   flush();
   return out;
 }
+/* ---- the single door for every spoken line -------------------------
+   Nothing calls playback directly. say(L, done) decides how a line is voiced:
+   a baked Coach Stokes mp3 when one exists, on-device speech otherwise, with a
+   per-line fallback if the file will not play. A server-backed voice plugs in here
+   and nowhere else. L is {id, t, r, p} as produced by chunk(). */
+function sayDevice(L,done){
+  const u=new SpeechSynthesisUtterance(L.t);
+  if(SPK.voice) u.voice=SPK.voice;
+  /* the basic iOS voices smear below 1.0, and their pitch shifting sounds synthetic */
+  u.rate=IOS?clamp(SPK.rate+0.12,1,1.4):clamp(SPK.rate*(L.r||1),0.5,1.7);
+  u.pitch=IOS?1:clamp(L.p||1,0.6,1.5);
+  u.volume=1;
+  let moved=false;
+  const fin=()=>{ if(moved)return; moved=true; done(); };
+  u.onend=fin; u.onerror=fin;
+  const est=1600+L.t.length*(IOS?64:58)/Math.max(0.6,u.rate);
+  setTimeout(()=>{ if(moved)return; try{ if(speechSynthesis.speaking)return; }catch(e){} fin(); },est);
+  try{ speechSynthesis.speak(u); }catch(e){ fin(); }
+}
+/* ONE persistent element, unlocked inside a real tap. Never a new Audio() per clip -
+   iOS grants permission per element, so per-clip elements are silent forever. */
+function sayBaked(L,done){
+  const a=audioEl();
+  let moved=false;
+  const fin=()=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null; done(); };
+  const bail=(reason,kind)=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null;
+    audioNote(L.id,reason,kind); sayDevice(L,done); };
+  a.onended=fin;
+  a.onerror=()=>{ const c=(a.error&&a.error.code)||0;
+    bail('media error code '+(c||'?'),(c===4||c===2)?'missing':'other'); };
+  try{
+    a.src=AUDIO.base+L.id+'.mp3';
+    a.playbackRate=clamp(SPK.rate*(L.r||1),0.5,2);
+    const p=a.play();
+    if(p&&p.then) p.then(()=>{ AUDIO.unlocked=true; })
+      .catch(err=>{ const n=(err&&err.name)||'play() rejected';
+        bail(n, n==='NotAllowedError'?'locked':(n==='NotSupportedError'?'missing':'other')); });
+  }catch(err){ bail('throw: '+((err&&err.message)||'unknown'),'other'); }
+}
+function say(L,done){
+  const fin=typeof done==='function'?done:function(){};
+  if(!L||!L.t){ fin(); return; }
+  if(AUDIO.have[L.id]) sayBaked(L,fin); else sayDevice(L,fin);
+}
 function speakLines(lines,done){
   if(!SPK.on||!SPK.ok||!lines||!lines.length){ if(done)done(); return S.gen; }
   const gen=++S.gen;
   const q=buildQueue(lines);
   try{ speechSynthesis.cancel(); }catch(e){}
   let i=0;
-  const speakOne=(L,go)=>{
-    const u=new SpeechSynthesisUtterance(L.t);
-    if(SPK.voice) u.voice=SPK.voice;
-    /* the basic iOS voices smear below 1.0, and their pitch shifting sounds synthetic */
-    u.rate=IOS?clamp(SPK.rate+0.12,1,1.4):clamp(SPK.rate*(L.r||1),0.5,1.7);
-    u.pitch=IOS?1:clamp(L.p||1,0.6,1.5);
-    u.volume=1;
-    let moved=false;
-    const done1=()=>{ if(moved)return; moved=true; go(); };
-    u.onend=done1; u.onerror=done1;
-    const est=1600+L.t.length*(IOS?64:58)/Math.max(0.6,u.rate);
-    setTimeout(()=>{ if(moved)return; try{ if(speechSynthesis.speaking)return; }catch(e){} done1(); },est);
-    try{ speechSynthesis.speak(u); }catch(e){ done1(); }
-  };
-  const playOne=(L,go)=>{
-    const a=audioEl();
-    let moved=false;
-    const done1=()=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null; go(); };
-    const bail=(reason,kind)=>{ if(moved)return; moved=true; a.onended=null; a.onerror=null;
-      audioNote(L.id,reason,kind); speakOne(L,go); };
-    a.onended=done1;
-    a.onerror=()=>{ const c=(a.error&&a.error.code)||0;
-      bail('media error code '+(c||'?'),(c===4||c===2)?'missing':'other'); };
-    try{
-      a.src=AUDIO.base+L.id+'.mp3';
-      a.playbackRate=clamp(SPK.rate*(L.r||1),0.5,2);
-      const p=a.play();
-      if(p&&p.catch) p.catch(err=>{ const n=(err&&err.name)||'play() rejected';
-        bail(n, n==='NotAllowedError'?'locked':(n==='NotSupportedError'?'missing':'other')); });
-    }catch(err){ bail('throw: '+((err&&err.message)||'unknown'),'other'); }
-  };
   const next=()=>{
     if(gen!==S.gen) return;
     if(i>=q.length){ setSpeakUI(false); if(done)done(); return; }
     const L=q[i++];
     const go=()=>{ if(gen!==S.gen)return; L.pause?setTimeout(next,L.pause):next(); };
-    if(L.kind==='audio') playOne(L,go); else speakOne(L,go);
+    say(L,go);
   };
   setSpeakUI(true);
   /* cancel() followed immediately by speak() is silent on iOS - give it a tick. But an

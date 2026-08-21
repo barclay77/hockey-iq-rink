@@ -1,9 +1,10 @@
 /* Hockey IQ Rink - offline cache.
    Bump CACHE when you change any file, otherwise browsers keep serving the old one. */
-const CACHE = 'hockey-iq-v40';
+const CACHE = 'hockey-iq-v43';
 const ASSETS = [
   './',
   './index.html',
+  './situations.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
