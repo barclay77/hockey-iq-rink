@@ -192,6 +192,18 @@ input[type=range]{accent-color:var(--us2)}
 .railwrap.open .grab .gchev{transform:rotate(180deg)}
 .railh{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:800}
 .posrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+/* the position picker and Quiz me both sat inside the collapsed sheet on a phone,
+   which is the one place a kid never looks - so on phones they come out here */
+.quickbar{display:none}
+.quickbar .qlab{flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim)}
+.quickbar .qpos{flex:1 1 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;min-width:0}
+.quickbar .qp{background:#1e2c48;border:1px solid #2f4066;border-radius:9px;min-height:42px;
+  font-size:14px;font-weight:800;color:var(--ink)}
+.quickbar .qp.on{background:var(--hi);border-color:var(--hi);color:#fff}
+.quickbar .qp.off{opacity:.32}
+.quickbar .qquiz{flex:0 0 auto;background:var(--us);color:#fff;border-radius:10px;
+  min-height:42px;padding:0 12px;font-size:13px;font-weight:750;white-space:nowrap}
 .pbtn{background:#1e2c48;border:1px solid #2f4066;border-radius:10px;padding:7px 4px;text-align:center;line-height:1.1}
 .pbtn .ab{display:block;font-size:16px;font-weight:800}
 .pbtn .nm{display:block;font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
@@ -365,6 +377,7 @@ input[type=range]{accent-color:var(--us2)}
 
   /* one row of positions, letters only - thumbs, not mice */
   .posrow{grid-template-columns:repeat(6,1fr);gap:5px}
+  .quickbar{display:flex;align-items:center;gap:7px;flex:0 0 auto}
   .pbtn{padding:10px 2px;min-height:44px}
   .pbtn .ab{font-size:15px}
   .pbtn .nm{display:none}
@@ -449,6 +462,7 @@ input[type=range]{accent-color:var(--us2)}
 /* wider than tall - landscape phone or a small window - so use the two-column layout
    instead of stacking, which is what wasted 400px of width before */
 @media (max-width:1000px) and (min-aspect-ratio:1/1){
+  .quickbar{display:none}
   .body{flex-direction:row}
   .stage{padding:8px 10px!important}
   .railwrap{position:static;flex:0 0 clamp(232px,34%,320px);max-height:none;
@@ -476,6 +490,8 @@ input[type=range]{accent-color:var(--us2)}
 
 /* small phone */
 @media (max-width:430px){
+  .quickbar .qlab{display:none}
+  .quickbar .qquiz{padding:0 9px;font-size:12px}
   .topbar{gap:6px;padding-left:calc(9px + env(safe-area-inset-left));padding-right:calc(9px + env(safe-area-inset-right))}
   .pill{font-size:10.5px;padding:4px 8px;letter-spacing:.06em}
   .tbtn{padding:8px 10px;font-size:12.5px}
@@ -518,7 +534,7 @@ input[type=range]{accent-color:var(--us2)}
     <p class="lede">Everything on the ice is one of three things. Pick what is happening.</p>
     <div class="menucols" id="menucols"></div>
 
-    <div class="coachbox">
+    <div class="coachbox" style="display:none">
       <div class="coachhead">
         <h3>Create your own play</h3>
         <p>Say it or type it the way you would say it to the team, and it goes on the ice.</p>
@@ -553,7 +569,7 @@ input[type=range]{accent-color:var(--us2)}
     <span class="qprog" id="p-prog"></span>
     <button class="tbtn" id="p-listen">Listen</button>
     <button class="tbtn" id="p-watch">Watch</button>
-    <button class="tbtn" id="p-coach">Coach</button>
+    <button class="tbtn" id="p-coach" style="display:none">Coach</button>
     <button class="tbtn round" id="p-set" title="Settings">&#9881;</button>
     <button class="tbtn round" id="p-help" title="How to read the rink">?</button>
     <button class="tbtn round" id="p-more" title="More">&#8943;</button>
@@ -564,10 +580,15 @@ input[type=range]{accent-color:var(--us2)}
       <div class="varrow" id="varrow"></div>
       <div class="rinkwrap">
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
-        <button class="zoomb" id="zoomb" title="See the whole zone">WIDE</button>
+        <button class="zoomb" id="zoomb" title="Zoom in on the play">ZOOM</button>
         <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
       </div>
       <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span></div>
+      <div class="quickbar" id="quickbar">
+        <span class="qlab">You are</span>
+        <div class="qpos" id="qposlist"></div>
+        <button class="qquiz" id="qgoquiz">Quiz me &#9654;</button>
+      </div>
       <div class="ctrl" id="ctrlrow">
         <button class="primary" id="play">Play &#9654;</button>
         <button id="pause"><span class="ic">&#9646;&#9646;</span><span class="lbl"> Pause</span></button>
@@ -692,6 +713,9 @@ input[type=range]{accent-color:var(--us2)}
     </div>
     <input type="file" id="importfile" accept=".json,application/json" style="display:none">
     <div class="help" style="margin-top:7px">Phones and tablets clear browser storage when they run low on space, so if you have built plays worth keeping, save them to a file.</div>
+    <h4>Voice files</h4>
+    <div class="help" id="audiodiag" style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5">-</div>
+    <button class="mbtn" id="audiotest" style="padding:9px 14px;font-size:13px;margin-top:7px">Play a real voice file</button>
     <div class="help" style="margin-top:12px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px">
       Build <b id="buildstamp">-</b> &middot; if this is not the build you just pushed, the device is serving a cached copy: pull down to refresh, or close and reopen the app.</div>
     <button class="closebtn" id="closeset">Done</button>
@@ -714,7 +738,7 @@ input[type=range]{accent-color:var(--us2)}
     <div class="msub">Everything from the top bar.</div>
     <button class="bigbtn blue" id="mo-listen" style="width:100%;margin-bottom:8px">Listen to this situation</button>
     <button class="bigbtn plain" id="mo-watch" style="width:100%;margin-bottom:8px">Watch it for real</button>
-    <button class="bigbtn plain" id="mo-coach" style="width:100%;margin-bottom:8px">Coach: tell me the play</button>
+    <button class="bigbtn plain" id="mo-coach" style="display:none">Coach: tell me the play</button>
     <button class="bigbtn plain" id="mo-set" style="width:100%;margin-bottom:8px">Settings</button>
     <button class="bigbtn plain" id="mo-help" style="width:100%">How to read the rink</button>
     <button class="closebtn" id="closemore">Close</button>
@@ -2159,10 +2183,10 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const S={
   sit:SITUATIONS[0], varIdx:0, pos:'C',
   t:0, target:1, playing:false, raf:null, lastTs:null, gen:0,
-  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false,
+  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.12';
+const BUILD='2026-08-21.18';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2185,7 +2209,11 @@ function unlockAudioEl(){
   try{
     a.src=SILENT_WAV;
     const p=a.play();
-    if(p&&p.then) p.then(()=>{AUDIO.unlocked=true;}).catch(e=>{ audioNote('(unlock)',(e&&e.name)||'rejected',(e&&e.name)==='NotAllowedError'?'locked':'other'); });
+    if(p&&p.then) p.then(()=>{AUDIO.unlocked=true;}).catch(e=>{
+      const nm=(e&&e.name)||'rejected';
+      if(nm==='AbortError') return;      // superseded by a real clip, not a refusal
+      audioNote('(unlock)',nm,nm==='NotAllowedError'?'locked':'other');
+    });
     else AUDIO.unlocked=true;
   }catch(e){ AUDIO.lastFail={id:'(unlock)',reason:'throw: '+(e&&e.message)}; }
 }
@@ -2653,7 +2681,9 @@ function render(){
 
   const fi=frameIdx(t);
   const zb=$('zoomb');
-  if(zb){ zb.textContent=S.wide?'CLOSE':'WIDE'; zb.classList.toggle('off',!S.opt.zoom); }
+  if(zb){ zb.textContent=S.wide?'ZOOM':'WIDE';
+    zb.title=S.wide?'Zoom in on the play':'See the whole zone';
+    zb.classList.toggle('off',!S.opt.zoom); }
   paintCue();
   $('scrub').value=Math.round(t*1000);
   renderTopbar(); renderNext();
@@ -2921,9 +2951,22 @@ function chunk(txt,opt){
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function setSpeakUI(on){ const b=$('p-listen'); if(b) b.classList.toggle('speaking',!!on); }
 function hush(){
-  if(SPK.ok){ try{speechSynthesis.cancel();}catch(e){} }
+  if(SPK.ok){
+    try{ speechSynthesis.cancel(); }catch(e){}
+    /* iOS Safari routinely ignores cancel() partway through an utterance, and
+       joinForIOS hands it one long one per press - so the voice carried on talking
+       after Pause. Nudging it through pause/resume and cancelling again on the next
+       two ticks is what actually silences it. */
+    if(IOS) try{
+      speechSynthesis.pause();
+      const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u);
+      speechSynthesis.cancel(); speechSynthesis.resume();
+      setTimeout(()=>{ try{ speechSynthesis.cancel(); }catch(e){} },0);
+      setTimeout(()=>{ try{ speechSynthesis.cancel(); }catch(e){} },140);
+    }catch(e){}
+  }
   /* a baked clip is a real media element - cancelling speech does not stop it */
-  if(AUDIO.el){ try{ AUDIO.el.pause(); }catch(e){} }
+  if(AUDIO.el){ try{ AUDIO.el.pause(); AUDIO.el.currentTime=0; }catch(e){} }
   setSpeakUI(false);
 }
 /* iOS restarts its audio session for every single utterance - that is what clips the
@@ -3175,6 +3218,7 @@ function setStageUI(on){
   STAGE.active=!!on;
   $('stageover').classList.toggle('on',!!on);
   $('ctrlrow').style.display = on ? 'none' : (S.mode==='quiz'?'none':'flex');
+  $('quickbar').style.display = (on||S.mode!=='learn') ? 'none' : '';
   $('varrow').style.display = on ? 'none' : '';
   if(!on){ buildVars(); renderNext(); }
   else { $('nextbar').style.display='none'; }
@@ -3239,15 +3283,46 @@ $('m-quizall').onclick=()=>{ showScreen('play'); setMode('quiz'); startTest('all
 function mask(which,on){ $('mask-'+which).classList.toggle('on',on); }
 $('closehelp').onclick=()=>{ mask('help',false); try{localStorage.setItem('hiq_seen','1');}catch(e){} };
 $('closeset').onclick=()=>mask('set',false);
+/* Which of the three things went wrong: no manifest entry, no file, or iOS refusing
+   to play. The console cannot be read on a phone, so it goes on screen. */
+const PROBE='which-one-are-you-gusetl';
+function audioDiag(msg){
+  const box=$('audiodiag'); if(!box)return;
+  if(msg){ box.innerHTML='<b style="color:#ffd98a">'+esc(msg)+'</b>'; return; }
+  const n=Object.keys(AUDIO.have).length, f=AUDIO.fails, lf=AUDIO.lastFail;
+  box.innerHTML=
+    'Manifest: '+(AUDIO.loaded?(n+' baked lines'):'still loading...')+'<br>'+
+    '"Which one are you?" in manifest: <b>'+(AUDIO.have[PROBE]?'yes':'NO')+'</b><br>'+
+    'Playback unlocked: <b>'+(AUDIO.unlocked?'yes':'no')+'</b><br>'+
+    'Fell back to robot voice - locked '+(f.locked||0)+', missing '+(f.missing||0)+', other '+(f.other||0)+
+    (lf?'<br>Last: <b>'+esc(String(lf.id))+'</b> '+esc(String(lf.reason||''))+(lf.kind?' ['+lf.kind+']':''):'');
+}
+function audioProbe(){
+  const id=AUDIO.have[PROBE]?PROBE:Object.keys(AUDIO.have)[0];
+  if(!id){ audioDiag('No baked lines at all - manifest.json is empty or did not load.'); return; }
+  const a=audioEl();
+  a.onended=()=>audioDiag('Played "'+id+'" fine. The files and permissions are OK.');
+  a.onerror=()=>{ const c=(a.error&&a.error.code)||0;
+    audioDiag('FAILED - media error '+c+(c===4||c===2?' (file missing, or not a real mp3)':'')); };
+  try{
+    a.src=AUDIO.base+id+'.mp3'; a.playbackRate=1;
+    const p=a.play();
+    if(p&&p.then) p.then(()=>{ AUDIO.unlocked=true; })
+      .catch(e=>{ const nm=(e&&e.name)||'play() rejected';
+        audioDiag('FAILED - '+nm+(nm==='NotAllowedError'?' (iOS blocked playback)':'')); });
+    else AUDIO.unlocked=true;
+    audioDiag('Playing '+id+'...');
+  }catch(e){ audioDiag('FAILED - threw: '+((e&&e.message)||'unknown')); }
+}
 $('closevid').onclick=()=>mask('vid',false);
 ['help','set','vid','coach','more'].forEach(k=>$('mask-'+k).addEventListener('click',e=>{ if(e.target===$('mask-'+k))mask(k,false); }));
-$('p-set').onclick=()=>{ playCount(); mask('set',true); };
+$('p-set').onclick=()=>{ playCount(); mask('set',true); audioDiag(); };
 $('p-more').onclick=()=>mask('more',true);
 $('closemore').onclick=()=>mask('more',false);
 $('mo-listen').onclick=()=>{ mask('more',false); $('p-listen').click(); };
 $('mo-watch').onclick=()=>{ mask('more',false); openVideos(); };
 $('mo-coach').onclick=()=>{ mask('more',false); $('p-coach').click(); };
-$('mo-set').onclick=()=>{ mask('more',false); playCount(); mask('set',true); };
+$('mo-set').onclick=()=>{ mask('more',false); playCount(); mask('set',true); audioDiag(); };
 $('mo-help').onclick=()=>{ mask('more',false); mask('help',true); };
 $('p-watch').onclick=()=>openVideos();
 
@@ -3407,6 +3482,7 @@ function railLearn(){
   buildPos();
   if(sit.roster.includes(S.pos)&&c) buildTabs(c);
   $('goquiz').onclick=()=>{ setMode('quiz'); startTest('sit'); };
+  const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
   $('gobuild').onclick=()=>startBuilderFrom(null);
 }
 function buildPos(){
@@ -3419,10 +3495,22 @@ function buildPos(){
     b.onclick=()=>{ S.pos=p; paintRail(); render(); };
     pl.appendChild(b);
   });
+  buildQuickPos();
   const hint=$('poshint');
   if(hint) hint.textContent=S.sit.roster.includes(S.pos)
     ? 'The yellow YOU on the ice is your '+POSNAMES[S.pos]+'. Drag anyone to test a spot.'
     : POSNAMES[S.pos]+' is not on the ice here.';
+}
+function buildQuickPos(){
+  const ql=$('qposlist'); if(!ql)return; ql.innerHTML='';
+  OURPOS.concat(['G']).forEach(p=>{
+    const b=document.createElement('button');
+    b.className='qp'+(p===S.pos?' on':'')+(S.sit.roster.includes(p)?'':' off');
+    b.type='button'; b.textContent=p;
+    b.title=POSNAMES[p];
+    b.onclick=()=>{ S.pos=p; paintRail(); render(); };
+    ql.appendChild(b);
+  });
 }
 function buildTabs(c){
   const tabs=[['look','Look'],['do','Do'],['oops','Oops']];
@@ -3546,6 +3634,7 @@ function setMode(m){
   if(m!=='learn') clearStage();
   S.mode=m; TEST.active=(m==='quiz');
   $('ctrlrow').style.display=(m==='quiz'||STAGE.active)?'none':'flex';
+  $('quickbar').style.display=(m!=='learn'||STAGE.active)?'none':'';
   $('p-back').innerHTML=(m==='learn')?'&#8249; Menu':'&#8249; Learn';
   $('p-watch').style.display=(m==='learn')?'':'none';
   $('p-prog').textContent='';
@@ -4230,7 +4319,8 @@ step('voice',  ()=>speakNote());
 step('render', ()=>render());
 step('screen', ()=>showScreen('menu'));
 step('install',()=>{ initInstallButton(); playCount(); syncSheet();
-  const bs=$('buildstamp'); if(bs) bs.textContent=BUILD; });
+  const bs=$('buildstamp'); if(bs) bs.textContent=BUILD;
+  const at=$('audiotest'); if(at) at.onclick=audioProbe; });
 step('resize', ()=>{
   /* iOS fires resize constantly - URL bar collapsing on scroll, keyboard opening on the
      coach input. The menu only needs rebuilding when the phone/desktop breakpoint is
