@@ -31,7 +31,7 @@ window.addEventListener('error',function(ev){
   --bg:#080c24; --bg2:#111838; --bg3:#1a2350; --line:#2a3566;
   --ink:#f1f4fa; --dim:#98a0b8;
   --us:#2a4fa8; --us2:#5a7fd8; --them:#bf1e2e; --hi:#c6243a;
-  --def:#bf1e2e; --tra:#5f697f; --off:#3e6fd0;
+  --def:#bf1e2e; --tra:#ffc629; --off:#3e6fd0;
   --you:#ffc629;
 }
 *{box-sizing:border-box}
@@ -62,11 +62,15 @@ select,input{touch-action:manipulation}
 .screen.on{display:flex}
 
 /* ======== MENU ======== */
-#sc-menu{align-items:center;justify-content:center;overflow:auto;-webkit-overflow-scrolling:touch;
+#sc-menu{align-items:center;justify-content:flex-start;overflow:auto;-webkit-overflow-scrolling:touch;
   padding:calc(24px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
           calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
-.menuwrap{width:100%;max-width:1080px;text-align:center}
-.menuwrap h1{font-size:30px;margin-bottom:5px}
+.menuwrap{width:100%;max-width:1080px;text-align:center;margin:auto}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:5px}
+.brandmark{flex:0 0 auto;width:46px;height:46px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.12);box-shadow:0 3px 12px rgba(0,0,0,.4)}
+.menuwrap h1{font-size:30px;margin:0}
+@media (max-width:430px){ .brandmark{width:38px;height:38px} .menuwrap h1{font-size:25px} }
 .lede{color:var(--dim);font-size:15px;margin:0 0 22px}
 .menucols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;text-align:left}
 .mcol{background:var(--bg2);border:1px solid var(--line);border-top:4px solid var(--def);
@@ -83,7 +87,7 @@ select,input{touch-action:manipulation}
   padding:11px 13px 9px;color:#14243f}
 .mdot{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:7px;vertical-align:1px}
 .mitem .mthumb{display:flex;align-items:center;justify-content:center;position:relative;background:#fff;
-  width:100%;aspect-ratio:2.2;overflow:hidden;
+  width:100%;aspect-ratio:2.26;overflow:hidden;
   border-top:1px solid #e4ebf4;border-bottom:1px solid #e4ebf4}
 .mitem .mthumb svg{display:block;width:100%;height:100%}
 .mitem .mgo{position:absolute;right:8px;bottom:8px;display:inline-flex;align-items:center;
@@ -510,7 +514,7 @@ input[type=range]{accent-color:var(--us2)}
 <!-- =============== MENU =============== -->
 <section id="sc-menu" class="screen on">
   <div class="menuwrap">
-    <h1>Hockey IQ Rink</h1>
+    <div class="brand"><img class="brandmark" src="icons/icon-192.png" alt="" width="46" height="46"><h1>Hockey IQ Rink</h1></div>
     <p class="lede">Everything on the ice is one of three things. Pick what is happening.</p>
     <div class="menucols" id="menucols"></div>
 
@@ -610,7 +614,7 @@ input[type=range]{accent-color:var(--us2)}
     <h4>1. Every situation is one of three things</h4>
     <div class="phrow"><span class="pchip" style="background:#bf1e2e">DEFENSE</span>
       <span><b>They have the puck.</b> Our job is to get it back. Nobody chases the puck - everybody takes a job.</span></div>
-    <div class="phrow"><span class="pchip" style="background:#5f697f">TRANSITION</span>
+    <div class="phrow"><span class="pchip" style="background:#ffc629;color:#12204f">TRANSITION</span>
       <span><b>The puck just changed hands.</b> The fastest part of hockey. Move it up the ice before they get set.</span></div>
     <div class="phrow"><span class="pchip" style="background:#3e6fd0">OFFENSE</span>
       <span><b>We have the puck.</b> Keep it and score. Being in the right spot matters more than being fast.</span></div>
@@ -641,7 +645,7 @@ input[type=range]{accent-color:var(--us2)}
     <div class="phrow"><span class="pchip" style="background:#bf1e2e">ANDROID</span>
       <span>Open it in <b>Chrome</b> and tap <b>Install</b> when it offers, or use the menu (three dots) and
       <b>Add to Home screen</b>.</span></div>
-    <div class="phrow"><span class="pchip" style="background:#5f697f">ANY</span>
+    <div class="phrow"><span class="pchip" style="background:#ffc629;color:#12204f">ANY</span>
       <span>Share it by sending the link. Nothing to sign up for and nothing to download from a store.</span></div>
     <div class="help">One warning worth knowing: phones clear browser storage when they run low on space.
       If you build your own plays, go to Settings and <b>save them to a file</b> so they cannot be lost.</div>
@@ -1658,11 +1662,12 @@ const CHANNELS = [
    and a single play can move from one to the next. That is the
    whole point: the phase changes while you watch.
    ============================================================ */
+const phaseInk=c=>c==='#ffc629'?'#12204f':'#fff';
 const PHASE={
   D:{k:'D',label:'DEFENSE',  col:'#bf1e2e',
      sub:'They have the puck. Our job is to get it back.',
      say:'Defense. They have the puck. Our job is to get it back.'},
-  T:{k:'T',label:'TRANSITION',col:'#5f697f',
+  T:{k:'T',label:'TRANSITION',col:'#ffc629',
      sub:'The puck just changed hands. Move it up the ice, fast.',
      say:'Transition. The puck just changed hands. Move it up the ice, fast.'},
   O:{k:'O',label:'OFFENSE',  col:'#3e6fd0',
@@ -2157,7 +2162,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.4';
+const BUILD='2026-08-21.12';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2202,7 +2207,7 @@ function loadAudioManifest(){
   }).catch(()=>{ AUDIO.loaded=true; });
 }
 loadAudioManifest();
-const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false};
+const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false, clue:0};
 let CUSTOM=[];
 
 const variant=()=>S.sit.variants[S.varIdx];
@@ -2349,6 +2354,62 @@ function camera(){
   return a.map((n,k)=>+(n+(b[k]-n)*u).toFixed(2));
 }
 
+/* Is a placement question live and still unanswered? Everything below hangs off this. */
+function placeQ(){
+  if(!TEST.active||TEST.answered) return null;
+  const q=TEST.qs[TEST.i];
+  return (q&&q.type==='place')?q:null;
+}
+/* Clue words built from the ANSWER's own coordinates, so they can never be wrong and
+   never need authoring. Deliberately flip-safe: no top/bottom/left/right, only
+   hockey ideas a 10-year-old already has - our end, the boards, the puck. */
+function clueWords(q){
+  const c=correct(q.pos,S.t); if(!c) return '';
+  const p=puckAt(S.t).p, bits=[];
+  bits.push(c[0]<75?'in OUR OWN end':(c[0]<=125?'around the MIDDLE of the ice':'in THEIR end'));
+  if(c[1]<22||c[1]>63) bits.push('close to the BOARDS');
+  else if(c[1]>30&&c[1]<55) bits.push('in the MIDDLE lane');
+  const dx=c[0]-p[0];
+  if(Math.abs(dx)<9) bits.push('about level with the puck');
+  else if(dx<0) bits.push('closer to our own net than the puck');
+  else bits.push('further up the ice than the puck');
+  const sameSide=(c[1]-42.5)*(p[1]-42.5)>0, near=Math.abs(c[1]-p[1])<14;
+  if(near) bits.push('near the puck');
+  else if(sameSide) bits.push('on the puck\'s side');
+  else bits.push('on the far side from the puck');
+  return 'Look '+bits.join(', ')+'.';
+}
+/* The area to hunt in, shown by shadowing the rest of the sheet - the same idiom as
+   the follow-camera spotlight, so it reads as "the answer is in the light part".
+   Sits under the tokens, so the dot he is dragging stays crisp. */
+function drawClueZone(q,level){
+  const c=correct(q.pos,S.t); if(!c) return;
+  const b=disp(c), r=level>=2?9:18, g=layer('ghost'), mid='cluehole';
+  const defs=el('defs'), mk=el('mask',{id:mid,maskUnits:'userSpaceOnUse',x:0,y:0,width:200,height:85});
+  mk.appendChild(el('rect',{x:0,y:0,width:200,height:85,fill:'#fff'}));
+  mk.appendChild(el('circle',{cx:b[0],cy:b[1],r:r*1.14,fill:'#8a8a8a'}));   // just enough feather
+  mk.appendChild(el('circle',{cx:b[0],cy:b[1],r,fill:'#000'}));
+  defs.appendChild(mk); g.appendChild(defs);
+  g.appendChild(el('rect',{x:0,y:0,width:200,height:85,fill:'#131a33','fill-opacity':0.5,
+    mask:'url(#'+mid+')','clip-path':'url(#rinkclip)'}));
+  g.appendChild(el('circle',{cx:b[0],cy:b[1],r,fill:'none',stroke:'#5f697f',
+    'stroke-width':0.5,'stroke-dasharray':'2.4 1.8'}));
+}
+/* The dot he is meant to grab: a ring that never stops pulsing, and the words on the ice. */
+function drawDragMe(p){
+  const g=layer('focus'), r=TR();
+  const ring=el('circle',{cx:p[0],cy:p[1],r:r*1.7,fill:'none',stroke:'#c98a00','stroke-width':0.6});
+  ring.appendChild(el('animate',{attributeName:'r',values:(r*1.5).toFixed(2)+';'+(r*3).toFixed(2)+';'+(r*1.5).toFixed(2),
+    dur:'1.6s',repeatCount:'indefinite'}));
+  ring.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0.15;0.95',dur:'1.6s',repeatCount:'indefinite'}));
+  g.appendChild(ring);
+  const ly=p[1]-r*3.1;
+  g.appendChild(el('path',{d:'M'+(p[0]-1.6)+','+(ly+1.1)+' L'+(p[0]+1.6)+','+(ly+1.1)+' L'+p[0]+','+(ly+3.2)+' z',fill:'#c98a00'}));
+  ['#fff','#8a6000'].forEach((col,i)=>g.appendChild(el('text',Object.assign(
+    {x:p[0],y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,fill:col},
+    i===0?{stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'}:{}),'DRAG ME')));
+}
+
 /* the step whose words are on screen right now */
 function cueFrame(t){
   const f=frames(); let best=f[0];
@@ -2410,7 +2471,7 @@ function render(){
     S.fs = w<360?1.5 : w<440?1.36 : w<560?1.24 : w<700?1.1 : 1;
   }
   ['fade','labels','lanes','trail','pass','space','ghost','focus','tok','look','puck'].forEach(k=>layer(k).innerHTML='');
-  if(S.opt.zoom){
+  if(S.opt.zoom&&!(placeQ()&&TEST.clue>=1)){
     const gr=$('spotgrad');
     if(gr){ gr.setAttribute('cx',(vb[0]+vb[2]/2).toFixed(1)); gr.setAttribute('cy',(vb[1]+vb[3]/2).toFixed(1));
             gr.setAttribute('r',(Math.max(vb[2],vb[3])*0.66).toFixed(1)); }
@@ -2524,18 +2585,22 @@ function render(){
   const gather=id=>{ const p=shown(id,t); if(p)pts.push(disp(p)); };
   if(S.opt.them) THEMIDS.forEach(gather);
   sit.roster.forEach(gather);
+  /* On a placement question every other dot goes quiet, so the one he has to move is
+     the only bright thing on the ice. */
+  const pq=placeQ();
   if(S.opt.them) THEMIDS.forEach(id=>{
     const p=shown(id,t); if(!p)return;
-    token(id,disp(p),'them',id==='XG'?'G':id.slice(1),(S.opt.roles&&dist(p,puckPos)<=18)?roleText(roles[id]):null,pts,dist(p,puckPos)>18);
+    token(id,disp(p),'them',id==='XG'?'G':id.slice(1),(S.opt.roles&&!pq&&dist(p,puckPos)<=18)?roleText(roles[id]):null,pts,pq?true:dist(p,puckPos)>18);
   });
   // draw YOU last so it is always the token on top and always grabbable
   sit.roster.filter(id=>id!==S.pos).forEach(id=>{
     const p=shown(id,t); if(!p)return;
-    token(id,disp(p),'us',id==='G'?'G':id,null,null,id!==pk.w&&dist(p,puckPos)>26);
+    token(id,disp(p),'us',id==='G'?'G':id,null,null,pq?true:(id!==pk.w&&dist(p,puckPos)>26));
   });
+  if(pq&&TEST.clue>=1) drawClueZone(pq,TEST.clue);
   if(sit.roster.includes(S.pos)){
     const p=shown(S.pos,t);
-    if(p) token(S.pos,disp(p),'me',S.pos);
+    if(p){ token(S.pos,disp(p),'me',S.pos); if(pq) drawDragMe(disp(p)); }
   }
   if(eff('focus')&&!S.playing&&S.mode==='learn') drawFocus(t);
 
@@ -2685,7 +2750,7 @@ function paintCue(){
 }
 function renderTopbar(){
   const p=PHASE[phaseAt(S.t)];
-  $('p-phase').textContent=p.label; $('p-phase').style.background=p.col;
+  $('p-phase').textContent=p.label; $('p-phase').style.background=p.col; $('p-phase').style.color=phaseInk(p.col);
   $('p-name').textContent=S.sit.name;
   $('p-sub').textContent = S.mode==='build' ? 'Building your play'
     : (S.mode==='quiz' ? variant().name : variant().name+'  -  '+p.sub);
@@ -3119,7 +3184,7 @@ function stageSituation(){
   const p=PHASE[S.sit.phase];
   STAGE.step='situation'; STAGE.label='The situation'; STAGE.cue=S.sit.about;
   $('stagecard').innerHTML=
-    '<span class="pill" style="background:'+p.col+'">'+p.label+'</span>'+
+    '<span class="pill" style="background:'+p.col+';color:'+phaseInk(p.col)+'">'+p.label+'</span>'+
     '<h2>'+esc(S.sit.name)+'</h2>'+
     '<p class="stagewhat">'+esc(S.sit.about)+'</p>'+
     '<p class="stagesay">'+esc(p.say)+'</p>'+
@@ -3220,14 +3285,7 @@ function thumbSVG(sit){
   Object.keys(them).forEach(k=>pts.push(them[k]));
   if(pk) pts.push([pk[0],pk[1]]);
   if(!pts.length) return '';
-  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]), pad=15, AR=2.2;
-  let x=Math.min.apply(null,xs)-pad, y=Math.min.apply(null,ys)-pad;
-  let w=Math.max.apply(null,xs)+pad-x, h=Math.max.apply(null,ys)+pad-y;
-  if(w/h<AR){ const nw=h*AR; x-=(nw-w)/2; w=nw; } else { const nh=w/AR; y-=(nh-h)/2; h=nh; }
-  // keep the box on the sheet: slide it back inside 0..200 / 0..85 rather than
-  // padding out over the boards, which leaves the rink floating with dead space
-  if(w<=200) x=Math.min(Math.max(x,0),200-w); else x=(200-w)/2;
-  if(h<=85)  y=Math.min(Math.max(y,0),85-h);  else y=(85-h)/2;
+  const x=-3, y=-3, w=206, h=91;
   const cid='tc-'+String(sit.id).replace(/[^a-z0-9]/gi,'');
   const L=(x1,y1,x2,y2,c,sw)=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+sw+'"/>';
   let g='<svg viewBox="'+[x,y,w,h].map(n=>n.toFixed(1)).join(' ')+'" preserveAspectRatio="xMidYMid meet" aria-hidden="true">';
@@ -3523,7 +3581,7 @@ function startTest(scope){
   TEST.qs=qs; TEST.active=true; showQuestion();
 }
 function showQuestion(){
-  const q=TEST.qs[TEST.i]; TEST.answered=false; TEST.retried=false; TEST.lastRight=false;
+  const q=TEST.qs[TEST.i]; TEST.answered=false; TEST.retried=false; TEST.lastRight=false; TEST.clue=0;
   if(!q){ finishTest(); return; }
   const s=sitById(q.sit);
   if(s){ S.sit=s; const i=s.variants.findIndex(v=>v.id===q.v); S.varIdx=i<0?0:i; }
@@ -3556,17 +3614,31 @@ function railQuiz(){
        q.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div>';
   } else {
     const ask='<span class="qtype place">Put yourself in the right spot</span><div class="qtext">'+esc(q.ask)+'</div>'+
-       '<p style="font-size:13px;color:#93a3bd;margin:0 0 12px">You are the <b>'+POSNAMES[q.pos]+
-       '</b>. Drag the yellow <b>YOU</b> on the ice, then check it. The vision beams and the ghost stay hidden until you commit.</p>';
+       '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">You are the <b>'+POSNAMES[q.pos]+
+       '</b>. Find the yellow dot that says <b>DRAG ME</b> and pull it where you belong.</p>';
+    const clue='<div id="cluebox"></div>'+
+       (TEST.clue<2?'<button class="bigbtn plain" id="cluebtn" style="width:100%;margin-bottom:8px">'+
+         (TEST.clue===0?'I need a clue':'Make the area smaller')+'</button>':'');
     const btn='<button class="bigbtn blue" id="checkspot" style="width:100%">Check my spot</button>';
-    /* on a phone the question is already under the ice, so the button gets the peek */
-    h+= isPhone() ? btn+'<div style="height:10px"></div>'+ask : ask+btn;
+    /* on a phone the question is already under the ice, so the buttons get the peek -
+       and the clue button must be up there with them, not below the fold */
+    h+= isPhone() ? btn+'<div style="height:8px"></div>'+clue+ask : ask+clue+btn;
   }
   h+='<div id="whybox"></div><div class="spacer"></div>'+
      '<button class="bigbtn plain" id="quitquiz">Stop the quiz</button>';
   $('rail').innerHTML=h;
   if(q.type==='mc') $('opts').querySelectorAll('.opt').forEach(b=>b.onclick=()=>answerMC(+b.dataset.i));
-  else $('checkspot').onclick=checkSpot;
+  else {
+    $('checkspot').onclick=checkSpot;
+    const cb=$('cluebtn');
+    if(cb) cb.onclick=()=>{ TEST.clue++; railQuiz(); render(); };
+    const box=$('cluebox');
+    if(box&&TEST.clue>=1){
+      box.innerHTML='<div style="font-size:13.5px;line-height:1.35;color:#ffd98a;background:rgba(255,198,41,.1);'+
+        'border:1px solid rgba(255,198,41,.32);border-radius:10px;padding:9px 11px;margin-bottom:8px">'+
+        esc(clueWords(q))+(TEST.clue>=1?' <b>The bright part of the ice is where to look.</b>':'')+'</div>';
+    }
+  }
   $('quitquiz').onclick=()=>setMode('learn');
 }
 function answerMC(i){
@@ -3584,7 +3656,7 @@ function checkSpot(){
   const mine=S.manual[q.pos]||[100,42.5], c=correct(q.pos,S.t), d=dist(mine,c);
   const right=d<=10;
   TEST.lastRight=right;
-  if(right&&!TEST.retried) TEST.right++;          // the score comes from the first try
+  if(right&&!TEST.retried&&TEST.clue<2) TEST.right++;   // first try; the tight area costs the point
   const job=((S.sit.coach||{})[q.pos]||{}).job||'';
   render();
   const head = right ? (TEST.retried?'There it is.':(d<=5?'Bang on.':'Good spot.'))
@@ -3597,7 +3669,7 @@ function checkSpot(){
 }
 function retrySpot(){
   const q=TEST.qs[TEST.i]; if(!q||q.type!=='place')return;
-  TEST.answered=false; TEST.retried=true; TEST.lastRight=false;
+  TEST.answered=false; TEST.retried=true; TEST.lastRight=false; TEST.clue=0;
   S.manual={}; S.manual[q.pos]=[100,42.5];
   railQuiz(); render();
   if(SPK.on) speakLines(chunk('Have another go.',{rate:0.95,pause:240})
@@ -3781,7 +3853,7 @@ const PENDING=[];
 function hitRow(phase,label,btn,fn,dim){
   PENDING.push(fn);
   return '<div class="hit"'+(dim?' style="border-left-color:'+phase.col+';opacity:.8"':' style="border-left-color:'+phase.col+'"')+'>'+
-    '<span class="pchip" style="background:'+phase.col+'">'+phase.label+'</span>'+
+    '<span class="pchip" style="background:'+phase.col+';color:'+phaseInk(phase.col)+'">'+phase.label+'</span>'+
     '<span style="flex:1">'+esc(label)+'</span>'+
     '<button class="go">'+btn+'</button></div>';
 }
@@ -3957,7 +4029,7 @@ function railBuild(){
   $('bname').onchange=()=>{ play.name=$('bname').value.trim()||'My play'; renderTopbar(); buildMenu(); };
   const ph=$('bphase');
   ph.innerHTML=['D','T','O'].map(k=>'<button data-k="'+k+'" style="'+
-    (play.phase===k?'background:'+PHASE[k].col+';color:#ffffff;border-color:'+PHASE[k].col:'')+'">'+
+    (play.phase===k?'background:'+PHASE[k].col+';color:'+phaseInk(PHASE[k].col)+';border-color:'+PHASE[k].col:'')+'">'+
     PHASE[k].label+'</button>').join('');
   ph.querySelectorAll('button').forEach(b=>b.onclick=()=>{ play.phase=b.dataset.k; railBuild(); render(); });
 
