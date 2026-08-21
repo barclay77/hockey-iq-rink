@@ -90,14 +90,15 @@ select,input{touch-action:manipulation}
   width:100%;aspect-ratio:2.26;overflow:hidden;
   border-top:1px solid #e4ebf4;border-bottom:1px solid #e4ebf4}
 .mitem .mthumb svg{display:block;width:100%;height:100%}
-.mitem .mgo{position:absolute;right:8px;bottom:50px;display:inline-flex;align-items:center;
-  min-height:36px;padding:0 14px;border-radius:999px;background:rgba(10,18,34,.8);color:#fff;
-  font-size:12.5px;font-weight:700;transition:.14s}
+.mitem .mact{display:flex;gap:8px;padding:9px 13px 0}
+.mitem .mgo{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:0 12px;border-radius:10px;background:#1e2c48;border:1px solid #2f4066;
+  color:var(--ink);font-size:13px;font-weight:750;transition:.14s}
 .mitem .msub{display:block;font-size:12.5px;color:#4b5d79;padding:9px 13px 11px;line-height:1.4}
-.mitem .mgo.mplay{bottom:8px;background:rgba(191,30,46,.92)}
+.mitem .mgo.mplay{background:#bf1e2e;border-color:#bf1e2e;color:#fff}
 @media (hover:hover){.mitem:hover{border-color:#8fb0d8;transform:translateY(-2px);
   box-shadow:0 10px 22px rgba(3,10,25,.38)}
-  .mitem:hover .mgo{background:#bf1e2e}}
+  .mitem:hover .mgo{border-color:#5a79ad}}
 .menufoot{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
 .mbtn{background:var(--bg3);border:1px solid var(--line);border-radius:11px;padding:11px 20px;font-size:14px;font-weight:600}
 @media (hover:hover){.mbtn:hover{border-color:#5a79ad}}
@@ -234,7 +235,7 @@ input[type=range]{accent-color:var(--us2)}
 .tabbody .good{color:#6ee7a0}
 .feedback{padding:10px 12px;border-radius:10px;font-size:13.5px;display:none}
 .feedback.show{display:block}
-.feedback.great{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.45)}
+.feedback.great{background:rgba(42,79,168,.24);border:1px solid rgba(90,127,216,.6)}
 .feedback.good{background:rgba(42,79,168,.18);border:1px solid rgba(90,127,216,.5)}
 .feedback.off{background:rgba(191,30,46,.16);border:1px solid rgba(191,30,46,.5)}
 .bigbtn{background:var(--hi);color:#ffffff;border-radius:11px;padding:12px;font-size:14.5px;font-weight:750;text-align:center}
@@ -245,14 +246,16 @@ input[type=range]{accent-color:var(--us2)}
 .qtype{display:inline-block;font-size:9.5px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;
   padding:3px 9px;border-radius:5px;margin-bottom:9px}
 .qtype.mc{background:rgba(79,155,255,.2);color:#8fc0ff;border:1px solid rgba(79,155,255,.45)}
-.qtype.place{background:rgba(245,165,36,.2);color:#f7c46c;border:1px solid rgba(245,165,36,.45)}
+.qtype.place{background:rgba(124,134,162,.22);color:#c9d2e6;border:1px solid rgba(124,134,162,.5)}
 .qtext{font-size:17px;font-weight:650;line-height:1.3;margin-bottom:13px}
 .opt{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--line);
   border-radius:11px;padding:12px 14px;margin-bottom:8px;font-size:14.5px;line-height:1.3}
 @media (hover:hover){.opt:hover{border-color:#5a79ad;background:#243457}}
-.opt.right{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.65)}
-.opt.wrong{background:rgba(224,54,78,.18);border-color:rgba(224,54,78,.6)}
+.opt.right{background:rgba(42,79,168,.26);border-color:rgba(90,127,216,.7)}
+.opt.wrong{background:rgba(191,30,46,.2);border-color:rgba(191,30,46,.65)}
 .why{padding:11px 13px;border-radius:11px;font-size:14px;line-height:1.35;margin-top:4px}
+.why.trybad{background:rgba(191,30,46,.18);border:1px solid rgba(191,30,46,.55)}
+.why.trygood{background:rgba(255,198,41,.15);border:1px solid rgba(255,198,41,.5);color:#ffe6a8}
 .tbar{height:7px;background:var(--bg3);border-radius:99px;overflow:hidden}
 .tbar i{display:block;height:100%;background:var(--us2);border-radius:99px;transition:.2s}
 
@@ -2194,7 +2197,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.28';
+const BUILD='2026-08-21.35';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2243,7 +2246,7 @@ function loadAudioManifest(){
   }).catch(()=>{ AUDIO.loaded=true; });
 }
 loadAudioManifest();
-const TRY={running:false,fail:null,warn:null};
+const TRY={running:false,fail:null,warn:null,first:null};
 const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false, clue:0};
 let CUSTOM=[];
 
@@ -2490,16 +2493,19 @@ function tryEval(i){
     if(mine2.who&&mine2.m<4.5&&mine2.m<okLane-0.6){
       const nm=OPPNAME(mine2.who.id);
       return {fatal:true,at:mine2.who.p,msg:'PASS BLOCKED',
-        why:nm.charAt(0).toUpperCase()+nm.slice(1)+' was standing in that lane. The puck never got to you.'};
+        why:nm.charAt(0).toUpperCase()+nm.slice(1)+' was standing in that lane. The puck never got to you.',
+        say:'The pass never got there because somebody was in the lane.'};
     }
     const len=dist(from,me), okLen=dist(from,auth);
     if(len>Math.max(46,okLen+18)) return {fatal:true,at:me,msg:'TOO FAR',
       why:'That pass is '+Math.round(len)+' feet - '+Math.round(len-okLen)+
-          ' feet longer than it should be. You were too far away to be an option.'};
+          ' feet longer than it should be. You were too far away to be an option.',
+      say:'You were too far away to be an option.'};
   }
   /* 2. the man he was supposed to have */
   let mine=null;
   THEMIDS.forEach(id=>{
+    if(id==='XG') return;              // nobody covers the other team's goalie
     const p=shown(id,t); if(!p) return;
     let owner=null, od=99;
     S.sit.roster.forEach(rid=>{                       // whose man is he, by the book?
@@ -2516,17 +2522,20 @@ function tryEval(i){
   });
   if(mine)
     return {at:mine.p,msg:OPPNAME(mine.id).toUpperCase()+' IS ALONE',
-      why:'That was your man, and nobody else picked him up.'};
+      why:'That was your man, and nobody else picked him up.',
+      say:'You left your man alone.'};
   /* 3. wrong side of the puck */
   const sa=Math.sign(auth[0]-puck[0]), sm=Math.sign(me[0]-puck[0]);
   if(sa&&sm&&sa!==sm&&Math.abs(me[0]-puck[0])>7)
     return {at:me,msg:'WRONG SIDE OF THE PUCK',
       why:sa<0?'You should be between the puck and our net, not up ice of it.'
-              :'You should be up ice of the puck, not behind it.'};
+              :'You should be up ice of the puck, not behind it.',
+      say:'You were on the wrong side of the puck.'};
   /* 4. the middle given away */
   if(auth[1]>30&&auth[1]<55&&(me[1]<26||me[1]>59))
     return {at:[Math.min(188,Math.max(12,me[0])),42.5],msg:'MIDDLE IS OPEN',
-      why:'Your spot is the middle lane. You left it, and the middle is the dangerous ice.'};
+      why:'Your spot is the middle lane. You left it, and the middle is the dangerous ice.',
+      say:'You left the middle of the ice open.'};
   return null;
 }
 function drawTry(t){
@@ -2745,7 +2754,7 @@ function render(){
   }
   if(eff('focus')&&!S.playing&&S.mode==='learn') drawFocus(t);
   if(S.mode==='try'){
-    if(TRY.running&&!TRY.fail) TRY.warn=tryEval(frameIdx(t));
+    if(TRY.running&&!TRY.fail){ TRY.warn=tryEval(frameIdx(t)); if(TRY.warn&&!TRY.first) TRY.first=TRY.warn; }
     drawTry(t);
   }
 
@@ -3199,6 +3208,11 @@ function enumerateAudioScript(){
   }));
   Object.keys(PLACEQ).forEach(sid=>(PLACEQ[sid]||[]).forEach(q=>add(chunk(q.ask))));
   ['That is it.','Not this time.','There it is.','Bang on.','Good spot.','Still not it.','Not quite.',
+   'The flashing circle is where you belong.',
+   'The play broke.','You were where you belong the whole way.',
+   'The pass never got there because somebody was in the lane.',
+   'You were too far away to be an option.','You left your man alone.',
+   'You were on the wrong side of the puck.','You left the middle of the ice open.',
    'Have another go.','That is a kid who knows where to be.',
    'Solid. Go back to the ones you missed and watch them again.',
    'Good start. Hit Listen in Learn mode and walk through it once more.',
@@ -3312,9 +3326,9 @@ function tick(ts){
   const after=frameIdx(S.t), finished=S.t>=S.target-1e-6;
   if(S.mode==='try'&&after!==before){
     const v=tryEval(after);
-    if(v&&v.fatal){ TRY.fail=v; TRY.warn=null; stop(); render(); return; }
+    if(v&&v.fatal){ TRY.fail=v; TRY.warn=null; stop(); tryVerdict(); render(); return; }
   }
-  if(after!==before&&SPK.on){
+  if(after!==before&&SPK.on&&S.mode!=='try'){
     // hold here, say what just happened, then carry on - including on the last step
     /* held for narration: the button must still read PAUSE, or a tap starts a
        second run underneath the one that is already talking */
@@ -3327,7 +3341,9 @@ function tick(ts){
     });
     return;
   }
-  if(finished){ const done=S.t>=0.999; stop(); if(done)onPlayEnd(); return; }
+  if(finished){ const done=S.t>=0.999; stop();
+    if(S.mode==='try'){ tryVerdict(); render(); return; }
+    if(done)onPlayEnd(); return; }
   S.raf=requestAnimationFrame(tick);
 }
 function onPlayEnd(){
@@ -3339,7 +3355,8 @@ function onPlayEnd(){
 $('play').onclick=()=>{
   if(S.playing||S.narrating)return;
   if(S.t>=0.999)S.t=0;
-  if(S.mode==='try'){ TRY.fail=null; TRY.warn=null; TRY.running=true; }
+  if(S.mode==='try'){ TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=true;
+    const vb=$('tryverdict'); if(vb) vb.style.display='none'; }
   startPlay(1);
 };
 $('pause').onclick=()=>{ stop(); };
@@ -3531,7 +3548,8 @@ function menuCard(sit,col,sub){
   const b=document.createElement('button');
   b.className='mitem'; b.type='button';
   b.innerHTML='<span class="mtitle"><i class="mdot" style="background:'+col+'"></i>'+esc(sit.name)+'</span>'
-    +'<span class="mthumb">'+thumbSVG(sit)+'<span class="mgo">Watch it &#9654;</span>'
+    +'<span class="mthumb">'+thumbSVG(sit)+'</span>'
+    +'<span class="mact"><span class="mgo">Watch it &#9654;</span>'
       +'<span class="mgo mplay">Play it &#9654;</span></span>'
     +'<span class="msub">'+esc(sub)+'</span>';
   b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'try':null);
@@ -3613,6 +3631,7 @@ function railTry(){
     '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">If the play breaks because of where you stood, it stops and shows you why.</p>'+
     '<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
     '<div style="font-size:11.5px;color:#93a3bd" id="poshint"></div>'+
+    '<div id="tryverdict" class="why" style="display:none"></div>'+
     '<div class="spacer"></div>'+
     '<button class="bigbtn" id="tryright" style="width:100%;margin-bottom:8px">Put me back where I belong</button>'+
     '<button class="bigbtn plain" id="trywatch">Watch the right way</button>';
@@ -3623,8 +3642,23 @@ function railTry(){
   $('tryright').onclick=()=>{ tryReset(); render(); };
   $('trywatch').onclick=()=>{ setMode('learn'); };
 }
+function tryVerdict(){
+  const c=TRY.fail||TRY.first, box=$('tryverdict');
+  if(box){
+    box.style.display='block';
+    box.className='why '+(c?'trybad':'trygood');
+    box.innerHTML=c
+      ? '<b>'+esc(c.fatal?'The play broke.':'Careful.')+'</b> <b>'+esc(c.msg)+'</b> '+esc(c.why)
+      : '<b>That works.</b> You were where you belong the whole way, and the play came off.';
+  }
+  if(isPhone()) setSheet(true);
+  if(SPK.on) speakLines(
+    chunk(c?(c.fatal?'The play broke.':'Not quite.'):'That works.',{rate:0.95,pause:280})
+      .concat(chunk(c?c.say:'You were where you belong the whole way.',{rate:0.93,pause:200})));
+}
 function tryReset(){
-  stop(); TRY.running=false; TRY.fail=null; TRY.warn=null;
+  stop(); TRY.running=false; TRY.fail=null; TRY.warn=null; TRY.first=null;
+  const vb=$('tryverdict'); if(vb){ vb.style.display='none'; vb.innerHTML=''; }
   S.t=0; S.manual={};
   const c=correct(S.pos,0);
   if(c) S.manual[S.pos]=[c[0],c[1]];
@@ -3645,14 +3679,14 @@ function railLearn(){
   }
   h+='<div class="spacer"></div>'+
      '<button class="bigbtn" id="goquiz">Quiz me on this &#9654;</button>'+
-     '<button class="bigbtn plain" id="gobuild">Build my own play</button>';
+     '<button class="bigbtn plain" id="gotry">Try it your way &#9654;</button>';
   $('rail').innerHTML=h;
   buildPos();
   if(sit.roster.includes(S.pos)&&c) buildTabs(c);
   $('goquiz').onclick=()=>{ setMode('quiz'); startTest('sit'); };
   const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
   const qt=$('qgotry'); if(qt) qt.onclick=()=>{ setMode('try'); paintRail(); render(); };
-  $('gobuild').onclick=()=>startBuilderFrom(null);
+  $('gotry').onclick=()=>{ setMode('try'); paintRail(); render(); };
 }
 function buildPos(){
   const pl=$('poslist'); if(!pl)return; pl.innerHTML='';
@@ -3749,7 +3783,8 @@ svg.addEventListener('pointerdown',e=>{
      reads are computed against a play that never happens. */
   if(S.mode==='try'){
     if(id!==S.pos) return;
-    TRY.fail=null; TRY.warn=null; TRY.running=false;
+    TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=false;
+    const vb=$('tryverdict'); if(vb) vb.style.display='none';
   }
   drag=id; dragMoved=false;
   try{svg.setPointerCapture(e.pointerId);}catch(err){}
@@ -3936,7 +3971,8 @@ function checkSpot(){
     ? 'You were <b>'+Math.round(d)+' ft</b> off, close enough. '+esc(job)
     : 'You were <b>'+Math.round(d)+' ft</b> away. The flashing <b>BE HERE</b> circle on the ice is '+
       'where the '+POSNAMES[q.pos]+' belongs. '+esc(job);
-  showWhy(right,head,body,{retry:!right});
+  showWhy(right,head,body,{retry:!right,
+    say:right?'Good spot.':'The flashing circle is where you belong.'});
   if(isPhone()) setSheet(true);          // otherwise the answer lands below the fold
 }
 function retrySpot(){
@@ -3952,8 +3988,8 @@ function showWhy(right,head,body,opt){
   opt=opt||{};
   $('p-prog').textContent='Question '+(TEST.i+1)+' of '+TEST.qs.length+'  -  '+TEST.right+' right';
   let h='<div class="why" style="'+
-    (right?'background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.45)'
-          :'background:rgba(224,54,78,.14);border:1px solid rgba(224,54,78,.45)')+'">'+
+    (right?'background:rgba(42,79,168,.18);border:1px solid rgba(90,127,216,.5)'
+          :'background:rgba(191,30,46,.16);border:1px solid rgba(191,30,46,.5)')+'">'+
     '<b>'+head+'</b> '+body+'</div>';
   if(opt.retry) h+='<button class="bigbtn" id="retryq" style="width:100%;margin-top:10px">Try again &#8635;</button>'+
     '<div class="help" style="margin-top:5px">Look at the flashing circle, then go and stand there. '+
@@ -3963,7 +3999,10 @@ function showWhy(right,head,body,opt){
   $('whybox').innerHTML=h;
   $('nextq').onclick=()=>{ TEST.i++; showQuestion(); };
   const r=$('retryq'); if(r) r.onclick=retrySpot;
-  if(SPK.on) speakLines(chunk(head,{rate:0.95,pause:300}).concat(chunk(body,{rate:0.93,pause:190})));
+  if(SPK.on){
+    const said=opt.say||body;
+    speakLines(chunk(head,{rate:0.95,pause:300}).concat(chunk(said,{rate:0.93,pause:190})));
+  }
 }
 function finishTest(){
   TEST.done=true;
