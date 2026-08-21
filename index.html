@@ -90,10 +90,11 @@ select,input{touch-action:manipulation}
   width:100%;aspect-ratio:2.26;overflow:hidden;
   border-top:1px solid #e4ebf4;border-bottom:1px solid #e4ebf4}
 .mitem .mthumb svg{display:block;width:100%;height:100%}
-.mitem .mgo{position:absolute;right:8px;bottom:8px;display:inline-flex;align-items:center;
+.mitem .mgo{position:absolute;right:8px;bottom:50px;display:inline-flex;align-items:center;
   min-height:36px;padding:0 14px;border-radius:999px;background:rgba(10,18,34,.8);color:#fff;
   font-size:12.5px;font-weight:700;transition:.14s}
 .mitem .msub{display:block;font-size:12.5px;color:#4b5d79;padding:9px 13px 11px;line-height:1.4}
+.mitem .mgo.mplay{bottom:8px;background:rgba(191,30,46,.92)}
 @media (hover:hover){.mitem:hover{border-color:#8fb0d8;transform:translateY(-2px);
   box-shadow:0 10px 22px rgba(3,10,25,.38)}
   .mitem:hover .mgo{background:#bf1e2e}}
@@ -191,6 +192,8 @@ input[type=range]{accent-color:var(--us2)}
 .grab .gchev{font-size:9px;color:var(--dim);transition:transform .22s}
 .railwrap.open .grab .gchev{transform:rotate(180deg)}
 .railh{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:800}
+.qact{display:flex;gap:7px;align-items:stretch}
+.qact .bigbtn{flex:1 1 0;margin-bottom:0;padding:12px 6px}
 .posrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 /* the position picker and Quiz me both sat inside the collapsed sheet on a phone,
    which is the one place a kid never looks - so on phones they come out here */
@@ -202,8 +205,11 @@ input[type=range]{accent-color:var(--us2)}
   font-size:14px;font-weight:800;color:var(--ink)}
 .quickbar .qp.on{background:var(--hi);border-color:var(--hi);color:#fff}
 .quickbar .qp.off{opacity:.32}
-.quickbar .qquiz{flex:0 0 auto;background:var(--us);color:#fff;border-radius:10px;
+.quickbar .qr{display:flex;align-items:center;gap:7px;min-width:0}
+.quickbar .qr2{gap:7px}
+.quickbar .qquiz{flex:1 1 0;background:var(--us);color:#fff;border-radius:10px;
   min-height:42px;padding:0 12px;font-size:13px;font-weight:750;white-space:nowrap}
+.quickbar .qquiz.alt{background:var(--hi)}
 .pbtn{background:#1e2c48;border:1px solid #2f4066;border-radius:10px;padding:7px 4px;text-align:center;line-height:1.1}
 .pbtn .ab{display:block;font-size:16px;font-weight:800}
 .pbtn .nm{display:block;font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
@@ -377,7 +383,7 @@ input[type=range]{accent-color:var(--us2)}
 
   /* one row of positions, letters only - thumbs, not mice */
   .posrow{grid-template-columns:repeat(6,1fr);gap:5px}
-  .quickbar{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+  .quickbar{display:flex;flex-direction:column;align-items:stretch;gap:6px;flex:0 0 auto}
   .pbtn{padding:10px 2px;min-height:44px}
   .pbtn .ab{font-size:15px}
   .pbtn .nm{display:none}
@@ -585,9 +591,11 @@ input[type=range]{accent-color:var(--us2)}
       </div>
       <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span></div>
       <div class="quickbar" id="quickbar">
-        <span class="qlab">You are</span>
-        <div class="qpos" id="qposlist"></div>
-        <button class="qquiz" id="qgoquiz">Quiz me &#9654;</button>
+        <div class="qr"><span class="qlab">You are</span><div class="qpos" id="qposlist"></div></div>
+        <div class="qr qr2">
+          <button class="qquiz alt" id="qgotry">Try it &#9654;</button>
+          <button class="qquiz" id="qgoquiz">Quiz me &#9654;</button>
+        </div>
       </div>
       <div class="ctrl" id="ctrlrow">
         <button class="primary" id="play">Play &#9654;</button>
@@ -2186,7 +2194,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.18';
+const BUILD='2026-08-21.28';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2235,6 +2243,7 @@ function loadAudioManifest(){
   }).catch(()=>{ AUDIO.loaded=true; });
 }
 loadAudioManifest();
+const TRY={running:false,fail:null,warn:null};
 const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false, clue:0};
 let CUSTOM=[];
 
@@ -2333,7 +2342,18 @@ function correct(id,t){
   const side=(OURPOS.includes(id)||id==='G')?'us':'them';
   return at(series(side,id),t);
 }
-const shown=(id,t)=>S.manual[id]||correct(id,t);
+/* A manual drop normally freezes a player. In Try mode his own man still skates the
+   route the play asks for - just offset by however wrong his starting spot was. That is
+   what makes the failure happen where it would really happen. */
+const shown=(id,t)=>{
+  const m=S.manual[id];
+  if(!m) return correct(id,t);
+  if(S.mode==='try'&&TRY.running&&S.playing&&id===S.pos){
+    const c=correct(id,t), c0=correct(id,0);
+    if(c&&c0) return [m[0]+(c[0]-c0[0]), m[1]+(c[1]-c0[1])];
+  }
+  return m;
+};
 const disp=p=>p?(S.opt.flip?[p[0],85-p[1]]:p):null;
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 function landmark(key,t){
@@ -2344,7 +2364,7 @@ function landmark(key,t){
   return shown(key,t);
 }
 function eff(k){
-  if(S.mode==='build') return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
+  if(S.mode==='build'||S.mode==='try') return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
   if(TEST.active&&!TEST.done){
     const q=TEST.qs[TEST.i];
     if(q&&q.type==='place'&&!TEST.answered&&['ghost','look','space','trail','pass'].includes(k))return false;
@@ -2436,6 +2456,99 @@ function drawDragMe(p){
   ['#fff','#8a6000'].forEach((col,i)=>g.appendChild(el('text',Object.assign(
     {x:p[0],y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,fill:col},
     i===0?{stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'}:{}),'DRAG ME')));
+}
+
+/* ---------------- Try mode: what his spot costs ----------------
+   Everyone else plays the authored play. The puck route is scripted and is allowed to
+   FAIL - if the pass meant for him cannot get there, the play dies there. Reads are
+   computed from the same geometry the rest of the app uses; nothing is invented. */
+const OPPNAME=id=>id==='XG'?'their goalie':'red '+String(id).slice(1);
+function passMeantForHim(i){
+  const f=frames(); if(i<=0||!f[i]||!f[i-1]) return false;
+  const w=f[i].puck&&f[i].puck[2], pw=f[i-1].puck&&f[i-1].puck[2];
+  return w===S.pos&&pw!==S.pos;
+}
+function tryEval(i){
+  const f=frames(); if(!f[i]) return null;
+  const t=f[i].t, me=shown(S.pos,t), auth=correct(S.pos,t);
+  if(!me||!auth) return null;
+  const puck=puckAt(t).p;
+
+  /* 1. a pass with his name on it - fatal, the play stops */
+  if(passMeantForHim(i)){
+    const from=puckAt(f[i-1].t).p;
+    /* The PLAY's own pass sets the standard. A real pass threads past sticks, so an
+       absolute clearance rule fails the authored play itself - measure his lane
+       against the lane the play intended instead. */
+    const lane=to=>{ let m=99,who=null;
+      THEMIDS.forEach(id=>{ const p=shown(id,t); if(!p)return;
+        const d=segDist(p,from,to); if(d<m){ m=d; who={id,p}; } });
+      return {m,who}; };
+    const okLane=lane(auth).m, mine2=lane(me);
+    /* strictly worse than the play's own lane, and tight in absolute terms. Compared
+       against its own clearance, a correct placement can never trip this. */
+    if(mine2.who&&mine2.m<4.5&&mine2.m<okLane-0.6){
+      const nm=OPPNAME(mine2.who.id);
+      return {fatal:true,at:mine2.who.p,msg:'PASS BLOCKED',
+        why:nm.charAt(0).toUpperCase()+nm.slice(1)+' was standing in that lane. The puck never got to you.'};
+    }
+    const len=dist(from,me), okLen=dist(from,auth);
+    if(len>Math.max(46,okLen+18)) return {fatal:true,at:me,msg:'TOO FAR',
+      why:'That pass is '+Math.round(len)+' feet - '+Math.round(len-okLen)+
+          ' feet longer than it should be. You were too far away to be an option.'};
+  }
+  /* 2. the man he was supposed to have */
+  let mine=null;
+  THEMIDS.forEach(id=>{
+    const p=shown(id,t); if(!p) return;
+    let owner=null, od=99;
+    S.sit.roster.forEach(rid=>{                       // whose man is he, by the book?
+      if(rid==='G') return;
+      const a=correct(rid,t); if(!a) return;
+      const d=dist(a,p); if(d<od){ od=d; owner=rid; }
+    });
+    if(owner!==S.pos||od>14) return;
+    const covered=S.sit.roster.some(id=>{
+      if(id===S.pos||id==='G') return false;
+      const q=shown(id,t); return q&&dist(q,p)<11;
+    });
+    if(!covered&&dist(me,p)>18&&(!mine||od<mine.d)) mine={id,p,d:od};
+  });
+  if(mine)
+    return {at:mine.p,msg:OPPNAME(mine.id).toUpperCase()+' IS ALONE',
+      why:'That was your man, and nobody else picked him up.'};
+  /* 3. wrong side of the puck */
+  const sa=Math.sign(auth[0]-puck[0]), sm=Math.sign(me[0]-puck[0]);
+  if(sa&&sm&&sa!==sm&&Math.abs(me[0]-puck[0])>7)
+    return {at:me,msg:'WRONG SIDE OF THE PUCK',
+      why:sa<0?'You should be between the puck and our net, not up ice of it.'
+              :'You should be up ice of the puck, not behind it.'};
+  /* 4. the middle given away */
+  if(auth[1]>30&&auth[1]<55&&(me[1]<26||me[1]>59))
+    return {at:[Math.min(188,Math.max(12,me[0])),42.5],msg:'MIDDLE IS OPEN',
+      why:'Your spot is the middle lane. You left it, and the middle is the dangerous ice.'};
+  return null;
+}
+function drawTry(t){
+  const g=layer('focus');
+  if(!TRY.running&&!TRY.fail){                       // waiting for him to place it
+    const p=shown(S.pos,t); if(p) drawDragMe(disp(p));
+  }
+  const c=TRY.fail||TRY.warn; if(!c) return;
+  const col=c.fatal?'#bf1e2e':'#c98a00', b=disp(c.at);
+  const ring=el('circle',{cx:b[0],cy:b[1],r:TR()*1.6,fill:'none',stroke:col,'stroke-width':0.8});
+  ring.appendChild(el('animate',{attributeName:'r',values:(TR()*1.5).toFixed(2)+';'+(TR()*3.1).toFixed(2)+';'+(TR()*1.5).toFixed(2),
+    dur:'1.5s',repeatCount:'indefinite'}));
+  ring.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0.1;0.95',dur:'1.5s',repeatCount:'indefinite'}));
+  g.appendChild(ring);
+  const lh=FS(4.4), lw=FS(c.msg.length*1.62+3.4);
+  const ly=b[1]<22?b[1]+FS(8.4):b[1]-FS(6);
+  const lx=Math.max(lw/2+2,Math.min(198-lw/2,b[0]));
+  g.appendChild(el('rect',{x:lx-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,fill:col,'fill-opacity':0.96}));
+  g.appendChild(el('text',{x:lx,y:ly,'font-size':FS(2.9),'text-anchor':'middle','font-weight':850,
+    fill:'#fff','letter-spacing':0.3},c.msg));
+  const cn=$('cuen'), ct=$('cuetext');
+  if(cn&&ct){ cn.textContent=c.fatal?'It broke':'Careful'; ct.innerHTML='<b>'+esc(c.msg)+'</b> '+esc(c.why); }
 }
 
 /* the step whose words are on screen right now */
@@ -2631,6 +2744,10 @@ function render(){
     if(p){ token(S.pos,disp(p),'me',S.pos); if(pq) drawDragMe(disp(p)); }
   }
   if(eff('focus')&&!S.playing&&S.mode==='learn') drawFocus(t);
+  if(S.mode==='try'){
+    if(TRY.running&&!TRY.fail) TRY.warn=tryEval(frameIdx(t));
+    drawTry(t);
+  }
 
   if(eff('ghost')) Object.keys(S.manual).forEach(id=>{
     if(id==='PUCK')return;
@@ -2657,11 +2774,12 @@ function render(){
         pulse.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0;0.95',dur:'1.8s',repeatCount:'indefinite'}));
         g.appendChild(pulse);
         g.appendChild(el('circle',{cx:b[0],cy:b[1],r:3.4,fill:col,'fill-opacity':0.22,stroke:col,'stroke-width':0.6}));
-        const ly=b[1]<20?b[1]+FS(8.2):b[1]-FS(5.8), lh=FS(4.2), lw=FS(9.4);
+        const txt=TEST.lastRight?'HERE':'BE HERE';
+        const ly=b[1]<20?b[1]+FS(8.2):b[1]-FS(5.8), lh=FS(4.2), lw=FS(txt.length*2.35+0.6);
         g.appendChild(el('rect',{x:b[0]-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
           fill:col,'fill-opacity':0.95}));
         g.appendChild(el('text',{x:b[0],y:ly,'font-size':FS(2.8),'text-anchor':'middle','font-weight':850,
-          fill:'#fff','letter-spacing':0.25},'HERE'));
+          fill:'#fff','letter-spacing':0.25},txt));
       }
     }
   }
@@ -2763,6 +2881,8 @@ function segDist(p,a,b){
 /* the strip under the ice: normally the step cue, but on a phone in a quiz it carries
    the question, because a question hidden inside the sheet is a question he cannot read */
 function paintCue(){
+  /* Try mode owns this strip while it has something to explain */
+  if(S.mode==='try' && typeof TRY!=='undefined' && (TRY.fail||TRY.warn)) return;
   if(typeof STAGE!=='undefined' && STAGE.active){
     $('cuen').textContent=STAGE.label||'Setup';
     $('cuetext').textContent=STAGE.cue||'';
@@ -3160,8 +3280,20 @@ function setPlayBtn(on){
   if(p){ p.disabled=!!on; p.classList.toggle('live',!!on); }
   if(q){ q.disabled=!on; }
 }
-function stop(){ S.playing=false; S.narrating=false; S.gen++; if(S.raf)cancelAnimationFrame(S.raf); S.raf=null; S.lastTs=null; setPlayBtn(false); hush(); }
-function hardReset(){ stop(); S.t=0; S.manual={}; note(null); }
+/* when a run ends - finished, paused or broken - pin his man where he actually ended
+   up, so the ice keeps telling the truth and the next drag starts from clean state */
+function tryFreeze(){
+  const p=shown(S.pos,S.t);            // resolve BEFORE S.playing goes false
+  TRY.running=false;
+  if(p) S.manual[S.pos]=[p[0],p[1]];
+}
+function stop(){
+  if(S.mode==='try'&&TRY.running) tryFreeze();
+  S.playing=false; S.narrating=false; S.gen++;
+  if(S.raf)cancelAnimationFrame(S.raf); S.raf=null; S.lastTs=null;
+  setPlayBtn(false); hush();
+}
+function hardReset(){ stop(); S.t=0; S.manual={}; note(null); if(S.mode==='try') tryReset(); }
 function startPlay(target){
   S.target=Math.min(1,target); if(S.t>=S.target-1e-4)return;
   if(S.raf) cancelAnimationFrame(S.raf);        // never run two loops at once
@@ -3178,6 +3310,10 @@ function tick(ts){
   S.t=Math.min(S.target,S.t+dt*(+$('speed').value)/playSecs());
   render();
   const after=frameIdx(S.t), finished=S.t>=S.target-1e-6;
+  if(S.mode==='try'&&after!==before){
+    const v=tryEval(after);
+    if(v&&v.fatal){ TRY.fail=v; TRY.warn=null; stop(); render(); return; }
+  }
   if(after!==before&&SPK.on){
     // hold here, say what just happened, then carry on - including on the last step
     /* held for narration: the button must still read PAUSE, or a tap starts a
@@ -3200,7 +3336,12 @@ function onPlayEnd(){
   renderNext();
   if($('t-follow').checked) setTimeout(()=>{ if(!S.playing)goNext(true); },SPK.on?300:900);
 }
-$('play').onclick=()=>{ if(S.playing||S.narrating)return; if(S.t>=0.999)S.t=0; startPlay(1); };
+$('play').onclick=()=>{
+  if(S.playing||S.narrating)return;
+  if(S.t>=0.999)S.t=0;
+  if(S.mode==='try'){ TRY.fail=null; TRY.warn=null; TRY.running=true; }
+  startPlay(1);
+};
 $('pause').onclick=()=>{ stop(); };
 $('zoomb').onclick=()=>{ S.wide=!S.wide; render(); };
 $('fwd').onclick=()=>{ const n=frames().find(x=>x.t>S.t+1e-3); stop(); startPlay(n?n.t:1); };
@@ -3218,7 +3359,7 @@ function setStageUI(on){
   STAGE.active=!!on;
   $('stageover').classList.toggle('on',!!on);
   $('ctrlrow').style.display = on ? 'none' : (S.mode==='quiz'?'none':'flex');
-  $('quickbar').style.display = (on||S.mode!=='learn') ? 'none' : '';
+  $('quickbar').style.display = (on||(S.mode!=='learn'&&S.mode!=='try')) ? 'none' : '';
   $('varrow').style.display = on ? 'none' : '';
   if(!on){ buildVars(); renderNext(); }
   else { $('nextbar').style.display='none'; }
@@ -3274,7 +3415,7 @@ function showScreen(name){
 }
 $('p-back').onclick=()=>{
   clearStage(); stop();
-  if(S.mode==='quiz'||S.mode==='build'){ setMode('learn'); return; }
+  if(S.mode==='quiz'||S.mode==='build'||S.mode==='try'){ setMode('learn'); return; }
   showScreen('menu');
 };
 $('m-howto').onclick=()=>mask('help',true);
@@ -3344,10 +3485,12 @@ function syncTapHints(){
 }
 /* opening a situation from the menu always starts with the stage - and it is a real tap,
    so this is where the audio gets unlocked */
-function openSituation(s){
+function openSituation(s,mode){
   loadSituation(s.id,s.variants[0].id);
-  showScreen('play'); setMode('learn');
+  showScreen('play');
   primeSpeech(); unlockAudioEl();
+  if(mode==='try'){ setMode('try'); paintRail(); render(); return; }
+  setMode('learn');
   stageSituation();
 }
 /* a little aerial of the opening frame, so the menu shows the play instead of describing it */
@@ -3388,9 +3531,10 @@ function menuCard(sit,col,sub){
   const b=document.createElement('button');
   b.className='mitem'; b.type='button';
   b.innerHTML='<span class="mtitle"><i class="mdot" style="background:'+col+'"></i>'+esc(sit.name)+'</span>'
-    +'<span class="mthumb">'+thumbSVG(sit)+'<span class="mgo">Watch it &#9654;</span></span>'
+    +'<span class="mthumb">'+thumbSVG(sit)+'<span class="mgo">Watch it &#9654;</span>'
+      +'<span class="mgo mplay">Play it &#9654;</span></span>'
     +'<span class="msub">'+esc(sub)+'</span>';
-  b.onclick=()=>openSituation(sit);
+  b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'try':null);
   return b;
 }
 function buildMenu(){
@@ -3460,9 +3604,33 @@ function note(cls,html){
 function paintRail(){
   if(S.mode==='learn') railLearn();
   else if(S.mode==='quiz') railQuiz();
+  else if(S.mode==='try') railTry();
   else railBuild();
 }
+function railTry(){
+  const h='<div class="qtype place">Try it your way</div>'+
+    '<div class="qtext">Put yourself where you think you belong, then hit Play. Everybody else plays it right.</div>'+
+    '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">If the play breaks because of where you stood, it stops and shows you why.</p>'+
+    '<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
+    '<div style="font-size:11.5px;color:#93a3bd" id="poshint"></div>'+
+    '<div class="spacer"></div>'+
+    '<button class="bigbtn" id="tryright" style="width:100%;margin-bottom:8px">Put me back where I belong</button>'+
+    '<button class="bigbtn plain" id="trywatch">Watch the right way</button>';
+  $('rail').innerHTML=h;
+  buildPos();
+  const qt2=$('qgotry'); if(qt2){ qt2.textContent='Try again'; qt2.onclick=()=>{ tryReset(); render(); }; }
+  const qq2=$('qgoquiz'); if(qq2) qq2.onclick=()=>{ setMode('quiz'); startTest('sit'); };
+  $('tryright').onclick=()=>{ tryReset(); render(); };
+  $('trywatch').onclick=()=>{ setMode('learn'); };
+}
+function tryReset(){
+  stop(); TRY.running=false; TRY.fail=null; TRY.warn=null;
+  S.t=0; S.manual={};
+  const c=correct(S.pos,0);
+  if(c) S.manual[S.pos]=[c[0],c[1]];
+}
 function railLearn(){
+  const tlbl=$('qgotry'); if(tlbl) tlbl.textContent='Try it \u25b6';
   const sit=S.sit, c=(sit.coach||{})[S.pos], p=PHASE[sit.phase];
   let h='<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
         '<div style="font-size:11.5px;color:#93a3bd" id="poshint"></div>'+
@@ -3483,6 +3651,7 @@ function railLearn(){
   if(sit.roster.includes(S.pos)&&c) buildTabs(c);
   $('goquiz').onclick=()=>{ setMode('quiz'); startTest('sit'); };
   const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
+  const qt=$('qgotry'); if(qt) qt.onclick=()=>{ setMode('try'); paintRail(); render(); };
   $('gobuild').onclick=()=>startBuilderFrom(null);
 }
 function buildPos(){
@@ -3492,7 +3661,7 @@ function buildPos(){
     const b=document.createElement('button');
     b.className='pbtn'+(p===S.pos?' on':'')+(on?'':' off');
     b.innerHTML='<span class="ab">'+p+'</span><span class="nm">'+POSNAMES[p]+'</span>';
-    b.onclick=()=>{ S.pos=p; paintRail(); render(); };
+    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); };
     pl.appendChild(b);
   });
   buildQuickPos();
@@ -3508,7 +3677,7 @@ function buildQuickPos(){
     b.className='qp'+(p===S.pos?' on':'')+(S.sit.roster.includes(p)?'':' off');
     b.type='button'; b.textContent=p;
     b.title=POSNAMES[p];
-    b.onclick=()=>{ S.pos=p; paintRail(); render(); };
+    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); };
     ql.appendChild(b);
   });
 }
@@ -3576,6 +3745,12 @@ svg.addEventListener('pointerdown',e=>{
     if(q&&q.type==='place'&&id!==q.pos) return;
     if(q&&q.type==='mc') return;
   }
+  /* Try mode moves ONE man: his own. Everybody else has to play it right, or the
+     reads are computed against a play that never happens. */
+  if(S.mode==='try'){
+    if(id!==S.pos) return;
+    TRY.fail=null; TRY.warn=null; TRY.running=false;
+  }
   drag=id; dragMoved=false;
   try{svg.setPointerCapture(e.pointerId);}catch(err){}
   stop(); e.preventDefault();
@@ -3634,7 +3809,10 @@ function setMode(m){
   if(m!=='learn') clearStage();
   S.mode=m; TEST.active=(m==='quiz');
   $('ctrlrow').style.display=(m==='quiz'||STAGE.active)?'none':'flex';
-  $('quickbar').style.display=(m!=='learn'||STAGE.active)?'none':'';
+  $('quickbar').style.display=((m!=='learn'&&m!=='try')||STAGE.active)?'none':'';
+  /* stepping half-simulates in Try mode - everyone moves but him - so it stays a Learn tool */
+  ['fwd','back','scrub'].forEach(k=>{ const e=$(k); if(e) e.style.display=(m==='try')?'none':''; });
+  if(m==='try') tryReset();
   $('p-back').innerHTML=(m==='learn')?'&#8249; Menu':'&#8249; Learn';
   $('p-watch').style.display=(m==='learn')?'':'none';
   $('p-prog').textContent='';
@@ -3705,13 +3883,17 @@ function railQuiz(){
     const ask='<span class="qtype place">Put yourself in the right spot</span><div class="qtext">'+esc(q.ask)+'</div>'+
        '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">You are the <b>'+POSNAMES[q.pos]+
        '</b>. Find the yellow dot that says <b>DRAG ME</b> and pull it where you belong.</p>';
-    const clue='<div id="cluebox"></div>'+
-       (TEST.clue<2?'<button class="bigbtn plain" id="cluebtn" style="width:100%;margin-bottom:8px">'+
-         (TEST.clue===0?'I need a clue':'Make the area smaller')+'</button>':'');
-    const btn='<button class="bigbtn blue" id="checkspot" style="width:100%">Check my spot</button>';
-    /* on a phone the question is already under the ice, so the buttons get the peek -
-       and the clue button must be up there with them, not below the fold */
-    h+= isPhone() ? btn+'<div style="height:8px"></div>'+clue+ask : ask+clue+btn;
+    /* The collapsed sheet's peek clears ONE button after the grab handle and the home-bar
+       inset, so on a phone Clue and Check have to share that row - stacked, the clue
+       button fell just below the fold and could not be found at all. */
+    const lbl=TEST.clue===0?'Give me a clue':'Smaller area', can=TEST.clue<2;
+    const box='<div id="cluebox"></div>';
+    const row='<div class="qact">'+
+      (can?'<button class="bigbtn plain" id="cluebtn">'+lbl+'</button>':'')+
+      '<button class="bigbtn blue" id="checkspot">Check my spot</button></div>';
+    const clueD=can?'<button class="bigbtn plain" id="cluebtn" style="width:100%;margin-bottom:8px">'+lbl+'</button>':'';
+    const btnD='<button class="bigbtn blue" id="checkspot" style="width:100%">Check my spot</button>';
+    h+= isPhone() ? row+box+ask : ask+box+clueD+btnD;
   }
   h+='<div id="whybox"></div><div class="spacer"></div>'+
      '<button class="bigbtn plain" id="quitquiz">Stop the quiz</button>';
@@ -3720,7 +3902,7 @@ function railQuiz(){
   else {
     $('checkspot').onclick=checkSpot;
     const cb=$('cluebtn');
-    if(cb) cb.onclick=()=>{ TEST.clue++; railQuiz(); render(); };
+    if(cb) cb.onclick=()=>{ TEST.clue++; railQuiz(); render(); if(isPhone()) setSheet(true); };
     const box=$('cluebox');
     if(box&&TEST.clue>=1){
       box.innerHTML='<div style="font-size:13.5px;line-height:1.35;color:#ffd98a;background:rgba(255,198,41,.1);'+
@@ -3752,15 +3934,17 @@ function checkSpot(){
                      : (TEST.retried?'Still not it.':'Not quite.');
   const body = right
     ? 'You were <b>'+Math.round(d)+' ft</b> off, close enough. '+esc(job)
-    : 'You were <b>'+Math.round(d)+' ft</b> away. The flashing circle on the ice is where the '+
-      POSNAMES[q.pos]+' belongs. '+esc(job);
+    : 'You were <b>'+Math.round(d)+' ft</b> away. The flashing <b>BE HERE</b> circle on the ice is '+
+      'where the '+POSNAMES[q.pos]+' belongs. '+esc(job);
   showWhy(right,head,body,{retry:!right});
+  if(isPhone()) setSheet(true);          // otherwise the answer lands below the fold
 }
 function retrySpot(){
   const q=TEST.qs[TEST.i]; if(!q||q.type!=='place')return;
   TEST.answered=false; TEST.retried=true; TEST.lastRight=false; TEST.clue=0;
   S.manual={}; S.manual[q.pos]=[100,42.5];
   railQuiz(); render();
+  if(isPhone()) setSheet(false);
   if(SPK.on) speakLines(chunk('Have another go.',{rate:0.95,pause:240})
     .concat(chunk('Put yourself where the '+POSNAMES[q.pos]+' belongs.',{rate:0.93,pause:180})));
 }
@@ -3803,8 +3987,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ ['help','set','vid','coach','more'].forEach(k=>mask(k,false)); return; }
   if(S.screen!=='play')return;
   if(e.code==='Space'){ e.preventDefault(); if(S.mode!=='quiz') (S.playing?$('pause'):$('play')).click(); }
-  else if(e.key==='ArrowRight'){ if(S.mode!=='quiz')$('fwd').click(); }
-  else if(e.key==='ArrowLeft'){ if(S.mode!=='quiz')$('back').click(); }
+  else if(e.key==='ArrowRight'){ if(S.mode!=='quiz'&&S.mode!=='try')$('fwd').click(); }
+  else if(e.key==='ArrowLeft'){ if(S.mode!=='quiz'&&S.mode!=='try')$('back').click(); }
   else if(e.key==='r'||e.key==='R'){ if(S.mode!=='quiz')$('reset').click(); }
   else if('12345'.indexOf(e.key)>=0&&S.mode==='learn'){ S.pos=OURPOS[+e.key-1]; paintRail(); render(); }
 });
