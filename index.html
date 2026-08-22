@@ -1156,7 +1156,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.51';
+const BUILD='2026-08-21.52';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2795,7 +2795,13 @@ function openVideos(){
     '<div class="chanlist"><b style="color:#93a3bd">Channels worth subscribing to:</b><br>'+
     CHANNELS.map(c=>'<a href="'+c.u+'" target="_blank" rel="noopener">'+c.n+'</a>').join(' &middot; ')+
     '</div><div class="help" style="margin-top:8px">Click a title to open it on YouTube, or shift-click to play it right here.</div>'
-  ) : '<div class="help">This is a play you built, so there is no video for it. Pick a built-in situation to get videos.</div>';
+  ) : (S.sit.custom ? '<div class="help">This is a play you built, so there is no video for it. Pick a built-in situation to get videos.</div>'
+     : '<a class="vidsearch" href="https://www.youtube.com/results?search_query='+
+       encodeURIComponent([SEARCHQ[S.sit.id]||S.sit.name,POSNAMES[S.pos],'youth hockey'].join(' '))+
+       '" target="_blank" rel="noopener">Search YouTube: '+esc(SEARCHQ[S.sit.id]||S.sit.name)+' &middot; '+POSNAMES[S.pos]+' &nearr;</a>'+
+       '<div class="help" style="margin-top:8px">No hand-picked clips for this one yet - the search above is the next best thing.</div>'+
+       '<div class="chanlist"><b style="color:#93a3bd">Channels worth subscribing to:</b><br>'+
+       CHANNELS.map(c=>'<a href="'+c.u+'" target="_blank" rel="noopener">'+c.n+'</a>').join(' &middot; ')+'</div>');
   $('vidbody').querySelectorAll('.vid').forEach(a=>a.addEventListener('click',e=>{
     if(!e.shiftKey)return; e.preventDefault();
     $('embed').innerHTML='<div class="embedwrap"><iframe src="https://www.youtube-nocookie.com/embed/'+a.dataset.vid+

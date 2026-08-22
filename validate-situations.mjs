@@ -195,10 +195,70 @@ for (const s of SITUATIONS) {
   /* ---- the soft ones: each has a visible failure mode in the app ---- */
   if (!s.tests || !s.tests.length) warn(`${at} no tests — "Quiz me on this" will fall through to the global pool and ask about other situations`);
   if (!s.roles) warn(`${at} no roles — the "Label the other team" setting will do nothing here`);
-  if (!s.videos || !s.videos.length) warn(`${at} no videos — the video modal will claim this is a play the user built`);
+  if ((!s.videos || !s.videos.length) && !s.searchq) warn(`${at} no videos and no searchq — the video modal has nothing to offer`);
+  else if (!s.videos || !s.videos.length) warn(`${at} no hand-picked videos — the modal falls back to the searchq`);
   if (!s.searchq) warn(`${at} no searchq`);
   if (!s.keys) warn(`${at} no keys — the coach prompt cannot find this situation`);
   if (!s.next) warn(`${at} no next — this situation dead-ends with no next-bar`);
+}
+
+/* ---- the rendered PATH, not just the keyframes ----
+   A play is watched as continuous motion, so a violation can live entirely between
+   two legal keyframes. This samples the interpolated path the way the app draws it.
+   That is how offside/onside shipped with the winger crossing the line at 22% of a
+   segment while the puck crossed at 69% - legal at every keyframe, wrong on screen. */
+const BLUE = 125;
+const seriesOf = (v, side, id) => { const o = []; for (const f of v.frames) if (f[side] && f[side][id]) o.push({ t: f.t, p: f[side][id] }); return o; };
+const sampleAt = (ser, t) => {
+  if (!ser.length) return null;
+  if (t <= ser[0].t) return ser[0].p;
+  if (t >= ser[ser.length - 1].t) return ser[ser.length - 1].p;
+  for (let i = 1; i < ser.length; i++) if (t <= ser[i].t) {
+    const a = ser[i - 1], b = ser[i], k = (t - a.t) / (b.t - a.t);
+    return [a.p[0] + (b.p[0] - a.p[0]) * k, a.p[1] + (b.p[1] - a.p[1]) * k];
+  }
+  return ser[ser.length - 1].p;
+};
+const STEPS = 400;
+for (const s of SITUATIONS) {
+  for (const v of s.variants) {
+    if (!Array.isArray(v.frames) || v.frames.length < 2) continue;
+    const ps = v.frames.filter((f) => f.puck).map((f) => ({ t: f.t, p: f.puck }));
+    if (!ps.length) continue;
+    let puckIn = null;
+    for (let k = 0; k <= STEPS; k++) { const t = k / STEPS; if (sampleAt(ps, t)[0] >= BLUE) { puckIn = t; break; } }
+    for (const id of (s.roster || [])) {
+      if (id === 'G') continue;
+      const ser = seriesOf(v, 'us', id);
+      if (!ser.length) continue;
+      let first = null;
+      for (let k = 0; k <= STEPS; k++) { const t = k / STEPS; if (sampleAt(ser, t)[0] > BLUE) { first = t; break; } }
+      if (first === null) continue;
+      const msg = puckIn === null
+        ? `[${s.id}/${v.id}] ${id} skates into their zone but the puck never gets in — offside on screen`
+        : `[${s.id}/${v.id}] ${id} crosses their blue line at t=${first.toFixed(3)} but the puck does not until t=${puckIn.toFixed(3)} — offside for ${((puckIn - first) * 100).toFixed(0)}% of the play`;
+      if (puckIn === null || first < puckIn - 0.002) { if (v.wrong) warn(msg + ' (wrong:true, presumably the point)'); else err(msg); }
+    }
+    /* two players of the SAME team must not occupy the same patch of ice */
+    const cur = {};
+    v.frames.forEach((f, i) => {
+      for (const side of ['us', 'them']) for (const id of Object.keys(f[side] || {})) cur[id] = { p: f[side][id], side };
+      const ids = Object.keys(cur);
+      for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) {
+        const A = cur[ids[a]], B = cur[ids[b]];
+        const d = Math.hypot(A.p[0] - B.p[0], A.p[1] - B.p[1]);
+        if (d < 1) err(`[${s.id}/${v.id}] frame ${i}: ${ids[a]} and ${ids[b]} are ${d.toFixed(1)} ft apart — drawn on top of each other`);
+        else if (d < 4 && A.side === B.side) warn(`[${s.id}/${v.id}] frame ${i}: teammates ${ids[a]} and ${ids[b]} are only ${d.toFixed(1)} ft apart`);
+      }
+    });
+    /* goalies belong in front of their own net */
+    const g = {};
+    v.frames.forEach((f, i) => {
+      for (const side of ['us', 'them']) for (const id of Object.keys(f[side] || {})) if (id === 'G' || id === 'XG') g[id] = f[side][id];
+      if (g.XG && g.XG[0] < 150) err(`[${s.id}/${v.id}] frame ${i}: their goalie is at x=${g.XG[0]}, nowhere near their net`);
+      if (g.G && g.G[0] > 50) err(`[${s.id}/${v.id}] frame ${i}: our goalie is at x=${g.G[0]}, nowhere near our net`);
+    });
+  }
 }
 
 /* ---- next-step targets must exist ---- */
