@@ -8,11 +8,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hockey IQ">
+<meta name="apple-mobile-web-app-title" content="Above The Puck">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<title>Hockey IQ Rink</title>
+<title>Above The Puck</title>
 <script>
 /* Anything that breaks before the app boots gets shown on screen, because you
    cannot open a console on a phone. */
@@ -69,7 +69,10 @@ select,input{touch-action:manipulation}
 .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:5px}
 .brandmark{flex:0 0 auto;width:46px;height:46px;border-radius:11px;
   border:1px solid rgba(255,255,255,.12);box-shadow:0 3px 12px rgba(0,0,0,.4)}
-.menuwrap h1{font-size:30px;margin:0}
+.menuwrap h1{font-size:30px;margin:0;display:flex;flex-direction:column;align-items:flex-start;
+  line-height:1;letter-spacing:.055em}
+.menuwrap h1 .wm2{font-size:.47em;font-weight:600;letter-spacing:.3em;text-indent:.3em;
+  color:var(--us2);margin-top:4px}
 @media (max-width:430px){ .brandmark{width:38px;height:38px} .menuwrap h1{font-size:25px} }
 .lede{color:var(--dim);font-size:15px;margin:0 0 22px}
 .agebar{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;align-items:center;margin:0 0 18px}
@@ -545,7 +548,7 @@ input[type=range]{accent-color:var(--us2)}
 <!-- =============== MENU =============== -->
 <section id="sc-menu" class="screen on">
   <div class="menuwrap">
-    <div class="brand"><img class="brandmark" src="icons/icon-192.png" alt="" width="46" height="46"><h1>Hockey IQ Rink</h1></div>
+    <div class="brand"><img class="brandmark" src="icons/icon-192.png" alt="" width="46" height="46"><h1><span class="wm1">ABOVE</span><span class="wm2">THE PUCK</span></h1></div>
     <p class="lede">Everything on the ice is one of three things. Pick what is happening.</p>
     <div class="agebar" id="agebar"></div>
     <div class="menucols" id="menucols"></div>
@@ -779,7 +782,7 @@ input[type=range]{accent-color:var(--us2)}
 <script src="situations.js"></script>
 <script>
 /* ============================================================
-   HOCKEY IQ RINK - situation data
+   ABOVE THE PUCK - situation data
    Coordinates are in FEET on a 200 x 85 NHL rink.
    x=0 is our end boards, x=200 is their end boards.
    WE ALWAYS DEFEND THE LEFT AND ATTACK TO THE RIGHT.
@@ -1127,7 +1130,7 @@ const FORMKEYS={
 </script>
 <script>
 /* ============================================================
-   HOCKEY IQ RINK - core engine
+   ABOVE THE PUCK - core engine
    ============================================================ */
 const SVGNS='http://www.w3.org/2000/svg';
 const OURPOS=['C','LW','RW','LD','RD'];
@@ -1156,7 +1159,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.54';
+const BUILD='2026-08-22.55';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for

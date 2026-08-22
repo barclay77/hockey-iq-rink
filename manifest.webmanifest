@@ -1,6 +1,6 @@
 {
-  "name": "Hockey IQ Rink",
-  "short_name": "Hockey IQ",
+  "name": "Above The Puck",
+  "short_name": "Above Puck",
   "description": "Learn hockey situations, positions and spacing - defense, transition and offense - on an interactive rink.",
   "id": "/hockey-iq-rink/",
   "start_url": ".",

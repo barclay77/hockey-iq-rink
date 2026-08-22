@@ -13,7 +13,7 @@
    menu reachability (the offsides bug as a test) and every cue present in
    audio/lines.json. */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -371,6 +371,12 @@ if (WRITE_ORDER) {
   console.log(`audio/to-render.json rewritten: ${ids.length} line(s), ${chars.toLocaleString()} chars`);
   console.log(`  lines.json ${Object.keys(lines).length} · already rendered ${have.size}`);
   if (!ids.length) console.log('  nothing to render — the file is now {}');
+  const orphans = [...have].filter((id) => !(id in lines));
+  if (orphans.length) {
+    console.log(`\n  ${orphans.length} rendered clip(s) no longer spoken anywhere — safe to delete:`);
+    for (const id of orphans) console.log(`    audio/${id}.mp3`);
+    console.log('  (then drop them from manifest.json)');
+  }
   process.exit(0);
 }
 const order = readJson('audio/to-render.json');
@@ -385,10 +391,24 @@ if (order && lines) {
     const genuine = ids.length - stale.length;
     const chars = ids.filter((id) => !have.has(id)).reduce((n, id) => n + order[id].length, 0);
     console.log(`audio: ${Object.keys(lines).length} lines, ${have.size} rendered, ${genuine} to render (${chars.toLocaleString()} chars)`);
+    const orphans = [...have].filter((id) => !(id in lines));
+    if (orphans.length) warn(`${orphans.length} rendered clip(s) are no longer spoken anywhere and can be deleted: ${orphans.slice(0, 6).map((id) => id + '.mp3').join(', ')}${orphans.length > 6 ? `, … (--to-render lists all ${orphans.length})` : ''}`);
   } else if (ids.length) {
     warn(`audio/manifest.json not found — cannot tell how much of the ${ids.length}-line work order is already rendered`);
   }
 }
+
+/* ---- the export is complete ----
+   Zip 5 shipped without this validator or the schema doc, because the export was
+   assembled from a hand-written file list instead of the app/ folder itself. A
+   missing validator means the deploy gate silently does not run, so assert the
+   whole shipping set is present beside us. */
+const REQUIRED = ['index.html', 'situations.js', 'sw.js', 'manifest.webmanifest',
+  'situations.SCHEMA.md', 'audio/lines.json', 'audio/README.md',
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png',
+  'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
+const absent = REQUIRED.filter((f) => !existsSync(join(here, f)));
+if (absent.length) err(`incomplete export — missing beside validate-situations.mjs: ${absent.join(', ')}`);
 
 /* ---- report ---- */
 const frames = SITUATIONS.reduce((n, s) => n + s.variants.reduce((m, v) => m + v.frames.length, 0), 0);
