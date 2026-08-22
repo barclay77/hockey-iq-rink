@@ -1,18 +1,38 @@
 #!/usr/bin/env node
 /* Validate situations.js. Plain node, no deps.
      node validate-situations.mjs            # from the app/ directory
+     node validate-situations.mjs --to-render  # rewrite audio/to-render.json from scratch
    Exits 0 clean, 1 on any error. Warnings never fail the build.
+
+   --to-render recomputes the render work order as lines.json MINUS audio/manifest.json
+   (the clips that actually exist), so it can never accumulate. Run it before every
+   render pass; the plain run warns when the committed order has gone stale.
 
    Checks: schema conformance, unique ids, legal age bands, coordinates inside the
    rink, frame timing, puck ownership, implausible skating distance between frames,
    menu reachability (the offsides bug as a test) and every cue present in
    audio/lines.json. */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const WRITE_ORDER = process.argv.includes('--to-render');
+
+/* ---- the render work order -------------------------------------------
+   manifest.json is written by the render pipeline and lists every clip that
+   exists. It is the only truthful record of what has been rendered; to-render
+   is a derived file and must be recomputed, never appended to. */
+const readJson = (rel) => { try { return JSON.parse(readFileSync(join(here, rel), 'utf8')); } catch { return null; } };
+const renderedIds = () => {
+  const m = readJson('audio/manifest.json');
+  if (!m) return null;
+  /* the pipeline has written this as {id: file}, {id: {file,…}} and [ids] over time */
+  if (Array.isArray(m)) return new Set(m.map((x) => (typeof x === 'string' ? x : x && x.id)).filter(Boolean));
+  if (m.lines && typeof m.lines === 'object') return new Set(Object.keys(m.lines));
+  return new Set(Object.keys(m));
+};
 const errors = [];
 const warnings = [];
 const err = (m) => errors.push(m);
@@ -335,6 +355,38 @@ if (lines) {
     err(`${missing.length} spoken line(s) have no entry in audio/lines.json — these will fall back to robot voice:`);
     for (const m of missing.slice(0, 25)) err('    ' + m);
     if (missing.length > 25) err(`    …and ${missing.length - 25} more`);
+  }
+}
+
+/* ---- render work order: derive it, or check the committed one is not stale ---- */
+const have = renderedIds();
+if (WRITE_ORDER) {
+  if (!lines) { console.error('FATAL: audio/lines.json unreadable — cannot build a work order'); process.exit(1); }
+  if (!have) { console.error('FATAL: audio/manifest.json unreadable — run this beside a real render output, or every line would look new'); process.exit(1); }
+  const order = {};
+  for (const id of Object.keys(lines)) if (!have.has(id)) order[id] = lines[id];
+  const ids = Object.keys(order);
+  const chars = ids.reduce((n, id) => n + order[id].length, 0);
+  writeFileSync(join(here, 'audio', 'to-render.json'), JSON.stringify(order, null, 2) + '\n');
+  console.log(`audio/to-render.json rewritten: ${ids.length} line(s), ${chars.toLocaleString()} chars`);
+  console.log(`  lines.json ${Object.keys(lines).length} · already rendered ${have.size}`);
+  if (!ids.length) console.log('  nothing to render — the file is now {}');
+  process.exit(0);
+}
+const order = readJson('audio/to-render.json');
+if (order && lines) {
+  const ids = Object.keys(order);
+  const dead = ids.filter((id) => !(id in lines));
+  if (dead.length) err(`audio/to-render.json orders ${dead.length} line(s) that are not in lines.json (${dead.slice(0, 3).join(', ')}${dead.length > 3 ? ', …' : ''}) — dead work order`);
+  for (const id of ids) if (lines[id] !== order[id]) err(`audio/to-render.json text for ${id} does not match lines.json — the clip would be rendered from the wrong text`);
+  if (have) {
+    const stale = ids.filter((id) => have.has(id));
+    if (stale.length) warn(`audio/to-render.json lists ${stale.length} of ${ids.length} line(s) that are already rendered — the cost estimate is inflated. Fix: node validate-situations.mjs --to-render`);
+    const genuine = ids.length - stale.length;
+    const chars = ids.filter((id) => !have.has(id)).reduce((n, id) => n + order[id].length, 0);
+    console.log(`audio: ${Object.keys(lines).length} lines, ${have.size} rendered, ${genuine} to render (${chars.toLocaleString()} chars)`);
+  } else if (ids.length) {
+    warn(`audio/manifest.json not found — cannot tell how much of the ${ids.length}-line work order is already rendered`);
   }
 }
 

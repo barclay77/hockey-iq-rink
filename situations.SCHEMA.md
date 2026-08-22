@@ -23,7 +23,7 @@ Feet, on a **200 × 85** NHL sheet.
 | `x = 200` | their end boards |
 | `y = 0` | top boards |
 | `y = 85` | bottom boards |
-| `y = 42.5` | centre ice |
+| `y = 42.5` | center ice |
 
 **We always defend the left and attack to the right.** A situation never flips this;
 the app's "Flip sides of the ice" setting mirrors `y` at display time only, so authored
@@ -46,7 +46,7 @@ instead of a guessed number. Mirrored pairs read `[ourEnd, theirEnd]`.
 ```js
 RINK.goalLine      // [11, 189]
 RINK.blueLine      // [75, 125]
-RINK.centreLine    // 100
+RINK.centerLine    // 100
 RINK.endDots       // [[31,20.5],[31,64.5],[169,20.5],[169,64.5]]
 RINK.neutralDots   // [[80,20.5],[80,64.5],[120,20.5],[120,64.5]]
 RINK.netMouth      // [[11,42.5],[189,42.5]]
@@ -57,7 +57,7 @@ RINK.middleLaneY   // [30,55]
 RINK.boardsLaneY   // [[0,22],[63,85]]
 ```
 
-Also: `length`, `width`, `centreY`, `cornerRadius`, `centreDot`, `centreCircleR`,
+Also: `length`, `width`, `centerY`, `cornerRadius`, `centerDot`, `centerCircleR`,
 `faceoffCircleR`, `hashOffsetX`, `hashInnerY`, `hashOuterY`, `creaseDepth`,
 `creaseHalfHeight`, `topBoards`, `bottomBoards`, `attackDirection`.
 

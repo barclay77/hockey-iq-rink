@@ -429,7 +429,7 @@ input[type=range]{accent-color:var(--us2)}
   .mchev{display:block;flex:0 0 auto;font-size:15px;line-height:1;color:var(--dim);transition:transform .18s}
   .mcol.open .mchev{transform:rotate(180deg)}
   .mrow{display:none;gap:10px;padding:0 14px 14px}
-  /* one phone-width column, centred: the cards are phone furniture, and letting them
+  /* one phone-width column, centered: the cards are phone furniture, and letting them
      run 850px wide is what left the rink thumbnails swimming in white */
   .menuwrap{max-width:500px}
   .mcol.open .mrow{display:flex}
@@ -657,7 +657,7 @@ input[type=range]{accent-color:var(--us2)}
       <span><b>The puck just changed hands.</b> The fastest part of hockey. Move it up the ice before they get set.</span></div>
     <div class="phrow"><span class="pchip" style="background:#3e6fd0">OFFENSE</span>
       <span><b>We have the puck.</b> Keep it and score. Being in the right spot matters more than being fast.</span></div>
-    <div class="help">The coloured word at the top of the screen always tells you which one you are in, and it changes by itself as the play moves - because that is what happens in a real game. When it changes, the <b>Next</b> bar under the rink offers you the situation that comes after it.</div>
+    <div class="help">The colored word at the top of the screen always tells you which one you are in, and it changes by itself as the play moves - because that is what happens in a real game. When it changes, the <b>Next</b> bar under the rink offers you the situation that comes after it.</div>
 
     <h4>2. What the circles mean</h4>
     <div class="keygrid">
@@ -666,8 +666,8 @@ input[type=range]{accent-color:var(--us2)}
       <div class="keyrow"><span class="sw them">3</span><span><b>Red = the other team.</b> The numbers 1 to 5 are only name tags so you can tell them apart. They are <i>not</i> positions.</span></div>
       <div class="keyrow"><span class="sw puck"></span><span><b>Black dot = the puck.</b> Sitting on a player means that player has it.</span></div>
       <div class="keyrow"><span class="sw dot"></span><span><b>Tiny red dots and thin red circles = paint on the ice.</b> Faceoff dots and faceoff circles. Not players.</span></div>
-      <div class="keyrow"><span class="sw ghost"></span><span><b>Dashed grey circle = where you should be.</b> It shows up when you drag somebody.</span></div>
-      <div class="keyrow"><span class="sw vis"></span><span><b>Grey beam = your vision.</b> Where your eyes go. The brightest, widest beam is what you look at first. Turn it off in Settings.</span></div>
+      <div class="keyrow"><span class="sw ghost"></span><span><b>Dashed gray circle = where you should be.</b> It shows up when you drag somebody.</span></div>
+      <div class="keyrow"><span class="sw vis"></span><span><b>Gray beam = your vision.</b> Where your eyes go. The brightest, widest beam is what you look at first. Turn it off in Settings.</span></div>
       <div class="keyrow"><span class="sw gap"></span><span><b>Thin dashed line = feet to your closest teammate.</b> Too close means you are stacked up.</span></div>
     </div>
     <div class="help" style="margin-top:9px">The red players have a small word under them - <i>net front</i>, <i>slot</i>, <i>their D</i> - so you always know who is who.</div>
@@ -1011,7 +1011,7 @@ const GENERICPOS=[['LD',['defence','defense','defenceman','defenseman','d man','
    ============================================================ */
 const FORMATIONS=[
  {id:'blank', name:'Blank sheet', phase:'T', focus:[-6,-6,212,97],
-  say:'Five skaters and a goalie at centre. Drag everybody where you want them.',
+  say:'Five skaters and a goalie at center. Drag everybody where you want them.',
   us:{G:[13.5,42.5],LD:[80,32],RD:[80,53],C:[100,42.5],LW:[100,20],RW:[100,65]},
   them:{XG:[187,42.5],X1:[122,42.5],X2:[122,20],X3:[122,65],X4:[142,32],X5:[142,53]},
   puck:[100,42.5,'C']},
@@ -1065,7 +1065,7 @@ const FORMATIONS=[
   puck:[128,42.5,'X1']},
 
  {id:'bo', name:'Strong side breakout', phase:'T', focus:[-5,-5,116,95],
-  say:'Wing on the wall, centre through the middle, far wing stretching.',
+  say:'Wing on the wall, center through the middle, far wing stretching.',
   us:{G:[13.5,42.5],LD:[9,36],RD:[11,52],LW:[30,7],C:[24,40],RW:[46,74]},
   them:{X1:[20,30],X2:[33,18],X3:[43,42],X4:[70,28],X5:[70,56]},
   puck:[9,36.5,'LD']},
@@ -1099,8 +1099,8 @@ const FORMATIONS=[
   them:{XG:[187,42.5],X1:[170.5,20.5],X2:[161,12],X3:[162,30],X4:[180,14],X5:[180,34]},
   puck:[169,20.5,null]},
 
- {id:'foc', name:'Centre ice faceoff', phase:'T', focus:[52,-5,96,95],
-  say:'Centre ice draw. Wings on the wall, D behind.',
+ {id:'foc', name:'Center ice faceoff', phase:'T', focus:[52,-5,96,95],
+  say:'Center ice draw. Wings on the wall, D behind.',
   us:{G:[13.5,42.5],C:[98.5,42.5],LW:[92,22],RW:[92,63],LD:[80,34],RD:[80,52]},
   them:{X1:[101.5,42.5],X2:[108,22],X3:[108,63],X4:[120,34],X5:[120,52]},
   puck:[100,42.5,null]}
@@ -1156,7 +1156,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-21.52';
+const BUILD='2026-08-21.54';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1268,10 +1268,25 @@ const FS=n=>+(n*S.fs*ZF()).toFixed(2);
 const TR=()=>+(2.45*Math.min(1.18,S.fs)*ZF()).toFixed(2);
 /* on a phone the long role words collide, so use short ones */
 const SHORTROLE={'in the corner':'corner','net front':'net','in the slot':'slot','on the wall':'wall',
-  'their centre':'their C','back-checker':'checker','carrying it':'has puck','their wing':'their W',
+  'their center':'their C','back-checker':'checker','carrying it':'has puck','their wing':'their W',
   'their F1':'F1','their F2':'F2','their F3':'F3','half wall':'wall','bumper':'bumper','killer':'PK',
-  'goalie':'G','their D':'their D','point':'point'};
-const roleText=r=>(S.fs>1.15&&SHORTROLE[r])?SHORTROLE[r]:r;
+  'goalie':'G','their D':'their D','point':'point',
+  'their D with it':'their D','their other D':'their D','their support':'support',
+  'watching you':'on you','on the puck':'on puck','the lone D':'lone D'};
+/* SHORTROLE is hand-kept, so a new situation's labels rendered full length on a phone
+   until somebody remembered to register them. Fall back to a rule, not a lookup:
+   strip the filler and keep the words that carry the meaning. */
+function shortRole(r){
+  if(SHORTROLE[r]) return SHORTROLE[r];
+  if(r.length<=8) return r;
+  let t=String(r).replace(/^(?:in|on|at) the /,'').replace(/^the /,'')
+        .replace(/ with it$/,'').replace(/\bother /,'').trim();
+  if(t.length>8&&/^their /.test(t)) t='their '+t.slice(6).split(' ')[0];
+  if(t.length>9) t=t.split(' ').slice(-2).join(' ');
+  if(t.length>10) t=t.split(' ').pop();
+  return t.length&&t.length<r.length?t:r;
+}
+const roleText=r=>S.fs>1.15?shortRole(r):r;
 
 /* ---------------- interpolation ---------------- */
 const ease=k=>k*k*(3-2*k);
@@ -1341,7 +1356,7 @@ function eff(k){
   return S.opt[k];
 }
 
-/* ---- camera: keep the play big and centred, and let him pull back when he wants the
+/* ---- camera: keep the play big and centered, and let him pull back when he wants the
    whole picture. The box is worked out per keyframe and slid between them, so the ice
    pans smoothly instead of jumping every time somebody crosses a distance threshold. ---- */
 function frameBox(fi){
@@ -1846,7 +1861,7 @@ function roleSpot(p,pts){
 }
 function token(id,p,kind,label,role,pts,mute){
   const g=el('g',{class:'tok','data-id':id,style:'cursor:grab'});
-  /* primary colours for the men in the play, subdued for the ones who are only options */
+  /* primary colors for the men in the play, subdued for the ones who are only options */
   const fill=kind==='them'?(mute?'#e0a7ad':'#bf1e2e'):(kind==='me'?'#ffc629':(mute?'#9ca6c8':'#1b2a6b'));
   const r=TR();
   // an invisible pad so a fingertip can grab it even though the dot is small
@@ -3339,7 +3354,7 @@ const EXAMPLES=[
   '1-2-2 forecheck, he is F1',
   'd-zone coverage with the puck behind our net',
   'breakout under pressure, d to d',
-  'zone entry with a delay, he is the centre',
+  'zone entry with a delay, he is the center',
   'penalty kill box',
   'build me a 1-3-1 power play',
   'set up a 2 on 1 rush',

@@ -11,7 +11,7 @@
 
    Coordinates are FEET on a 200 x 85 sheet. x=0 is our end boards, x=200 is
    theirs; we always defend the left and attack to the right. y=0 is the top
-   boards, y=85 the bottom, y=42.5 centre ice.
+   boards, y=85 the bottom, y=42.5 center ice.
 
    WARNING: a cue string determines its own audio id. Rewording a cue orphans
    its recorded mp3 and drops that line to robot voice until it is re-rendered.
@@ -22,13 +22,13 @@
    these rather than typing coordinates. Mirrored pairs are [ourEnd, theirEnd].
    ============================================================ */
 const RINK = {
-  length:200, width:85, centreY:42.5,
+  length:200, width:85, centerY:42.5,
   cornerRadius:28,
   goalLine:[11,189],
   blueLine:[75,125],
-  centreLine:100,
-  centreDot:[100,42.5],
-  centreCircleR:15,
+  centerLine:100,
+  centerDot:[100,42.5],
+  centerCircleR:15,
   faceoffCircleR:15,
   /* the four end-zone dots, and the two neutral-zone dots per side */
   endDots:[[31,20.5],[31,64.5],[169,20.5],[169,64.5]],
@@ -52,7 +52,7 @@ const SITUATIONS = [
   id:'dzone',
   name:'Defensive zone coverage',
   group:'D',
-  ages:['10U','12U','14U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'They have it in our end. Five jobs, and nobody chases.',
   focus:[-5,-5,110,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -397,7 +397,7 @@ const SITUATIONS = [
   },
   tests:[
     {
-      q:'They have the puck in the corner and your D is going to pressure him. You are the centre. What do you do?',
+      q:'They have the puck in the corner and your D is going to pressure him. You are the center. What do you do?',
       o:[
         'Go help your D in the corner - two on one',
         'Stay just off your D and cover the next man in the middle',
@@ -434,7 +434,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:0,
-      ask:'They just got the puck in the corner. Drag YOU to where the centre belongs right now.'
+      ask:'They just got the puck in the corner. Drag YOU to where the center belongs right now.'
     },
     {
       pos:'RD',
@@ -521,7 +521,7 @@ const SITUATIONS = [
   id:'forecheck',
   name:'Forecheck',
   group:'D',
-  ages:['10U','12U','14U','16U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'They have it in their end. We go get it back.',
   focus:[100,-5,107,95],
   roster:['C','LW','RW','LD','RD'],
@@ -846,7 +846,7 @@ const SITUATIONS = [
     X2:'their D',
     X3:'their wing',
     X4:'their wing',
-    X5:'their centre',
+    X5:'their center',
     XG:'goalie'
   },
   tests:[
@@ -965,7 +965,7 @@ const SITUATIONS = [
   id:'rush',
   name:'Defending the rush',
   phase:'D',
-  ages:['12U','14U','16U','18U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'They are carrying it at us. Squeeze them at the line.',
   focus:[46,-5,112,95],
   roster:['C','LW','RW','LD','RD'],
@@ -1095,7 +1095,7 @@ const SITUATIONS = [
       ],
       do:[
         'Match your winger stride for stride and stay above him.',
-        'Do not cross into the middle - that is your centre’s lane.',
+        'Do not cross into the middle - that is your center’s lane.',
         'Stick in the passing lane, body between him and our net.',
         'The second we win it, sprint wide. Odd-man rushes start here.'
       ],
@@ -1210,7 +1210,7 @@ const SITUATIONS = [
       why:'A short, even gap gives him nowhere to go. Backing all the way in hands them the whole zone for free.'
     },
     {
-      q:'You are the centre coming back through the neutral zone. Where do you skate?',
+      q:'You are the center coming back through the neutral zone. Where do you skate?',
       o:[
         'To the boards to help your winger',
         'Straight to the front of our net',
@@ -1225,7 +1225,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:1,
-      ask:'They are coming at us. Put the centre where he belongs on the way back.'
+      ask:'They are coming at us. Put the center where he belongs on the way back.'
     },
     {
       pos:'LD',
@@ -1575,7 +1575,7 @@ const SITUATIONS = [
   id:'breakout',
   name:'Breakout',
   group:'T',
-  ages:['10U','12U','14U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'We just won it. Now get out of our own end.',
   focus:[-5,-5,116,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -1879,7 +1879,7 @@ const SITUATIONS = [
   },
   tests:[
     {
-      q:'Your D has the puck behind our net. You are the centre. Where do you go?',
+      q:'Your D has the puck behind our net. You are the center. Where do you go?',
       o:[
         'Stand at the blue line and wait for a long pass',
         'Swing low, then come back through the middle with your feet moving',
@@ -1921,7 +1921,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:1,
-      ask:'Put the centre in his breakout support spot.'
+      ask:'Put the center in his breakout support spot.'
     }
   ],
   videos:[
@@ -1933,7 +1933,7 @@ const SITUATIONS = [
     },
     {
       id:'91349oj2Q6U',
-      t:'Breakout Options: D-to-D, Strong-Side Winger, Centre Pass',
+      t:'Breakout Options: D-to-D, Strong-Side Winger, Center Pass',
       c:'Coach K',
       w:'The three options animated above, explained on video.'
     },
@@ -2213,12 +2213,12 @@ const SITUATIONS = [
         'Try to beat all five of them yourself'
       ],
       a:1,
-      why:'A regroup turns a dead play into a fresh rush. Wings wide, centre in the middle, and come again.'
+      why:'A regroup turns a dead play into a fresh rush. Wings wide, center in the middle, and come again.'
     },
     {
       q:'On a regroup, where do the wings go?',
       o:[
-        'Into the middle next to the centre',
+        'Into the middle next to the center',
         'Wide, almost on the boards',
         'Back to help the D',
         'To the front of their net'
@@ -2236,7 +2236,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:2,
-      ask:'Put the centre in his lane on the regroup.'
+      ask:'Put the center in his lane on the regroup.'
     }
   ],
   videos:[
@@ -2278,7 +2278,7 @@ const SITUATIONS = [
   id:'offside',
   name:'Staying onside',
   group:'T',
-  ages:['8U','10U','12U'],
+  ages:['8U','10U','12U','14U','16U','18U'],
   about:'The puck goes in first, then you do.',
   focus:[80,-5,122,95],
   roster:['C','LW','RW','LD','RD'],
@@ -2456,7 +2456,7 @@ const SITUATIONS = [
         'Let the puck cross before you do.',
         'If the play gets stopped, get back out and start again.'
       ],
-      mistake:'Cutting to the middle early, so you are both offside and in your centre\'s way.'
+      mistake:'Cutting to the middle early, so you are both offside and in your center\'s way.'
     },
     LD:{
       job:'Follow the rush up, but stay behind it.',
@@ -2566,7 +2566,7 @@ const SITUATIONS = [
       pos:'C',
       fr:2,
       v:'onside',
-      ask:'You have the puck at the line. Put the centre where he takes it in.'
+      ask:'You have the puck at the line. Put the center where he takes it in.'
     }
   ],
   keys:{
@@ -2614,7 +2614,7 @@ const SITUATIONS = [
   id:'entry',
   name:'Zone entry',
   group:'T',
-  ages:['12U','14U','16U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'Crossing their blue line with the puck.',
   focus:[80,-5,122,95],
   roster:['C','LW','RW','LD','RD'],
@@ -2904,7 +2904,7 @@ const SITUATIONS = [
       why:'Two seconds of patience buys you your whole team. Skating into traffic alone is a turnover and a rush against.'
     },
     {
-      q:'Your winger is carrying it wide into the zone. You are the centre. When should you arrive in the middle?',
+      q:'Your winger is carrying it wide into the zone. You are the center. When should you arrive in the middle?',
       o:[
         'First, so you are ready',
         'At the exact same time',
@@ -2930,7 +2930,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:2,
-      ask:'Your winger is wide with the puck. Where is the centre as the trailer?'
+      ask:'Your winger is wide with the puck. Where is the center as the trailer?'
     },
     {
       pos:'RW',
@@ -2993,7 +2993,7 @@ const SITUATIONS = [
   id:'faceoff',
   name:'Faceoffs',
   group:'T',
-  ages:['8U','10U','12U'],
+  ages:['8U','10U','12U','14U','16U','18U'],
   about:'The puck belongs to nobody yet.',
   focus:[-5,-5,96,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -3254,7 +3254,7 @@ const SITUATIONS = [
     }
   },
   roles:{
-    X1:'their centre',
+    X1:'their center',
     X2:'their wing',
     X3:'their wing',
     X4:'their D',
@@ -3289,7 +3289,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:0,
-      ask:'Set up for the draw. Where is the centre?'
+      ask:'Set up for the draw. Where is the center?'
     },
     {
       pos:'RD',
@@ -3347,7 +3347,7 @@ const SITUATIONS = [
   id:'ozone',
   name:'Offensive zone play',
   group:'O',
-  ages:['10U','12U','14U'],
+  ages:['10U','12U','14U','16U','18U'],
   about:'We have it in their end. Keep it and score.',
   focus:[117,-5,90,95],
   roster:['C','LW','RW','LD','RD'],
@@ -3638,7 +3638,7 @@ const SITUATIONS = [
     },
     {
       q:'At your age, where do almost all the goals get scored from?',
-      o:['The blue line','Inside five feet of the net','The corner','Centre ice'],
+      o:['The blue line','Inside five feet of the net','The corner','Center ice'],
       a:1,
       why:'That is exactly why the net drive matters. Stop at the net, stick on the ice, be ready for something ugly.'
     }
@@ -3647,7 +3647,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:3,
-      ask:'The puck just went up to your D at the point. Where should the centre be?'
+      ask:'The puck just went up to your D at the point. Where should the center be?'
     },
     {
       pos:'RW',
@@ -4011,7 +4011,7 @@ const SITUATIONS = [
 /* ---- Support the puck (T, order 5) ---- */
 {
   id:'support', name:'Support the puck', group:'T', phase:'T', order:5,
-  ages:['8U','10U','12U'],
+  ages:['8U','10U','12U','14U'],
   about:'Three of you, one puck. Nobody else chases it.',
   focus:[100,-5,105,95],
   roster:['C','LW','RW'],
@@ -4112,7 +4112,7 @@ const SITUATIONS = [
 /* ---- Go to the net (O, order 7) ---- */
 {
   id:'netfront', name:'Go to the net', group:'O', phase:'O', order:7,
-  ages:['8U','10U','12U'],
+  ages:['8U','10U','12U','14U','16U','18U'],
   about:'Somebody has to be there. Most goals are ugly.',
   focus:[130,-5,75,95],
   roster:['C','LW','RW'],
@@ -4212,7 +4212,7 @@ const SITUATIONS = [
 /* ---- First one back (D, order 8) ---- */
 {
   id:'firstback', name:'First one back', group:'D', phase:'D', order:8,
-  ages:['8U','10U','12U'],
+  ages:['8U','10U','12U','14U','16U','18U'],
   about:'They got it. Somebody turns around right now.',
   focus:[20,-5,150,95],
   roster:['C','LW','RW'],
@@ -4321,7 +4321,7 @@ const SITUATIONS = [
   roster:['C','LW'],
   variants:[
     { id:'wide', name:'Stay wide, make him choose',
-      note:'Width is what beats one defenceman.',
+      note:'Width is what beats one defenseman.',
       frames:[
         {t:0, cue:'Center has it at their blue line. Left wing is on the other side.',
          us:{C:[126,50], LW:[128,20]},
@@ -4343,7 +4343,7 @@ const SITUATIONS = [
     { id:'narrow', name:'Both drift in - easy for him', wrong:true,
       note:'Two players in one lane is a 1 on 1 with a witness.',
       frames:[
-        {t:0, cue:'Same rush, same lone defenceman.',
+        {t:0, cue:'Same rush, same lone defenseman.',
          us:{C:[126,50], LW:[128,20]},
          them:{X1:[146,38], XG:[186,42.5]},
          puck:[126,50,'C']},
@@ -4361,7 +4361,7 @@ const SITUATIONS = [
   next:{ wide:{sit:'netfront', v:'arrive', label:'Shot is coming. Somebody get to the net.'} },
   coach:{
     C:{ job:'You have the puck. Drive at him and force him to commit.',
-      look:[{n:1, label:'The lone defenceman', to:'X1'},
+      look:[{n:1, label:'The lone defenseman', to:'X1'},
             {n:2, label:'Your winger on the far side', to:'LW'},
             {n:3, label:'The net', to:'theirNet'}],
       do:['Stay wide in your lane. Do not drift toward your winger.',
@@ -4372,7 +4372,7 @@ const SITUATIONS = [
       remember:'Make him choose, then pass.' },
     LW:{ job:'Stay wide and stay ONSIDE. Be ready for the pass across.',
       look:[{n:1, label:'The puck', to:'puck'},
-            {n:2, label:'The lone defenceman', to:'X1'},
+            {n:2, label:'The lone defenseman', to:'X1'},
             {n:3, label:'Your own lane - hold it', to:[168,18]}],
       do:['Hold your width all the way in. Your lane is your job.',
           'Time it so you cross the line after the puck.',
@@ -4387,8 +4387,8 @@ const SITUATIONS = [
      why:'The whole point is making one man cover two. Pass too early and he just covers the receiver.'},
     {q:'You are the far player on a 2 on 1. What is your job?',
      o:['Skate toward the puck to help','Hold your lane and stay wide','Go to the front of the net','Hang back at the line'],a:1,
-     why:'Width is what beats one defenceman. Drift in and you have made it a 1 on 1.'},
-    {q:'The defenceman stays in the middle and never commits. What now?',
+     why:'Width is what beats one defenseman. Drift in and you have made it a 1 on 1.'},
+    {q:'The defenseman stays in the middle and never commits. What now?',
      o:['Force the pass anyway','Shoot low for a rebound','Turn back and regroup','Skate into him'],a:1,
      why:'If he will not choose, take the shot he is giving you and let your winger hunt the rebound.'}
   ],
@@ -4533,7 +4533,7 @@ const SITUATIONS = [
   ages:['14U','16U','18U'],
   about:'Give them the outside, take away the middle, wait for the mistake.',
   focus:[40,-5,120,95],
-  roles:{X1:'their D with it', X2:'their other D', X3:'their centre', X4:'their wing', X5:'their wing', XG:'goalie'},
+  roles:{X1:'their D with it', X2:'their other D', X3:'their center', X4:'their wing', X5:'their wing', XG:'goalie'},
   roster:['C','LW','RW','LD','RD'],
   variants:[
     { id:'122', name:'1-2-2: steer him to the wall',
@@ -4567,7 +4567,7 @@ const SITUATIONS = [
          us:{C:[166,52]},
          them:{X1:[172,44], X3:[140,42]},
          puck:[172,44,'X1']},
-        {t:1, cue:'One pass to their centre and they are through us with speed.',
+        {t:1, cue:'One pass to their center and they are through us with speed.',
          us:{C:[164,50], LW:[120,22], RW:[118,60]},
          them:{X3:[104,42], X1:[168,46]},
          puck:[104,42,'X3']}
@@ -4578,7 +4578,7 @@ const SITUATIONS = [
   coach:{
     C:{ job:'You are the one man in. Take the middle away and steer him to a wall.',
       look:[{n:1, label:'The puck carrier', to:'X1'},
-            {n:2, label:'Their centre in the middle', to:'X3'},
+            {n:2, label:'Their center in the middle', to:'X3'},
             {n:3, label:'The wall you are steering him to', to:[150,62]}],
       do:['Approach on an angle, never straight on. Your body picks the wall for him.',
           'Take the middle pass away with your stick as you come.',
@@ -4587,7 +4587,7 @@ const SITUATIONS = [
       mistake:'Chasing him deep. The middle of the ice opens and one pass beats all five of you.',
       remember:'Angle, steer, never chase.' },
     LW:{ job:'Hold the middle at the line. You are the second layer, not a forechecker.',
-      look:[{n:1, label:'Their centre', to:'X3'},
+      look:[{n:1, label:'Their center', to:'X3'},
             {n:2, label:'The puck', to:'puck'},
             {n:3, label:'The middle lane', to:[120,42]}],
       do:['Stand your ground at the line. Let them come to you.',
@@ -4629,7 +4629,7 @@ const SITUATIONS = [
   },
   tests:[
     {q:'You are the one forward in on a 1-2-2. He has it behind his own net. What do you do?',
-     o:['Chase him behind the net','Angle him toward one wall','Stand at the blue line','Cover their centre'],a:1,
+     o:['Chase him behind the net','Angle him toward one wall','Stand at the blue line','Cover their center'],a:1,
      why:'Your body picks the wall for him. Chasing empties the middle, and one pass beats all five of you.'},
     {q:'You are a winger in the trap and the puck is on the far wall. What is your job?',
      o:['Go help on the puck','Hold the middle passing lane','Go to the net','Backcheck deep'],a:1,
@@ -4650,5 +4650,332 @@ const SITUATIONS = [
                'take the middle','wait for the mistake','layers','second layer'],
     v:{'122':['1-2-2','122','right way','steer','hold the lane'],
        chase:['chase','chased','broken','empty middle','wrong']}}
+},
+
+/* ---- Stay between him and the net (D, order 6) ---- */
+{
+  id:'oneone', name:'Stay between him and the net', group:'D', phase:'D', order:6,
+  ages:['8U','10U','12U','14U','16U','18U'],
+  about:'One on one. You do not need the puck, you need the inside.',
+  focus:[-5,-5,110,95],
+  roster:['G','LD','C'],
+  roles:{X1:'carrying it', X2:'their support', XG:'goalie'},
+  variants:[
+    { id:'inside', name:'Take the inside',
+      note:'Beat him to the middle and he has nowhere good to go.',
+      frames:[
+        {t:0, cue:'He is coming down the wall at you. Do not lunge.',
+         us:{LD:[46,30], C:[58,44], G:[13.5,42.5]}, them:{X1:[62,18], X2:[70,44]},
+         puck:[62,18,'X1']},
+        {t:0.4, cue:'Left D skates backward and stays between him and the net.',
+         us:{LD:[40,26]},
+         them:{X1:[52,16]},
+         puck:[52,16,'X1']},
+        {t:0.7, cue:'Stick on the puck side, body on the inside. He has to keep going wide.',
+         us:{LD:[32,22], C:[44,38]},
+         them:{X1:[40,14]},
+         puck:[40,14,'X1']},
+        {t:1, cue:'He runs out of room behind the net. No shot, no chance.',
+         us:{LD:[24,26]},
+         them:{X1:[22,16]},
+         puck:[22,16,'X1']}
+      ]},
+    { id:'lunge', name:'Lunge at the puck - beaten', wrong:true,
+      note:'Reaching for the puck is how you end up watching.',
+      frames:[
+        {t:0, cue:'Same rush down the same wall.',
+         us:{LD:[46,30], C:[58,44], G:[13.5,42.5]}, them:{X1:[62,18], X2:[70,44]},
+         puck:[62,18,'X1']},
+        {t:0.5, cue:'Left D reaches for the puck and turns his body to do it.',
+         us:{LD:[50,20]},
+         them:{X1:[52,24]},
+         puck:[52,24,'X1']},
+        {t:1, cue:'He steps inside and there is nobody between him and the goalie.',
+         us:{LD:[48,18]},
+         them:{X1:[32,38]},
+         puck:[32,38,'X1']}
+      ]}
+  ],
+  phases:{inside:['D','D','D','D'], lunge:['D','D','D']},
+  next:{ inside:{sit:'breakout', v:'wall', label:'We killed it on the wall. Now break out.'} },
+  coach:{
+    LD:{ job:'Get between him and the net and stay there. That is the whole job.',
+      look:[{n:1, label:'His chest, not the puck', to:'X1'},
+            {n:2, label:'Your own net behind you', to:'ourNet'},
+            {n:3, label:'His support coming late', to:'X2'}],
+      do:['Skate backward. The moment you turn and run you are beaten.',
+          'Watch his chest. The puck lies to you, his body does not.',
+          'Body on the inside, stick on the puck side.',
+          'Push him to the boards and let the wall do your work.'],
+      mistake:'Reaching for the puck. You turn your body to reach, and he goes through the space where you used to be.',
+      remember:'Inside, backward, no lunge.' },
+    G:{ job:'Stay square to him and let your D push him wide.',
+      look:[{n:1, label:'The puck', to:'puck'},
+            {n:2, label:'Your D between you and him', to:'LD'}],
+      do:['Be set before he gets to the circle.',
+          'Play the shooter and trust your D to own the inside.',
+          'Talk - tell him which way you want the man pushed.'],
+      mistake:'Coming way out to challenge when your D already has the inside.',
+      remember:'Set early, stay square.' },
+    C:{ job:'Come back on the inside and take his support away.',
+      look:[{n:1, label:'His support man', to:'X2'},
+            {n:2, label:'The puck', to:'puck'},
+            {n:3, label:'The middle of the ice', to:[50,42]}],
+      do:['Cover the man coming late, not the puck. Your D has the puck.',
+          'Stay on the inside of him so a pass to the middle is dead.',
+          'Be ready for the loose one when your D wins the wall.'],
+      mistake:'Going to the puck as well, so both of you are on one man and his support is wide open.',
+      remember:'Take his help away.' }
+  },
+  tests:[
+    {q:'A player is coming down the wall at you one on one. What do you watch?',
+     o:['The puck','His chest','His skates','The net'],a:1,
+     why:'The puck lies to you, his body does not. Watch his chest and you cannot be fooled.'},
+    {q:'Where do you keep your body?',
+     o:['Between him and the boards','Between him and the net','Right on top of him','Behind him'],a:1,
+     why:'You do not need the puck. If you own the inside, the worst he gets is a bad angle.'},
+    {q:'What is the mistake that gets you beaten every time?',
+     o:['Skating backward','Reaching for the puck','Pushing him wide','Watching his chest'],a:1,
+     why:'You turn your body to reach, and he goes straight through the space where you used to be.'}
+  ],
+  placeq:[
+    {pos:'LD', fr:2, v:'inside', ask:'He is going down the wall. Drag YOU to where the left D belongs.'},
+    {pos:'C', fr:2, v:'inside', ask:'Now put the center where he takes the support man away.'}
+  ],
+  searchq:'youth hockey 1 on 1 defending body position inside',
+  keys:{ base:['one on one','1 on 1','1v1','defending','body position','inside','lunge','reach',
+               'take away the middle','wall','angle him off','backward'],
+    v:{inside:['inside','right way','backward','body position'],
+       lunge:['lunge','reach','reached','beaten','wrong']}}
+},
+
+/* ---- Get open (O, order 9) ---- */
+{
+  id:'getopen', name:'Get open', group:'O', phase:'O', order:9,
+  ages:['8U','10U','12U'],
+  about:'Your teammate has it. Give him somewhere to pass.',
+  focus:[110,-5,95,95],
+  roster:['C','LW','RW'],
+  roles:{X1:'on the puck', X2:'watching you', XG:'goalie'},
+  variants:[
+    { id:'move', name:'Move to open ice',
+      note:'One step away from a stick is the whole trick.',
+      frames:[
+        {t:0, cue:'Center has it. You are covered, so he has nowhere to go.',
+         us:{C:[146,44], LW:[158,26], RW:[156,60]},
+         them:{X1:[152,44], X2:[160,28], XG:[186,42.5]},
+         puck:[146,44,'C']},
+        {t:0.4, cue:'Left wing takes two hard steps away from the stick on him.',
+         us:{LW:[164,16]},
+         them:{X2:[160,26]},
+         puck:[146,44,'C']},
+        {t:0.7, cue:'Now there is a clean lane. Center hits him right away.',
+         us:{C:[150,42]},
+         puck:[164,16,'LW']},
+        {t:1, cue:'One step made a pass out of nothing. That is getting open.',
+         us:{LW:[170,20], RW:[168,56], C:[160,40]},
+         them:{X2:[166,26], X1:[156,42]},
+         puck:[170,20,'LW']}
+      ]},
+    { id:'stand', name:'Stand still - no pass', wrong:true,
+      note:'Waving your stick is not getting open.',
+      frames:[
+        {t:0, cue:'Same puck, same coverage.',
+         us:{C:[146,44], LW:[158,26], RW:[156,60]},
+         them:{X1:[152,44], X2:[160,28], XG:[186,42.5]},
+         puck:[146,44,'C']},
+        {t:0.5, cue:'Left wing stands there and yells for it. The stick is still on him.',
+         us:{LW:[158,25]},
+         them:{X2:[160,27]},
+         puck:[146,44,'C']},
+        {t:1, cue:'Center has to force it, and their man picks it off.',
+         us:{C:[144,42]},
+         them:{X2:[158,26], X1:[150,44]},
+         puck:[158,26,'X2']}
+      ]}
+  ],
+  phases:{move:['O','O','O','O'], stand:['O','O','D']},
+  next:{ move:{sit:'netfront', v:'arrive', label:'You are open with the puck. Now get one to the net.'} },
+  coach:{
+    LW:{ job:'If you are covered, move. Two hard steps is usually enough.',
+      look:[{n:1, label:'The stick that is on you', to:'X2'},
+            {n:2, label:'Your teammate with the puck', to:'C'},
+            {n:3, label:'The open ice near you', to:[164,16]}],
+      do:['Look at his stick, not his body. The stick is what takes the pass away.',
+          'Two hard steps to either side beats standing still every time.',
+          'Move so your teammate can see you, not just so you are free.',
+          'Stick on the ice and blade flat before the pass arrives.'],
+      mistake:'Standing still and yelling. Nobody can pass through a stick, no matter how loud you are.',
+      remember:'Covered means move.' },
+    C:{ job:'Wait the extra beat for someone to get open. Do not force it.',
+      look:[{n:1, label:'The man on you', to:'X1'},
+            {n:2, label:'Your wing on one side', to:'LW'},
+            {n:3, label:'Your wing on the other', to:'RW'}],
+      do:['Protect the puck and count to one.',
+          'Pass when the lane is clean, not when you are panicking.',
+          'A pass into a stick is a turnover with your name on it.',
+          'If nobody moves, put it somewhere safe and reset.'],
+      mistake:'Forcing it into a covered teammate because you ran out of patience.',
+      remember:'Clean lane or no pass.' },
+    RW:{ job:'Do the same thing on your side. Do not both go to the same spot.',
+      look:[{n:1, label:'The puck', to:'puck'},
+            {n:2, label:'Your other winger', to:'LW'},
+            {n:3, label:'The open ice on your side', to:[168,56]}],
+      do:['Watch where your other winger goes and take the other space.',
+          'Move when the puck moves.',
+          'Keep your width so there are two options, not one.'],
+      mistake:'Ending up in the same place as your other winger so there is really only one option.',
+      remember:'Take the other space.' }
+  },
+  tests:[
+    {q:'Your teammate has the puck and a stick is right on you. What do you do?',
+     o:['Yell louder for the pass','Take two hard steps away','Stand still and wait','Skate at the puck'],a:1,
+     why:'Nobody can pass through a stick no matter how loud you are. One step makes a pass out of nothing.'},
+    {q:'What are you actually looking at when you try to get open?',
+     o:['His body','His stick','The goalie','The boards'],a:1,
+     why:'The stick is the thing taking the pass away. Get away from the stick and the lane opens.'},
+    {q:'You have the puck and nobody is open. What is the right play?',
+     o:['Force it to a covered teammate','Wait a beat, then pass a clean lane','Shoot it away','Skate into two players'],a:1,
+     why:'A pass into a stick is a turnover with your name on it. Protect it and count to one.'}
+  ],
+  placeq:[
+    {pos:'LW', fr:1, v:'move', ask:'A stick is on you. Drag YOU to where you get open.'},
+    {pos:'RW', fr:1, v:'move', ask:'Now put the right wing where he takes the other space.'}
+  ],
+  searchq:'youth hockey getting open support passing lanes small area',
+  keys:{ base:['get open','getting open','open ice','support','passing lane','covered','move your feet',
+               'give him a target','stick on you','yelling for it'],
+    v:{move:['move','two steps','right way','open'],
+       stand:['stand','standing','still','yell','wrong']}}
+},
+
+/* ---- Offensive faceoff plays (O, order 95) ---- */
+{
+  id:'ozdraw', name:'Offensive faceoff plays', group:'O', phase:'O', order:95,
+  ages:['10U','12U','14U','16U','18U'],
+  about:'You know where the puck is going before it drops. Nobody else does.',
+  focus:[125,-5,80,95],
+  roles:{X1:'their center', X2:'their wing', X3:'their wing', X4:'their D', X5:'their D', XG:'goalie'},
+  roster:['C','LW','RW','LD','RD'],
+  variants:[
+    { id:'tip', name:'Back to the D, tip it',
+      note:'The set play that scores most at every level.',
+      frames:[
+        {t:0, cue:'Draw in their end on the left dot. Everybody knows the play.',
+         us:{C:[169,18], LW:[176,10], RW:[166,34], LD:[156,20], RD:[158,50]},
+         them:{X1:[171,18], X2:[176,26], X3:[164,10], X4:[172,44], X5:[160,32], XG:[186,42.5]},
+         puck:[170,20.5]},
+        {t:0.35, cue:'Center wins it straight back to the left D. One motion, no stickhandling.',
+         us:{C:[168,22]},
+         them:{X1:[172,20]},
+         puck:[156,20,'LD']},
+        {t:0.7, cue:'Left wing goes hard to the net front. He is the tip, not a spectator.',
+         us:{LW:[178,38], C:[172,26]},
+         them:{X2:[177,30], X4:[176,44]},
+         puck:[156,20,'LD']},
+        {t:1, cue:'Low shot at the net and left wing gets a stick on it. Goalie never saw it.',
+         us:{LD:[158,22]},
+         them:{XG:[184,40]},
+         puck:[180,40]}
+      ]},
+    { id:'wall', name:'Win it to the wall',
+      note:'The counter when they cheat toward the point.',
+      frames:[
+        {t:0, cue:'Same draw. Watch their center this time - he is leaning at your D.',
+         us:{C:[169,18], LW:[176,10], RW:[166,34], LD:[156,20], RD:[158,50]},
+         them:{X1:[171,18], X2:[176,26], X3:[164,10], X4:[172,44], X5:[160,32], XG:[186,42.5]},
+         puck:[170,20.5]},
+        {t:0.35, cue:'So center wins it forward to the wall instead. Left wing is already there.',
+         us:{C:[170,22], LW:[178,8]},
+         them:{X1:[168,22]},
+         puck:[178,8,'LW']},
+        {t:0.7, cue:'Left wing steps into the circle. Their D has to come out to him.',
+         us:{LW:[177,16], RW:[176,36]},
+         them:{X4:[178,26]},
+         puck:[177,16,'LW']},
+        {t:1, cue:'Quick shot from the circle with right wing at the net. Same result, different door.',
+         us:{RW:[180,40]},
+         them:{XG:[184,41]},
+         puck:[181,40]}
+      ]}
+  ],
+  phases:{tip:['O','O','O','O'], wall:['O','O','O','O']},
+  next:{ tip:{sit:'netfront', v:'arrive', label:'Rebound is loose. Somebody get to it.'},
+         wall:{sit:'ozone', v:'cycle', label:'They stopped it but we kept it. Now work it low.'} },
+  coach:{
+    C:{ job:'You decide where it goes before the linesman blows the whistle. Then win it there.',
+      look:[{n:1, label:'Their center - which way is he leaning?', to:'X1'},
+            {n:2, label:'Your D at the point', to:'LD'},
+            {n:3, label:'Your wing on the wall', to:'LW'}],
+      do:['Call the play before you line up. Everybody needs to know.',
+          'Watch his stick and his feet. Whichever way he leans, take the other door.',
+          'One motion. If you have to stickhandle it, you already lost the draw.',
+          'After the win, get to the slot. You are the second chance.'],
+      mistake:'Lining up with no plan and just battling. A draw you win by accident goes nowhere.',
+      remember:'Pick the door before it drops.' },
+    LD:{ job:'You are the shot. Be ready before the puck gets to you.',
+      look:[{n:1, label:'The dot', to:'puck'},
+            {n:2, label:'Your man at the net', to:'LW'},
+            {n:3, label:'The shooting lane', to:'theirNet'}],
+      do:['Feet set and stick back before the drop. The puck arrives fast.',
+          'Low and hard so it can be tipped. Never high on a faceoff play.',
+          'If the lane is blocked, walk one step to the middle and go.',
+          'Miss the net on a set play and you gave them the puck for free.'],
+      mistake:'Catching it flat-footed and having to settle it. That half second is the whole play.',
+      remember:'Set feet, low shot.' },
+    LW:{ job:'You are either the tip at the net or the shooter on the wall. Know which.',
+      look:[{n:1, label:'The center - where is he sending it?', to:'C'},
+            {n:2, label:'The net front', to:[178,38]},
+            {n:3, label:'Their D on your side', to:'X4'}],
+      do:['Go on the drop, not after it. Late is the same as not going.',
+          'At the net, stick on the ice and blade open for a tip.',
+          'On the wall, catch it and step INTO the circle before you shoot.',
+          'Take their D away from the shooting lane by making him choose.'],
+      mistake:'Standing still to see what happens. Both versions of this play need you moving on the drop.',
+      remember:'Move on the drop.' },
+    RW:{ job:'Cover the middle first, then get to the net.',
+      look:[{n:1, label:'Their D in the slot', to:'X5'},
+            {n:2, label:'The puck', to:'puck'},
+            {n:3, label:'The net', to:'theirNet'}],
+      do:['Take the slot away first. A lost draw here is a rush against.',
+          'Once the shot is coming, get to the far side of the net.',
+          'Anything that squirts wide is yours.',
+          'Do not stand where your left wing already is.'],
+      mistake:'Cheating to the net before the draw is won, so their D walks straight up the middle.',
+      remember:'Slot first, net second.' },
+    RD:{ job:'Stay home. You are the one who saves this if we lose it.',
+      look:[{n:1, label:'The dot', to:'puck'},
+            {n:2, label:'Their winger on your side', to:'X2'},
+            {n:3, label:'The middle of the ice', to:[160,42]}],
+      do:['Hold the blue line on your side. Do not creep in.',
+          'If they win it and go, you are the only one back.',
+          'Once we clearly have it, then you can join the play.',
+          'Talk to your partner so one of you is always home.'],
+      mistake:'Jumping in on the shot too. Now a blocked shot is a two on nothing the other way.',
+      remember:'One of us stays home.' }
+  },
+  tests:[
+    {q:'You are the center on an offensive faceoff. What is the first thing you do?',
+     o:['Get low and battle','Call the play before you line up','Watch the linesman','Look at the net'],a:1,
+     why:'A draw you win by accident goes nowhere. Everybody has to know where the puck is going.'},
+    {q:'Their center is leaning hard toward your D at the point. Where do you win it?',
+     o:['Back to the D anyway','Forward to the wall','Straight ahead','Between his legs'],a:1,
+     why:'Whichever way he leans, take the other door. That is the whole counter.'},
+    {q:'You are the D shooting off a faceoff win. What kind of shot?',
+     o:['High for the corner','Low and hard for a tip','A soft one','Off the glass'],a:1,
+     why:'Low can be tipped and rebounded, and your man at the net is there for exactly that.'},
+    {q:'You are the far D on an offensive draw. What is your job?',
+     o:['Jump in for the rebound','Hold the blue line and stay home','Screen the goalie','Go to the corner'],a:1,
+     why:'If they win it clean you are the only one back. A blocked shot with both D in is a two on nothing.'}
+  ],
+  placeq:[
+    {pos:'LW', fr:2, v:'tip', ask:'The D is about to shoot. Drag YOU to where the left wing gets his tip.'},
+    {pos:'RD', fr:2, v:'tip', ask:'Now put the right D where he belongs while all this happens.'}
+  ],
+  searchq:'hockey offensive zone faceoff set plays youth',
+  keys:{ base:['offensive faceoff','faceoff play','set play','off the draw','draw in their end',
+               'faceoff plays','win the draw','tip','faceoff shot','ozone draw','circle'],
+    v:{tip:['tip','back to the point','back to the d','shot','net front'],
+       wall:['wall','forward','to the wall','counter','circle']}}
 }
 ];

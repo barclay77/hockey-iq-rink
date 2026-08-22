@@ -1,10 +1,10 @@
 # Voice pack for Hockey IQ Rink
 
-The app speaks 579 fixed lines (situation intros, step cues, job descriptions, quiz
+The app speaks 1,090 fixed lines (situation intros, step cues, job descriptions, quiz
 questions/options/why-text, feedback phrases) plus a handful of lines built from a
 live number (a measured distance in feet, a live quiz score) that can't be
-pre-recorded and will always use on-device speech synthesis. This pack covers the 558
-fixed ones.
+pre-recorded and will always use on-device speech synthesis. This pack covers all
+1,090 fixed ones.
 
 ## What to do
 
@@ -36,9 +36,22 @@ pace, real pauses at periods. A couple of lines are written in ALL CAPS on
 screen for emphasis (the phase words) - the text you're given is already
 sentence-cased for speech, so no need to shout those either.
 
+## Rendering only the delta
+
+`lines.json` is always the FULL script. `to-render.json` is the work order for the
+next render pass, and it is **derived, never hand-maintained**: it is `lines.json`
+minus the ids already in `manifest.json`. Regenerate it right before a render:
+
+    node validate-situations.mjs --to-render     # from app/, prints line + char count
+
+That rewrites `to-render.json` from scratch (`{}` when there is nothing new), so it
+cannot accumulate stale entries. The plain validator run warns if the committed work
+order lists clips that already exist - the render itself is unaffected (existing files
+are skipped) but the cost estimate would be inflated.
+
 ## Format notes for whoever wires it up
 
-- `lines.json`: flat object, `{ "<id>": "<text to speak>" }`. 579 entries.
+- `lines.json`: flat object, `{ "<id>": "<text to speak>" }`. 1,090 entries.
 - The app already contains the player and the manifest check - nothing else to
   build. It plays `audio/<id>.mp3` when the id is listed in the manifest, and
   falls back to speechSynthesis, per line, if the id is missing or the file
