@@ -145,6 +145,71 @@ select,input{touch-action:manipulation}
 .zoomb.off{display:none}
 svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none}
 
+/* ======== Try mode: the read meter ======== */
+.readbar{display:none;flex:0 0 auto;background:var(--bg2);border:1px solid var(--line);
+  border-radius:11px;padding:8px 11px 9px}
+.readbar.on{display:block}
+.rbtop{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.rbpill{font-size:10.5px;font-weight:850;letter-spacing:.09em;padding:5px 9px;border-radius:6px;
+  background:#1b2a6b;color:#fff;flex:0 0 auto;white-space:nowrap}
+.rbscore{font-size:14px;font-weight:850;font-variant-numeric:tabular-nums;color:var(--ink);flex:0 0 auto}
+.rbsteps{display:flex;gap:4px;flex:1 1 auto;min-width:0}
+.rbstep{flex:1 1 0;min-width:0;height:26px;border-radius:7px;background:#1a2350;border:1px solid #2a3566;
+  font-size:11px;font-weight:800;color:#7b88a8;display:flex;align-items:center;justify-content:center;padding:0}
+.rbstep.now{box-shadow:0 0 0 2px rgba(255,198,41,.6)}
+.rbstep.good{background:#123f2a;border-color:#1f6b45;color:#8fe0b4}
+.rbstep.warn{background:#41300a;border-color:#8a6a10;color:#ffd98a}
+.rbstep.bad{background:#45111e;border-color:#8f1c2c;color:#ff9fae}
+.rbwhy{font-size:12.5px;line-height:1.35;color:#c6d3e6}
+.rbwhy b{color:#fff}
+.stars{display:flex;gap:6px;margin:9px 0 0}
+.star{flex:1 1 0;text-align:center;border-radius:9px;padding:7px 4px;background:#141c40;border:1px solid #2a3566}
+.star.lit{background:#3b2f05;border-color:#8a6a10}
+.star .sic{display:block;font-size:15px;line-height:1;color:#3f4b70}
+.star.lit .sic{color:var(--tra)}
+.star .slab{display:block;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+.star.lock{opacity:.5}
+.streak{font-size:12px;color:var(--dim);margin-top:8px}
+.streak b{color:var(--tra)}
+.misslist{margin:8px 0 0;font-size:12.5px;line-height:1.4;color:#c6d3e6}
+.misslist .mi{display:flex;gap:7px;padding:4px 0}
+.misslist .mn{flex:0 0 auto;font-size:10px;font-weight:850;padding:2px 6px;border-radius:5px;
+  background:#45111e;border:1px solid #8f1c2c;color:#ff9fae;height:18px}
+.misslist .mn.w{background:#41300a;border-color:#8a6a10;color:#ffd98a}
+
+/* ======== Coach mode: the call strip ======== */
+.callbar{display:none;flex:0 0 auto;background:var(--bg2);border:1px solid var(--line);
+  border-left:4px solid var(--tra);border-radius:11px;padding:9px 11px 10px}
+.callbar.on{display:block}
+.cbtop{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.cbstep{font-size:10px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;color:var(--tra)}
+.cbask{font-size:14.5px;font-weight:700;line-height:1.25}
+.cbmen{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.cbman{min-height:44px;padding:0 13px;border-radius:10px;background:#1a2350;border:1px solid #2a3566;
+  color:var(--ink);font-size:14px;font-weight:800;display:inline-flex;align-items:center;gap:6px}
+.cbman .cbsub{font-size:10.5px;font-weight:600;color:var(--dim);letter-spacing:.03em}
+.cbman.sel{background:#3b2f05;border-color:var(--tra);color:#fff}
+.cbman.set{background:#132a4d;border-color:#3e6fd0}
+.cbman.set .cbsub{color:#9dc0f5}
+.cbman.ok{background:#123f2a;border-color:#1f6b45}
+.cbman.no{background:#45111e;border-color:#8f1c2c}
+.cbrow{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.cbgo{flex:1 1 150px;min-height:46px;padding:0 16px;border-radius:11px;background:var(--hi);
+  border:1px solid var(--hi);color:#fff;font-size:15px;font-weight:800}
+.cbgo.wait{background:#1a2350;border-color:#2a3566;color:var(--dim)}
+.cbplain{min-height:46px;padding:0 14px;border-radius:11px;background:var(--bg3);
+  border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:650}
+.cbnote{font-size:12px;color:var(--dim);line-height:1.35;margin-top:8px}
+.cbres{margin-top:8px;font-size:12.5px;line-height:1.4}
+.cbres .cr{display:flex;gap:7px;padding:3px 0}
+.cbres .crt{flex:0 0 auto;font-size:10px;font-weight:850;padding:2px 6px;border-radius:5px;height:18px}
+.cbres .crt.y{background:#123f2a;border:1px solid #1f6b45;color:#8fe0b4}
+.cbres .crt.n{background:#45111e;border:1px solid #8f1c2c;color:#ff9fae}
+.pacer{display:flex;gap:6px;margin:0 0 10px}
+.pacer button{flex:1 1 0;min-height:42px;border-radius:10px;background:#1a2350;border:1px solid #2a3566;
+  color:var(--dim);font-size:12.5px;font-weight:750;padding:0 8px}
+.pacer button.on{background:var(--hi);border-color:var(--hi);color:#fff}
+
 /* ======== setting the stage: what is happening, then who you are ======== */
 .stageover{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;
   padding:18px;background:rgba(6,11,20,.82)}
@@ -410,6 +475,14 @@ input[type=range]{accent-color:var(--us2)}
   .tbtitle span{font-size:11px}
   .qprog{display:none}
 
+  .callbar{padding:8px 10px 9px;border-radius:10px}
+  .cbtop{margin-bottom:7px}
+  .cbask{font-size:14px}
+  .cbman{padding:0 11px;font-size:13.5px}
+  .cbnote{font-size:11.5px;margin-top:7px}
+  .cbgo{font-size:14.5px}
+  .readbar{padding:7px 10px 8px;border-radius:10px}
+  .rbwhy{font-size:12px}
   .cue{padding:9px 12px;border-radius:10px}
   .cue .t{font-size:15.5px}
   .ctrl{gap:6px}
@@ -464,6 +537,10 @@ input[type=range]{accent-color:var(--us2)}
 }
 
 /* landscape phone: almost no height to spare */
+@media (max-width:1000px) and (max-height:700px){
+  /* on a short phone the how-to line is the first thing to go - the chips explain themselves */
+  .cbnote{display:none}
+}
 @media (max-width:1000px) and (max-height:560px){
   .rinkwrap{min-height:90px}
   .railwrap{max-height:58px}
@@ -601,6 +678,15 @@ input[type=range]{accent-color:var(--us2)}
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
         <button class="zoomb" id="zoomb" title="Zoom in on the play">ZOOM</button>
         <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
+      </div>
+      <div class="callbar" id="callbar"></div>
+      <div class="readbar" id="readbar">
+        <div class="rbtop">
+          <span class="rbpill" id="rbpill">PLACE YOURSELF</span>
+          <span class="rbscore" id="rbscore"></span>
+          <span class="rbsteps" id="rbsteps"></span>
+        </div>
+        <div class="rbwhy" id="rbwhy"></div>
       </div>
       <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span></div>
       <div class="quickbar" id="quickbar">
@@ -1159,7 +1245,7 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-22.55';
+const BUILD='2026-08-22.71';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1208,7 +1294,8 @@ function loadAudioManifest(){
   }).catch(()=>{ AUDIO.loaded=true; });
 }
 loadAudioManifest();
-const TRY={running:false,fail:null,warn:null,first:null};
+const TRY={running:false,ran:false,done:false,fail:null,warn:null,first:null,start:null,
+  misses:[],grade:{},rs:{},flash:null,read:null,tries:0,key:''};
 const TEST={active:false, qs:[], i:0, right:0, answered:false, done:false, retried:false, lastRight:false, clue:0};
 let CUSTOM=[];
 
@@ -1258,8 +1345,8 @@ function buildRink(){
   inner.appendChild(el('rect',{x:7,y:39.5,width:4,height:6,fill:'#fff','fill-opacity':0.6,stroke:'#bf1e2e','stroke-width':0.4}));
   inner.appendChild(el('rect',{x:189,y:39.5,width:4,height:6,fill:'#fff','fill-opacity':0.6,stroke:'#bf1e2e','stroke-width':0.4}));
   g.appendChild(inner); svg.appendChild(g);
-  ['fade','labels','lanes','trail','pass','space','ghost','focus','tok','look','puck'].forEach(id=>
-    svg.appendChild(el('g',id==='tok'||id==='puck'?{id:'g-'+id}:{id:'g-'+id,'pointer-events':'none'})));
+  ['fade','labels','lanes','trail','pass','space','ghost','pick','focus','tok','look','puck'].forEach(id=>
+    svg.appendChild(el('g',(id==='tok'||id==='puck'||id==='pick')?{id:'g-'+id}:{id:'g-'+id,'pointer-events':'none'})));
 }
 const layer=id=>$('g-'+id);
 const isPhone=()=>window.matchMedia('(max-width:1000px)').matches;
@@ -1271,6 +1358,7 @@ const FS=n=>+(n*S.fs*ZF()).toFixed(2);
 const TR=()=>+(2.45*Math.min(1.18,S.fs)*ZF()).toFixed(2);
 /* on a phone the long role words collide, so use short ones */
 const SHORTROLE={'in the corner':'corner','net front':'net','in the slot':'slot','on the wall':'wall',
+  'weak side':'weak','goalie':'G',
   'their center':'their C','back-checker':'checker','carrying it':'has puck','their wing':'their W',
   'their F1':'F1','their F2':'F2','their F3':'F3','half wall':'wall','bumper':'bumper','killer':'PK',
   'goalie':'G','their D':'their D','point':'point',
@@ -1289,7 +1377,7 @@ function shortRole(r){
   if(t.length>10) t=t.split(' ').pop();
   return t.length&&t.length<r.length?t:r;
 }
-const roleText=r=>S.fs>1.15?shortRole(r):r;
+const roleText=r=>r?(S.fs>1.15?shortRole(r):r):null;
 
 /* ---------------- interpolation ---------------- */
 const ease=k=>k*k*(3-2*k);
@@ -1333,11 +1421,19 @@ function target(id,t){
    route the play asks for - just offset by however wrong his starting spot was. That is
    what makes the failure happen where it would really happen. */
 const shown=(id,t)=>{
+  if(S.mode==='coach'){
+    const c=correct(id,t); if(!c) return null;
+    const o=coachOff(id,t);
+    return (o[0]||o[1])?[c[0]+o[0],c[1]+o[1]]:c;
+  }
   const m=S.manual[id];
   if(!m) return correct(id,t);
-  if(S.mode==='try'&&TRY.running&&S.playing&&id===S.pos){
-    const c=correct(id,t), c0=correct(id,0);
-    if(c&&c0) return [m[0]+(c[0]-c0[0]), m[1]+(c[1]-c0[1])];
+  /* His own man skates the route the play asks for, offset by however wrong his start was.
+     This has to hold at EVERY t once a run exists - not just while the clock is running -
+     or scrubbing back to a step draws him where the graded geometry never had him. */
+  if(S.mode==='try'&&id===S.pos&&(TRY.running||TRY.ran)){
+    const c=correct(id,t), c0=correct(id,0), base=TRY.start||m;
+    if(c&&c0) return [base[0]+(c[0]-c0[0]), base[1]+(c[1]-c0[1])];
   }
   return m;
 };
@@ -1351,7 +1447,8 @@ function landmark(key,t){
   return shown(key,t);
 }
 function eff(k){
-  if(S.mode==='build'||S.mode==='try') return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
+  if(S.mode==='build'||S.mode==='try'||S.mode==='coach')
+    return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
   if(TEST.active&&!TEST.done){
     const q=TEST.qs[TEST.i];
     if(q&&q.type==='place'&&!TEST.answered&&['ghost','look','space','trail','pass'].includes(k))return false;
@@ -1438,8 +1535,13 @@ function drawDragMe(p){
     dur:'1.6s',repeatCount:'indefinite'}));
   ring.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0.15;0.95',dur:'1.6s',repeatCount:'indefinite'}));
   g.appendChild(ring);
-  const ly=p[1]-r*3.1;
-  g.appendChild(el('path',{d:'M'+(p[0]-1.6)+','+(ly+1.1)+' L'+(p[0]+1.6)+','+(ly+1.1)+' L'+p[0]+','+(ly+3.2)+' z',fill:'#c98a00'}));
+  const vb=S.vb||FULLVIEW, below=p[1]<26;             // top of the ice belongs to the zone words
+  let ly=below?p[1]+r*4.4:p[1]-r*3.1;
+  ly=Math.max(vb[1]+FS(4.2),Math.min(vb[1]+vb[3]-FS(1.6),ly));
+  g.appendChild(el('path',{d:below
+    ?'M'+(p[0]-1.6)+','+(ly-2.6)+' L'+(p[0]+1.6)+','+(ly-2.6)+' L'+p[0]+','+(ly-4.7)+' z'
+    :'M'+(p[0]-1.6)+','+(ly+1.1)+' L'+(p[0]+1.6)+','+(ly+1.1)+' L'+p[0]+','+(ly+3.2)+' z',
+    fill:'#c98a00'}));
   ['#fff','#8a6000'].forEach((col,i)=>g.appendChild(el('text',Object.assign(
     {x:p[0],y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,fill:col},
     i===0?{stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'}:{}),'DRAG ME')));
@@ -1528,12 +1630,374 @@ function tryEval(i){
       say:'You left the middle of the ice open.'};
   return null;
 }
+/* ---- Coach the play: he picks the spot, for anybody ---------------------------
+   One step at a time. Tap a player, and three grey circles appear: the spot the play
+   asks for, and two that are wrong for a reason this app can already name. Anybody he
+   leaves alone skates the route as authored - no punishment for not choosing.
+   A wrong pick is NOT undone. The player carries that error forward for the rest of
+   the play, so the ice he sees downstream is the ice his call actually made. */
+const COACH={next:1,sel:null,choice:{},legs:{},opts:{},lastRes:null,phase:'ask',
+  asked:0,right:0,done:false,ran:false};
+function coachReset(){
+  COACH.next=1; COACH.sel=null; COACH.choice={}; COACH.legs={}; COACH.opts={};
+  COACH.lastRes=null; COACH.phase='ask'; COACH.asked=0; COACH.right=0;
+  COACH.done=false; COACH.ran=false;
+  S.t=0; S.manual={};
+}
+function coachOff(id,t){
+  const legs=COACH.legs[id]; if(!legs||!legs.length) return [0,0];
+  let prev=[0,0];
+  for(let i=0;i<legs.length;i++){
+    const L=legs[i];
+    if(t<=L.t0) return prev;
+    if(t>=L.t1){ prev=[L.dx,L.dy]; continue; }
+    const k=ease((t-L.t0)/((L.t1-L.t0)||1));
+    return [prev[0]+(L.dx-prev[0])*k, prev[1]+(L.dy-prev[1])*k];
+  }
+  return prev;
+}
+const coachMen=()=>S.sit.roster.filter(id=>id!=='G');
+function hash32(str){ let h=2166136261;
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+  return h>>>0; }
+function rngFrom(seed){ let x=(seed||1)>>>0;
+  return ()=>{ x^=x<<13; x>>>=0; x^=x>>>17; x^=x<<5; x>>>=0; return x/4294967296; }; }
+/* Why is this a bad place to stand? Measured against the play as written, never against
+   an earlier pick - so a circle's answer never changes underneath him. */
+function spotFault(id,p,t){
+  const auth=correct(id,t); if(!auth) return null;
+  const pk=puckAt(t), pp=pk.p;
+  if(p[0]<9||p[0]>191||p[1]<5||p[1]>80) return {msg:'IN THE BOARDS',why:'There is no ice there.'};
+  if(p[0]>125&&pp[0]<125&&auth[0]<=125)
+    return {msg:'OFFSIDE',why:'Over their blue line before the puck. The whistle goes and the rush is dead.'};
+  const sa=Math.sign(auth[0]-pp[0]), sm=Math.sign(p[0]-pp[0]);
+  if(sa&&sm&&sa!==sm&&Math.abs(p[0]-pp[0])>9)
+    return {msg:'WRONG SIDE',why:sa<0?'He has to be between the puck and our net, not up ice of it.'
+                                   :'He has to be up ice of the puck, not behind it.'};
+  if(auth[1]>30&&auth[1]<55&&(p[1]<25||p[1]>60))
+    return {msg:'MIDDLE OPEN',why:'That is the middle lane man. Send him wide and the dangerous ice is empty.'};
+  /* judged against the authored spot's own clearance - a reason a kid reads has to be
+     one that is NOT equally true of the right answer */
+  const nearest=to=>{ let best=null;
+    S.sit.roster.forEach(rid=>{ if(rid===id||rid==='G')return;
+      const q=correct(rid,t); if(!q)return;
+      const d=dist(q,to); if(!best||d<best.d) best={id:rid,d:d}; });
+    return best; };
+  const okGap=nearest(auth), myGap=nearest(p);
+  if(myGap&&myGap.d<11&&(!okGap||myGap.d<okGap.d-1.5))
+    return {msg:'STACKED UP',why:'That puts him on top of '+(POSNAMES[myGap.id]||myGap.id)+
+      '. Two men in one lane is one man wasted.'};
+  if(pk.w&&pk.w!==id&&(OURPOS.includes(pk.w)||pk.w==='G')){
+    const lane=to=>{ let m=99;
+      THEMIDS.forEach(o=>{ const q=correct(o,t); if(!q)return; const d=segDist(q,pp,to); if(d<m)m=d; });
+      return m; };
+    const okLane=lane(auth), myLane=lane(p);
+    if(myLane<4.5&&myLane<okLane-0.6)
+      return {msg:'LANE BLOCKED',why:'A red stick is standing in that passing lane.'};
+    const len=dist(pp,p), ok=dist(pp,auth);
+    if(len>Math.max(48,ok+16)) return {msg:'TOO FAR',why:Math.round(len)+
+      ' feet from the puck. He is not an option out there.'};
+  }
+  if(dist(p,auth)>30) return {msg:'OUT OF THE PLAY',why:'That is '+Math.round(dist(p,auth))+
+    ' feet from the job this play gives him.'};
+  return null;
+}
+/* Three circles, seeded off the play so they are the same every single time he sees it. */
+function pickOptions(id,fi){
+  const ck=S.sit.id+'|'+variant().id+'|'+fi+'|'+id;
+  if(COACH.opts[ck]) return COACH.opts[ck];
+  const f=frames(); if(!f[fi]) return null;
+  const t=f[fi].t, right=correct(id,t); if(!right) return null;
+  const rnd=rngFrom(hash32(S.sit.id+'|'+variant().id+'|'+fi+'|'+id));
+  const dirs=[]; for(let k=0;k<12;k++) dirs.push(k*Math.PI/6);
+  for(let i=dirs.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const tmp=dirs[i]; dirs[i]=dirs[j]; dirs[j]=tmp; }
+  const out=[];
+  let loose=false;
+  const scan=(dists,namedOnly)=>{
+    dirs.forEach(a=>{
+      if(out.length>=2) return;
+      for(let k=0;k<dists.length;k++){
+        const d=dists[k], p=[right[0]+Math.cos(a)*d, right[1]+Math.sin(a)*d];
+        if(p[0]<11||p[0]>189||p[1]<6||p[1]>79) continue;
+        if(dist(p,right)<13) continue;
+        const fault=spotFault(id,p,t); if(!fault) continue;
+        if(namedOnly&&fault.msg==='OUT OF THE PLAY') continue;
+        if(!loose&&out.some(o=>o.fault.msg===fault.msg)) continue;
+        if(out.some(o=>dist(o.p,p)<14)) continue;
+        out.push({p:[+p[0].toFixed(1),+p[1].toFixed(1)],fault:fault}); break;
+      }
+    });
+  };
+  scan([17,24],true); scan([20,28,34],false);
+  /* a couple of tight plays have only one nameable wrong spot near the right one - take a
+     second wrong spot with the same reason rather than show him a two-way coin flip */
+  if(out.length<2){ loose=true; scan([15,21,27,33,39],false); }
+  let opts=[{p:right,right:true}].concat(out.map(o=>({p:o.p,right:false,fault:o.fault})));
+  for(let i=opts.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const tmp=opts[i]; opts[i]=opts[j]; opts[j]=tmp; }
+  COACH.opts[ck]=opts;
+  return opts;
+}
+function coachRun(){
+  if(COACH.phase!=='ask'||S.playing||COACH.done) return;
+  const f=frames(), fi=COACH.next; if(!f[fi]) return;
+  const t0=f[fi-1].t, t1=f[fi].t;
+  coachMen().forEach(id=>{
+    const c=COACH.choice[fi+'|'+id]; if(!c) return;
+    const auth=correct(id,t1); if(!auth) return;
+    (COACH.legs[id]=COACH.legs[id]||[]).push({t0:t0,t1:t1,
+      dx:+(c.p[0]-auth[0]).toFixed(2), dy:+(c.p[1]-auth[1]).toFixed(2)});
+  });
+  COACH.sel=null; COACH.ran=true; S.t=t0;
+  startPlay(t1);
+}
+function coachArrive(){
+  if(COACH.phase!=='ask') return;        // one verdict per step, whatever fires the arrival
+  const fi=COACH.next, f=frames(), res=[];
+  if(f[fi]) S.t=f[fi].t;
+  coachMen().forEach(id=>{
+    const c=COACH.choice[fi+'|'+id]; if(!c) return;
+    res.push({id:id,ok:c.right,fault:c.fault});
+    COACH.asked++; if(c.right) COACH.right++;
+  });
+  COACH.lastRes=res; COACH.phase='result';
+  if(fi>=f.length-1){
+    COACH.done=true;
+    try{ const db=tryStore(), key=S.sit.id+'/'+variant().id;
+      db.coach=db.coach||{};
+      const prev=db.coach[key]||{right:0,asked:0};
+      if(COACH.right>=prev.right) db.coach[key]={right:COACH.right,asked:COACH.asked};
+      tryStoreSave(db);
+    }catch(e){}
+  }
+  paintCall(); render();
+  if(SPK.on) speakLines(stepLines(fi));
+}
+function drawPicks(){
+  if(S.mode!=='coach') return;
+  const g=layer('pick'), f=frames(), fi=COACH.next;
+  if(!f[fi]||COACH.done&&COACH.phase!=='result') return;
+  if(S.playing&&COACH.phase==='ask') return;   // mid-step: nothing on the ice is tappable
+  const r=TR()*1.9;
+  if(COACH.phase==='result'){
+    (COACH.lastRes||[]).forEach(m=>{
+      const c=COACH.choice[fi+'|'+m.id]; if(!c) return;
+      const b=disp(c.p), col=m.ok?'#1f9d63':'#bf1e2e';
+      g.appendChild(el('circle',{cx:b[0],cy:b[1],r:r,fill:'none',stroke:col,'stroke-width':0.75}));
+      g.appendChild(el('text',{x:b[0],y:b[1]-r-FS(1.1),'font-size':FS(2.6),fill:col,
+        'text-anchor':'middle','font-weight':850},m.ok?'\u2713':'\u2715'));
+    });
+    return;
+  }
+  coachMen().forEach(id=>{
+    if(id===COACH.sel) return;
+    const c=COACH.choice[fi+'|'+id]; if(!c) return;
+    const b=disp(c.p);
+    g.appendChild(el('circle',{cx:b[0],cy:b[1],r:r*0.85,fill:'#8fa6c8','fill-opacity':0.2,
+      stroke:'#5c7396','stroke-width':0.4,'stroke-dasharray':'1.6 1.3'}));
+    g.appendChild(el('text',{x:b[0],y:b[1]+1,'font-size':FS(2.4),fill:'#2f4160',
+      'text-anchor':'middle','font-weight':750},id));
+  });
+  if(!COACH.sel) return;
+  const mine=shown(COACH.sel,S.t);
+  if(mine){ const b=disp(mine);
+    g.appendChild(el('circle',{cx:b[0],cy:b[1],r:TR()*1.75,fill:'none',
+      stroke:'#ffc629','stroke-width':0.7,'stroke-opacity':0.95})); }
+  const opts=pickOptions(COACH.sel,fi); if(!opts) return;
+  const chosen=COACH.choice[fi+'|'+COACH.sel];
+  opts.forEach((o,i)=>{
+    const b=disp(o.p), on=!!(chosen&&chosen.n===i);
+    const grp=el('g',{'data-pick':i,'data-man':COACH.sel,style:'cursor:pointer'});
+    grp.appendChild(el('circle',{cx:b[0],cy:b[1],r:Math.max(r*2.3,7.5),fill:'#fff','fill-opacity':0.001}));
+    grp.appendChild(el('circle',{cx:b[0],cy:b[1],r:r*1.05,
+      fill:on?'#ffc629':'#9fb0c8','fill-opacity':on?0.55:0.3,
+      stroke:on?'#ffc629':'#586e91','stroke-width':on?0.8:0.6,
+      'stroke-dasharray':on?'none':'2.2 1.5'}));
+    if(on) grp.appendChild(el('text',{x:b[0],y:b[1]+1,'font-size':FS(2.7),
+      fill:'#241202','text-anchor':'middle','font-weight':800},COACH.sel));
+    g.appendChild(grp);
+  });
+}
+function paintCall(){
+  const bar=$('callbar'); if(!bar) return;
+  if(S.mode!=='coach'){ bar.classList.remove('on'); bar.innerHTML=''; return; }
+  bar.classList.add('on');
+  const f=frames(), fi=COACH.next, last=f.length-1;
+  /* the cue strip counts frames, so this counts frames too - two different numbers for
+     the same moment is the fastest way to lose a ten year old */
+  const lab='Step '+(fi+1)+' of '+f.length;
+  const sc=$('coachscore');
+  if(sc) sc.innerHTML=COACH.asked
+    ? '<b style="color:#fff">'+COACH.right+' of '+COACH.asked+'</b> calls right so far.'
+    : 'No calls made yet. Anybody you do not move plays it the way it is drawn.';
+  if(COACH.done&&COACH.phase!=='result'){
+    bar.innerHTML='<div class="cbtop"><span class="cbstep">Done</span>'+
+      '<span class="cbask">'+(COACH.asked
+        ? COACH.right+' of '+COACH.asked+' calls right.'
+        : 'You let the play run itself. Try moving somebody.')+'</span></div>'+
+      '<div class="cbrow"><button class="cbgo" id="cbagain">Run it again \u25b6</button>'+
+      '<button class="cbplain" id="cbwatch">Watch the right way</button></div>';
+    return;
+  }
+  if(COACH.phase==='result'){
+    const res=COACH.lastRes||[];
+    const done=COACH.done;
+    bar.innerHTML='<div class="cbtop"><span class="cbstep">'+lab+'</span>'+
+      '<span class="cbask">'+(res.length
+        ? (res.every(m=>m.ok)?'All of that was right.':'Here is what those calls did.')
+        : 'Nobody moved, so everybody played it as drawn.')+'</span></div>'+
+      (res.length?'<div class="cbres">'+res.map(m=>
+        '<span class="cr"><span class="crt '+(m.ok?'y':'n')+'">'+m.id+'</span><span>'+
+        (m.ok?'Right where the play needs him.'
+             :'<b>'+esc(m.fault?m.fault.msg:'Not the spot')+'.</b> '+esc(m.fault?m.fault.why:''))+
+        '</span></span>').join('')+'</div>':'')+
+      '<div class="cbrow" style="margin-top:9px">'+
+        (done?'<button class="cbgo" id="cbdone">See how you did \u25b6</button>'
+             :'<button class="cbgo" id="cbnext">Next step \u25b6</button>')+
+        '<button class="cbplain" id="cbagain">Start over</button></div>'+
+      (res.some(m=>!m.ok)?'<div class="cbnote">He keeps that mistake for the rest of the play, so watch what it costs.</div>':'');
+    return;
+  }
+  const men=coachMen().map(id=>{
+    const c=COACH.choice[fi+'|'+id];
+    const cls=COACH.sel===id?' sel':(c?' set':'');
+    return '<button class="cbman'+cls+'" data-man="'+id+'">'+id+
+      '<span class="cbsub">'+(c?'\u2713 set':'pick')+'</span></button>';
+  }).join('');
+  const nset=coachMen().filter(id=>COACH.choice[fi+'|'+id]).length;
+  bar.innerHTML='<div class="cbtop"><span class="cbstep">'+lab+'</span>'+
+    '<span class="cbask">'+(COACH.sel
+      ? 'Where does '+(POSNAMES[COACH.sel]||COACH.sel)+' go? Tap a grey circle.'
+      : 'Who do you want to move?')+'</span></div>'+
+    '<div class="cbmen">'+men+'</div>'+
+    '<div class="cbrow"><button class="cbgo'+(nset?'':' wait')+'" id="cbgo">Run the step \u25b6</button>'+
+    (nset?'<button class="cbplain" id="cbclear">Clear picks</button>':'')+'</div>'+
+    '<div class="cbnote">Tap a player, then tap one of the grey circles. Anyone you leave alone skates it the way the coach drew it.</div>';
+}
+function coachPick(id,fi,n){
+  if(S.playing||COACH.phase!=='ask'||fi!==COACH.next) return;
+  const opts=pickOptions(id,fi); if(!opts||!opts[n]) return;
+  COACH.choice[fi+'|'+id]={n:n,p:opts[n].p,right:!!opts[n].right,fault:opts[n].fault||null};
+  COACH.sel=null;
+  paintCall(); render();
+}
+/* ---- the read meter ------------------------------------------------------------
+   tryEval above stays the record of truth: it names the miss at a keyframe. This is
+   the running picture he watches while it happens. Every component is measured off the
+   same geometry the rest of the app draws from, weighted by how much it actually costs
+   a team. Nothing here is invented, and nothing here is ever spoken - it is a screen
+   readout, so it can be worded freely without touching an audio id. */
+function readAt(t){
+  const me=shown(S.pos,t), auth=target(S.pos,t);
+  if(!me||!auth) return null;
+  const pk=puckAt(t), pp=S.manual.PUCK||(pk.w?shown(pk.w,t):pk.p);
+  const parts=[];
+  const add=(w,ok,bad)=>parts.push({w,ok:Math.max(0,Math.min(1,ok)),bad:bad||''});
+
+  add(3, (me[0]>125&&pp[0]<125&&auth[0]<=125)?0:1, 'You are over their blue line and the puck is not. That is a whistle.');
+
+  const sa=Math.sign(auth[0]-pp[0]), sm=Math.sign(me[0]-pp[0]);
+  add(2, (sa&&sm&&sa!==sm&&Math.abs(me[0]-pp[0])>7)?0:1,
+    sa<0?'Wrong side of the puck. Get between it and our net.':'Wrong side of the puck. Get up ice of it.');
+
+  add(2, (auth[1]>30&&auth[1]<55&&(me[1]<26||me[1]>59))?0:1,
+    'Your job is the middle lane, and the middle is open.');
+
+  let alone=null;
+  THEMIDS.forEach(id=>{
+    if(id==='XG') return;
+    const p=shown(id,t); if(!p) return;
+    let owner=null, od=99;
+    S.sit.roster.forEach(rid=>{ if(rid==='G')return; const a=target(rid,t); if(!a)return;
+      const d=dist(a,p); if(d<od){ od=d; owner=rid; } });
+    if(owner!==S.pos||od>14) return;
+    const cov=S.sit.roster.some(rid=>{ if(rid===S.pos||rid==='G')return false;
+      const q=shown(rid,t); return q&&dist(q,p)<11; });
+    if(!cov&&dist(me,p)>18&&(!alone||od<alone.d)) alone={id,p,d:od};
+  });
+  const an=alone?OPPNAME(alone.id):'';
+  add(2, alone?0:1, alone?(an.charAt(0).toUpperCase()+an.slice(1)+' is alone. That is your man.'):'');
+
+  if(pk.w&&pk.w!==S.pos&&(OURPOS.includes(pk.w)||pk.w==='G')){
+    /* A real pass threads sticks and a net-front play legitimately packs men tight, so
+       every one of these is judged against what the authored spot itself gets away with.
+       An absolute rule fails the play's own answer about a third of the time. */
+    const lane=to=>{ let m=99;
+      THEMIDS.forEach(id=>{ const p=shown(id,t); if(!p)return; const d=segDist(p,pp,to); if(d<m)m=d; });
+      return m; };
+    const okLane=lane(auth), myLane=lane(me);
+    add(2, (myLane<4.5&&myLane<okLane-0.6)?(myLane<okLane-2.5?0:0.55):1,
+      'A red stick is in the lane. He cannot pass to you.');
+    const len=dist(pp,me), okLen=dist(pp,auth), over=len-Math.max(44,okLen+8);
+    add(1, over<=0?1:(over>10?0:0.5), 'You are too far from the puck to be an option.');
+  }
+
+  const gap=to=>{ let m=99;
+    S.sit.roster.forEach(rid=>{ if(rid===S.pos||rid==='G')return;
+      const q=shown(rid,t); if(q){ const d=dist(q,to); if(d<m)m=d; } });
+    return m; };
+  const okGap=gap(auth), myGap=gap(me);
+  add(1, (myGap<11&&myGap<okGap-1.5)?0.35:1,
+    'You are stacked on a teammate. Two of you in one lane is one of you wasted.');
+
+  let sw=0, tw=0, worst=null;
+  parts.forEach(p=>{ sw+=p.ok*p.w; tw+=p.w;
+    const cost=(1-p.ok)*p.w;
+    if(cost>0.01&&p.bad&&(!worst||cost>worst.cost)) worst={cost,bad:p.bad}; });
+  const score=tw?Math.round(100*sw/tw):100;
+  const level=score>=86?0:score>=62?1:2;
+  return {score,level,
+    label:['GOOD SPOT','WATCH IT','THIS COSTS US'][level],
+    why:worst?worst.bad:''};
+}
+function tryMark(i){
+  const f=frames(); if(!f[i]) return null;
+  /* readAt is null under exactly the condition that makes judging impossible: this player
+     has no dot in this play. Ungraded is not the same as right, so record nothing and
+     leave the block grey rather than painting it the colour of a correct step. */
+  const r=readAt(f[i].t); if(!r) return null;
+  TRY.rs[i]=r.score;
+  const v=tryEval(i);
+  TRY.grade[i]= v ? (v.fatal?2:1) : 0;
+  TRY.misses=TRY.misses.filter(m=>m.i!==i);
+  if(v){ TRY.misses.push(Object.assign({i:i},v));
+         TRY.misses.sort((a,b)=>a.i-b.i);
+         TRY.flash={v:v,until:performance.now()+1800}; }
+  return v;
+}
+let RBLAST='';
+function paintRead(){
+  if(S.mode!=='try') return;
+  const bar=$('readbar'); if(!bar) return;
+  const f=frames(), r=TRY.read, cur=frameIdx(S.t);
+  const flash=(TRY.flash&&performance.now()<TRY.flash.until)?TRY.flash.v:null;
+  const pill=flash?flash.msg:(r?r.label:'PLACE YOURSELF');
+  const why=flash ? '<b>'+esc(flash.msg)+'.</b> '+esc(flash.why)
+    : (r&&r.why ? esc(r.why)
+      : (TRY.running?'Reading it right. Hold your spot.'
+        :'Drag your dot to where you think you belong, then hit Play. The meter shows what your spot costs, step by step.'));
+  const gk=f.map((x,i)=>TRY.grade[i]===undefined?'-':TRY.grade[i]).join('');
+  const key=[pill,r?r.score:-1,cur,why,gk].join('|');
+  if(key===RBLAST) return;
+  RBLAST=key;
+  const lvl=flash?(flash.fatal?2:1):(r?r.level:0);
+  $('rbpill').textContent=pill;
+  $('rbpill').style.background=['#1b6b45','#8a6a10','#8f1c2c'][lvl];
+  $('rbscore').textContent=r?r.score+'%':'';
+  $('rbsteps').innerHTML=f.map((x,i)=>{
+    const g=TRY.grade[i];
+    const cls=g===undefined?'':(g===0?'good':g===1?'warn':'bad');
+    return '<button class="rbstep '+cls+(i===cur?' now':'')+'" data-step="'+i+
+      '" title="Step '+(i+1)+'">'+(i+1)+'</button>';
+  }).join('');
+  $('rbwhy').innerHTML=why;
+}
 function drawTry(t){
   const g=layer('focus');
-  if(!TRY.running&&!TRY.fail){                       // waiting for him to place it
+  if(!TRY.running&&!TRY.ran){                        // waiting for him to place it
     const p=shown(S.pos,t); if(p) drawDragMe(disp(p));
   }
-  const c=TRY.fail||TRY.warn; if(!c) return;
+  const flash=(TRY.flash&&performance.now()<TRY.flash.until)?TRY.flash.v:null;
+  const c=flash||TRY.fail; if(!c) return;
   const col=c.fatal?'#bf1e2e':'#c98a00', b=disp(c.at);
   const ring=el('circle',{cx:b[0],cy:b[1],r:TR()*1.6,fill:'none',stroke:col,'stroke-width':0.8});
   ring.appendChild(el('animate',{attributeName:'r',values:(TR()*1.5).toFixed(2)+';'+(TR()*3.1).toFixed(2)+';'+(TR()*1.5).toFixed(2),
@@ -1623,7 +2087,7 @@ function render(){
     const w=(rot?perV:perH)*vb[2];       // how wide the ice actually draws, in px
     S.fs = w<360?1.5 : w<440?1.36 : w<560?1.24 : w<700?1.1 : 1;
   }
-  ['fade','labels','lanes','trail','pass','space','ghost','focus','tok','look','puck'].forEach(k=>layer(k).innerHTML='');
+  ['fade','labels','lanes','trail','pass','space','ghost','pick','focus','tok','look','puck'].forEach(k=>layer(k).innerHTML='');
   if(S.opt.zoom&&!(placeQ()&&TEST.clue>=1)){
     const gr=$('spotgrad');
     if(gr){ gr.setAttribute('cx',(vb[0]+vb[2]/2).toFixed(1)); gr.setAttribute('cy',(vb[1]+vb[3]/2).toFixed(1));
@@ -1757,9 +2221,12 @@ function render(){
   }
   if(eff('focus')&&!S.playing&&S.mode==='learn') drawFocus(t);
   if(S.mode==='try'){
-    if(TRY.running&&!TRY.fail){ TRY.warn=tryEval(frameIdx(t)); if(TRY.warn&&!TRY.first) TRY.first=TRY.warn; }
+    TRY.read=readAt(t);
     drawTry(t);
+    paintRead();
   }
+
+  if(S.mode==='coach') drawPicks();
 
   if(eff('ghost')) Object.keys(S.manual).forEach(id=>{
     if(id==='PUCK')return;
@@ -1893,8 +2360,6 @@ function segDist(p,a,b){
 /* the strip under the ice: normally the step cue, but on a phone in a quiz it carries
    the question, because a question hidden inside the sheet is a question he cannot read */
 function paintCue(){
-  /* Try mode owns this strip while it has something to explain */
-  if(S.mode==='try' && typeof TRY!=='undefined' && (TRY.fail||TRY.warn)) return;
   if(typeof STAGE!=='undefined' && STAGE.active){
     $('cuen').textContent=STAGE.label||'Setup';
     $('cuetext').textContent=STAGE.cue||'';
@@ -2323,18 +2788,18 @@ function setPlayBtn(on){
 }
 /* when a run ends - finished, paused or broken - pin his man where he actually ended
    up, so the ice keeps telling the truth and the next drag starts from clean state */
-function tryFreeze(){
-  const p=shown(S.pos,S.t);            // resolve BEFORE S.playing goes false
-  TRY.running=false;
-  if(p) S.manual[S.pos]=[p[0],p[1]];
-}
+/* A pause used to write his current spot back into S.manual so the dot would not snap to
+   the start. The offset math above covers that at any t, so this only ends the run. */
+function tryFreeze(){ TRY.running=false; }
 function stop(){
   if(S.mode==='try'&&TRY.running) tryFreeze();
   S.playing=false; S.narrating=false; S.gen++;
   if(S.raf)cancelAnimationFrame(S.raf); S.raf=null; S.lastTs=null;
   setPlayBtn(false); hush();
 }
-function hardReset(){ stop(); S.t=0; S.manual={}; note(null); if(S.mode==='try') tryReset(); }
+function hardReset(){ stop(); S.t=0; S.manual={}; note(null);
+  if(S.mode==='try') tryReset();
+  if(S.mode==='coach'){ coachReset(); paintCall(); } }
 function startPlay(target){
   S.target=Math.min(1,target); if(S.t>=S.target-1e-4)return;
   if(S.raf) cancelAnimationFrame(S.raf);        // never run two loops at once
@@ -2351,11 +2816,11 @@ function tick(ts){
   S.t=Math.min(S.target,S.t+dt*(+$('speed').value)/playSecs());
   render();
   const after=frameIdx(S.t), finished=S.t>=S.target-1e-6;
-  if(S.mode==='try'&&after!==before){
-    const v=tryEval(after);
-    if(v&&v.fatal){ TRY.fail=v; TRY.warn=null; stop(); tryVerdict(); render(); return; }
-  }
-  if(after!==before&&SPK.on&&S.mode!=='try'){
+  /* A mistake used to end the run. It does not any more: the play carries on so he
+     sees what his spot actually caused downstream, and the step goes on the record. */
+  if(S.mode==='try'&&after!==before) tryMark(after);
+  if(finished&&S.mode==='coach'){ stop(); coachArrive(); return; }
+  if(after!==before&&SPK.on&&S.mode!=='try'&&S.mode!=='coach'){
     // hold here, say what just happened, then carry on - including on the last step
     /* held for narration: the button must still read PAUSE, or a tap starts a
        second run underneath the one that is already talking */
@@ -2381,8 +2846,24 @@ function onPlayEnd(){
 }
 $('play').onclick=()=>{
   if(S.playing||S.narrating)return;
+  if(S.mode==='coach'){ coachRun(); return; }
   if(S.t>=0.999)S.t=0;
-  if(S.mode==='try'){ TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=true;
+  if(S.mode==='try'){
+    /* This button is Play AND Resume. Only a run starting from zero is a new attempt -
+       on a resume, everything below would wipe the record of the run he is in. */
+    const fresh=S.t<=1e-9||TRY.done;
+    if(fresh){
+      S.t=0;                                             // a replay starts at the start
+      TRY.done=false;
+      if(TRY.start) S.manual[S.pos]=TRY.start.slice();   // his choice, not where a run ended
+      const key=S.sit.id+'/'+variant().id+'/'+S.pos;
+      if(key!==TRY.key){ TRY.key=key; TRY.tries=0; }
+      TRY.tries++;
+      TRY.misses=[]; TRY.grade={}; TRY.rs={};
+      TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.flash=null;
+    }
+    TRY.running=true; TRY.ran=true;
+    if(fresh) tryMark(0);            // his placement is a step, and it is judged like one
     const vb=$('tryverdict'); if(vb) vb.style.display='none'; }
   startPlay(1);
 };
@@ -2393,6 +2874,29 @@ $('back').onclick=()=>{ const p=frames().slice().reverse().find(x=>x.t<S.t-1e-3)
 $('reset').onclick=()=>{ hardReset(); render(); };
 $('scrub').oninput=e=>{ stop(); S.t=e.target.value/1000; render(); };
 $('nextbtn').onclick=()=>goNext(true);
+$('callbar').onclick=e=>{
+  const t=e.target;
+  const man=t.closest&&t.closest('[data-man]');
+  if(man){ if(S.playing||COACH.phase!=='ask') return;
+           COACH.sel=(COACH.sel===man.dataset.man)?null:man.dataset.man; paintCall(); render(); return; }
+  const b=t.closest&&t.closest('button'); if(!b)return;
+  if(b.id==='cbgo') coachRun();
+  else if(b.id==='cbnext'){ COACH.next++; COACH.phase='ask'; COACH.lastRes=null; paintCall(); render(); }
+  else if(b.id==='cbdone'){ COACH.phase='done'; paintCall(); render(); }
+  else if(b.id==='cbagain'){ coachReset(); paintCall(); render(); }
+  else if(b.id==='cbclear'){ coachMen().forEach(id=>{ delete COACH.choice[COACH.next+'|'+id]; });
+                             COACH.sel=null; paintCall(); render(); }
+  else if(b.id==='cbwatch') setMode('learn');
+};
+$('readbar').onclick=e=>{
+  const b=e.target&&e.target.closest&&e.target.closest('.rbstep'); if(!b)return;
+  const f=frames(), i=+b.dataset.step;
+  if(!f[i])return;
+  stop(); S.t=f[i].t; TRY.flash=null;
+  const v=tryEval(i);
+  if(v) TRY.flash={v:v,until:performance.now()+2600};
+  RBLAST=''; render();
+};
 
 /* ---------------- setting the stage ----------------
    A kid opening a situation used to get narration over a rink that was not moving, with
@@ -2402,7 +2906,7 @@ const STAGE={active:false,step:null,cue:null,label:null};
 function setStageUI(on){
   STAGE.active=!!on;
   $('stageover').classList.toggle('on',!!on);
-  $('ctrlrow').style.display = on ? 'none' : (S.mode==='quiz'?'none':'flex');
+  $('ctrlrow').style.display = on ? 'none' : ((S.mode==='quiz'||S.mode==='coach')?'none':'flex');
   $('quickbar').style.display = (on||(S.mode!=='learn'&&S.mode!=='try')) ? 'none' : '';
   $('varrow').style.display = on ? 'none' : '';
   if(!on){ buildVars(); renderNext(); }
@@ -2459,7 +2963,7 @@ function showScreen(name){
 }
 $('p-back').onclick=()=>{
   clearStage(); stop();
-  if(S.mode==='quiz'||S.mode==='build'||S.mode==='try'){ setMode('learn'); return; }
+  if(S.mode==='quiz'||S.mode==='build'||S.mode==='try'||S.mode==='coach'){ setMode('learn'); return; }
   showScreen('menu');
 };
 $('m-howto').onclick=()=>mask('help',true);
@@ -2688,12 +3192,41 @@ function paintRail(){
   if(S.mode==='learn') railLearn();
   else if(S.mode==='quiz') railQuiz();
   else if(S.mode==='try') railTry();
+  else if(S.mode==='coach') railCoach();
   else railBuild();
+}
+const PACER='<div class="pacer" id="pacer">'+
+  '<button data-pace="try">Run it through</button>'+
+  '<button data-pace="coach">Stop each step</button></div>';
+function wirePacer(){
+  const p=$('pacer'); if(!p) return;
+  [...p.querySelectorAll('button')].forEach(b=>{
+    b.classList.toggle('on',b.dataset.pace===S.mode);
+    b.onclick=()=>{ if(b.dataset.pace!==S.mode) setMode(b.dataset.pace); };
+  });
+}
+function railCoach(){
+  $('rail').innerHTML='<div class="qtype place">You make the calls</div>'+
+    '<div class="qtext">Move anybody you like, one step at a time. Everybody you leave alone plays it the way the coach drew it.</div>'+
+    PACER+
+    '<div class="railh">Your calls</div>'+
+    '<div id="coachscore" style="font-size:13px;color:#c6d3e6;line-height:1.4"></div>'+
+    '<p style="font-size:12.5px;color:#93a3bd;margin:10px 0 0;line-height:1.4">Three circles for every man: one the play asks for, two that are wrong for a reason. A wrong pick sticks - he carries it to the end of the play.</p>'+
+    '<div class="spacer"></div>'+
+    '<button class="bigbtn" id="cstart" style="width:100%;margin-bottom:8px">Start over</button>'+
+    '<button class="bigbtn plain" id="cwatch">Watch the right way</button>';
+  wirePacer();
+  $('cstart').onclick=()=>{ coachReset(); paintCall(); render(); };
+  $('cwatch').onclick=()=>{ setMode('learn'); };
+  const qt=$('qgotry'); if(qt){ qt.textContent='Start over'; qt.onclick=()=>{ coachReset(); paintCall(); render(); }; }
+  const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
+  paintCall();
 }
 function railTry(){
   const h='<div class="qtype place">Try it your way</div>'+
     '<div class="qtext">Put yourself where you think you belong, then hit Play. Everybody else plays it right.</div>'+
-    '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">If the play breaks because of where you stood, it stops and shows you why.</p>'+
+    PACER+
+    '<p style="font-size:13px;color:#93a3bd;margin:0 0 10px">The play runs all the way through, whatever you do. The meter under the ice tells you what your spot is costing, step by step.</p>'+
     '<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
     '<div style="font-size:11.5px;color:#93a3bd" id="poshint"></div>'+
     '<div id="tryverdict" class="why" style="display:none"></div>'+
@@ -2701,32 +3234,116 @@ function railTry(){
     '<button class="bigbtn" id="tryright" style="width:100%;margin-bottom:8px">Put me back where I belong</button>'+
     '<button class="bigbtn plain" id="trywatch">Watch the right way</button>';
   $('rail').innerHTML=h;
-  buildPos();
+  buildPos(); wirePacer();
   const qt2=$('qgotry'); if(qt2){ qt2.textContent='Try again'; qt2.onclick=()=>{ tryReset(); render(); }; }
   const qq2=$('qgoquiz'); if(qq2) qq2.onclick=()=>{ setMode('quiz'); startTest('sit'); };
   $('tryright').onclick=()=>{ tryReset(); render(); };
   $('trywatch').onclick=()=>{ setMode('learn'); };
 }
+/* Three stars, stored as names rather than a count, so the puck-decision star can be
+   added later without invalidating what he has already earned. */
+const STARDEF=[['steps','Every step'],['call','Right call'],['first','First try']];
+function tryStore(){
+  try{
+    const o=JSON.parse(localStorage.getItem('hiq_try')||'{}');
+    /* v1 counted any run that did not BREAK the play as clean, so a kid out of position
+       on every step kept the streak forever. Those counters are inflated - zero them once. */
+    if(o.v!==2&&o.v!==3){ o.streak=0; o.bestStreak=0; }
+    /* v3: before an empty record was refused, pressing Play on a position that is not in
+       the play saved a best for a player with no dot. Drop those. */
+    if(o.v!==3&&o.best){
+      Object.keys(o.best).forEach(k=>{
+        const p=k.split('/'), sit=SITUATIONS.filter(s=>s.id===p[0])[0];
+        if(sit&&p[2]&&sit.roster.indexOf(p[2])<0) delete o.best[k];
+      });
+    }
+    o.v=3;
+    return o;
+  }catch(e){ return {v:3}; }
+}
+function tryStoreSave(o){ try{ localStorage.setItem('hiq_try',JSON.stringify(o)); }catch(e){} }
 function tryVerdict(){
-  const c=TRY.fail||TRY.first, box=$('tryverdict');
+  /* The record has to cover the whole play however he navigated it. Grading happens where
+     the clock travels and he can jump the clock past a step, so fill in anything unvisited
+     before judging - tryMark is idempotent, so this can never double-count. The flash is
+     put back afterwards: a completion sweep must not pop a ring at verdict time. */
+  const flash=TRY.flash;
+  frames().forEach((f,i)=>{ if(TRY.grade[i]===undefined) tryMark(i); });
+  TRY.flash=flash;
+  TRY.done=true;                     // this record is closed; the next Play is a new attempt
+  /* Nothing graded is NOT a clean run - it means this player has no dot in this play, so
+     there was never anything to be right about. An empty record cannot earn a star, a
+     streak or a saved best. */
+  if(!Object.keys(TRY.rs).length){
+    const nb=$('tryverdict');
+    if(nb){ nb.style.display='block'; nb.className='why trybad';
+      nb.innerHTML='<b>'+esc(POSNAMES[S.pos]||S.pos)+' is not on the ice in this play.</b> '+
+        'Nothing to grade - pick one of the players who is, and try that.'; }
+    if(isPhone()) setSheet(true);
+    return;
+  }
+  const fatal=TRY.misses.filter(m=>m.fatal);
+  const rs=Object.keys(TRY.rs).map(k=>TRY.rs[k]);
+  const grade=rs.length?Math.round(rs.reduce((a,b)=>a+b,0)/rs.length):100;
+  const clean=!TRY.misses.length;
+  const got={steps:clean, call:false, first:(TRY.tries===1&&clean)};
+  /* the same mistake held for four steps is ONE mistake, not four */
+  const rolled=[];
+  TRY.misses.forEach(m=>{
+    const prev=rolled[rolled.length-1];
+    if(prev&&prev.msg===m.msg&&prev.why===m.why){ prev.to=m.i; return; }
+    rolled.push({i:m.i,to:m.i,msg:m.msg,why:m.why,fatal:m.fatal});
+  });
+
+  const db=tryStore(), key=S.sit.id+'/'+variant().id+'/'+S.pos;
+  const had=(db.best&&db.best[key])||[];
+  const now=STARDEF.map(d=>d[0]).filter(k=>got[k]||had.indexOf(k)>=0);
+  db.best=db.best||{}; db.best[key]=now;
+  /* clean means clean: the same bar as the Every step star, which is what the word reads
+     as next to it on the card */
+  db.streak = clean ? (db.streak||0)+1 : 0;
+  db.bestStreak=Math.max(db.bestStreak||0,db.streak);
+  tryStoreSave(db);
+
+  const box=$('tryverdict');
   if(box){
+    const head = clean ? '<b>That works.</b> You were where you belong the whole way, and the play came off.'
+      : fatal.length ? '<b>The play broke.</b> It kept going so you can see what your spot cost.'
+      : '<b>Close.</b> The play came off, but it cost us on the way.';
+    let h='<div>'+head+'</div>'+
+      '<div class="stars">'+STARDEF.map(d=>{
+        const lit=got[d[0]], lock=(d[0]==='call');
+        return '<span class="star'+(lit?' lit':'')+(lock?' lock':'')+'">'+
+          '<span class="sic">'+(lit?'\u2605':lock?'\u25cb':'\u2606')+'</span>'+
+          '<span class="slab">'+esc(d[1])+'</span></span>';
+      }).join('')+'</div>'+
+      '<div class="streak">Read score <b>'+grade+'%</b>'+
+        (db.streak>1?' &middot; <b>'+db.streak+'</b> clean plays in a row':'')+
+        (db.bestStreak>db.streak?' &middot; best '+db.bestStreak:'')+'</div>';
+    if(rolled.length) h+='<div class="misslist">'+rolled.map(m=>
+      '<span class="mi"><span class="mn'+(m.fatal?'':' w')+'">'+
+      (m.to>m.i?(m.i+1)+'-'+(m.to+1):(m.i+1))+'</span>'+
+      '<span><b>'+esc(m.msg)+'.</b> '+esc(m.why)+'</span></span>').join('')+'</div>';
     box.style.display='block';
-    box.className='why '+(c?'trybad':'trygood');
-    box.innerHTML=c
-      ? '<b>'+esc(c.fatal?'The play broke.':'Careful.')+'</b> <b>'+esc(c.msg)+'</b> '+esc(c.why)
-      : '<b>That works.</b> You were where you belong the whole way, and the play came off.';
+    box.className='why '+(clean?'trygood':'trybad');
+    box.innerHTML=h;
   }
   if(isPhone()) setSheet(true);
+  /* spoken with the phrases the script already carries - a new wording here would
+     orphan a recording */
+  const c=TRY.misses[0];
   if(SPK.on) speakLines(
     chunk(c?(c.fatal?'The play broke.':'Not quite.'):'That works.',{rate:0.95,pause:280})
       .concat(chunk(c?c.say:'You were where you belong the whole way.',{rate:0.93,pause:200})));
 }
 function tryReset(){
   stop(); TRY.running=false; TRY.fail=null; TRY.warn=null; TRY.first=null;
+  TRY.misses=[]; TRY.grade={}; TRY.rs={}; TRY.flash=null; TRY.read=null;
+  TRY.ran=false; TRY.done=false; RBLAST='';
   const vb=$('tryverdict'); if(vb){ vb.style.display='none'; vb.innerHTML=''; }
-  S.t=0; S.manual={};
+  S.t=0; S.manual={}; TRY.start=null;
   const c=target(S.pos,0);
-  if(c) S.manual[S.pos]=[c[0],c[1]];
+  if(c){ S.manual[S.pos]=[c[0],c[1]]; TRY.start=[c[0],c[1]]; }
 }
 function railLearn(){
   const tlbl=$('qgotry'); if(tlbl) tlbl.textContent='Try it \u25b6';
@@ -2846,6 +3463,10 @@ function toRink(evt){
   return [p.x,p.y];
 }
 svg.addEventListener('pointerdown',e=>{
+  const pk=e.target.closest('g[data-pick]');
+  if(pk){ coachPick(pk.getAttribute('data-man'),COACH.next,+pk.getAttribute('data-pick'));
+          e.preventDefault(); return; }
+  if(S.mode==='coach') return;          // in coach mode the circles are the only input
   const g=e.target.closest('g.tok'); if(!g)return;
   const id=g.getAttribute('data-id');
   if(id==='PUCK'&&S.mode!=='build')return;
@@ -2859,7 +3480,8 @@ svg.addEventListener('pointerdown',e=>{
      reads are computed against a play that never happens. */
   if(S.mode==='try'){
     if(id!==S.pos) return;
-    TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=false;
+    TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=false; TRY.ran=false;
+    TRY.misses=[]; TRY.grade={}; TRY.flash=null; RBLAST='';
     const vb=$('tryverdict'); if(vb) vb.style.display='none';
   }
   drag=id; dragMoved=false;
@@ -2872,6 +3494,7 @@ svg.addEventListener('pointermove',e=>{
   let [x,y]=toRink(e);
   x=Math.max(1,Math.min(199,x)); y=Math.max(1,Math.min(84,y));
   S.manual[drag]=S.opt.flip?[x,85-y]:[x,y];
+  if(S.mode==='try'&&drag===S.pos) TRY.start=S.manual[drag].slice();
   render();
 });
 svg.addEventListener('pointerup',()=>{
@@ -2891,12 +3514,15 @@ svg.addEventListener('pointerup',()=>{
 
 /* ---------------- the bottom sheet on phones ---------------- */
 function sheetLabel(){
-  return S.mode==='quiz'?'The question':(S.mode==='build'?'Build controls':'Your job and position');
+  return S.mode==='quiz'?'The question'
+    :(S.mode==='build'?'Build controls'
+    :(S.mode==='coach'?'Your calls':'Your job and position'));
 }
 function setSheet(open){ $('railwrap').classList.toggle('open',!!open); }
 function syncSheet(){
   $('glabel').textContent=sheetLabel();
-  if(isPhone()) setSheet(S.mode!=='learn');
+  /* coach mode keeps the sheet shut: its whole UI is the strip under the ice */
+  if(isPhone()) setSheet(S.mode!=='learn'&&S.mode!=='coach');
 }
 $('grab').onclick=()=>setSheet(!$('railwrap').classList.contains('open'));
 
@@ -2919,25 +3545,29 @@ function tapToken(id){
 function setMode(m){
   if(m!=='learn') clearStage();
   S.mode=m; TEST.active=(m==='quiz');
-  $('ctrlrow').style.display=(m==='quiz'||STAGE.active)?'none':'flex';
+  const rb=$('readbar'); if(rb){ rb.classList.toggle('on',m==='try'); RBLAST=''; }
+  if(m==='coach'){ coachReset(); } else { const cb=$('callbar'); if(cb){ cb.classList.remove('on'); cb.innerHTML=''; } }
+  /* coach mode has its own Run the step button, so the transport row would only be a
+     way to scrub the legs out of sync */
+  $('ctrlrow').style.display=(m==='quiz'||m==='coach'||STAGE.active)?'none':'flex';
   $('quickbar').style.display=((m!=='learn'&&m!=='try')||STAGE.active)?'none':'';
   /* stepping half-simulates in Try mode - everyone moves but him - so it stays a Learn tool */
   ['fwd','back','scrub'].forEach(k=>{ const e=$(k); if(e) e.style.display=(m==='try')?'none':''; });
-  if(m==='try'){
+  if(m==='try'||m==='coach'){
     /* the sim measures against the authored play, so it can never run on a variant
        that exists to demonstrate the mistake - that grades the error as the target */
     if(variant().wrong){
       const i=S.sit.variants.findIndex(v=>!v.wrong);
       if(i>=0){ S.varIdx=i; buildVars(); }
     }
-    tryReset();
+    if(m==='try') tryReset(); else coachReset();
   }
   $('p-back').innerHTML=(m==='learn')?'&#8249; Menu':'&#8249; Learn';
   $('p-watch').style.display=(m==='learn')?'':'none';
   $('p-prog').textContent='';
   stop();
   if(m==='learn'){ TEST.done=false; S.manual={}; buildVars(); paintRail(); render(); }
-  else { buildVars(); render(); }
+  else { buildVars(); if(m==='coach'||m==='try') paintRail(); render(); }
   syncSheet();
 }
 
@@ -3124,8 +3754,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ ['help','set','vid','coach','more'].forEach(k=>mask(k,false)); return; }
   if(S.screen!=='play')return;
   if(e.code==='Space'){ e.preventDefault(); if(S.mode!=='quiz') (S.playing?$('pause'):$('play')).click(); }
-  else if(e.key==='ArrowRight'){ if(S.mode!=='quiz'&&S.mode!=='try')$('fwd').click(); }
-  else if(e.key==='ArrowLeft'){ if(S.mode!=='quiz'&&S.mode!=='try')$('back').click(); }
+  else if(e.key==='ArrowRight'){ if(S.mode!=='quiz'&&S.mode!=='try'&&S.mode!=='coach')$('fwd').click(); }
+  else if(e.key==='ArrowLeft'){ if(S.mode!=='quiz'&&S.mode!=='try'&&S.mode!=='coach')$('back').click(); }
   else if(e.key==='r'||e.key==='R'){ if(S.mode!=='quiz')$('reset').click(); }
   else if('12345'.indexOf(e.key)>=0&&S.mode==='learn'){ S.pos=OURPOS[+e.key-1]; paintRail(); render(); }
 });

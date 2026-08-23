@@ -2628,7 +2628,7 @@ const SITUATIONS = [
           t:0,
           cue:'We are crossing center with the puck. Now spacing is everything - wide, wide, and one in the middle.',
           us:{LW:[112,12], C:[104,38], RW:[110,66], LD:[98,30], RD:[94,54]},
-          them:{X1:[118,44], X2:[140,28], X3:[140,58], X4:[128,16], X5:[128,70]},
+          them:{X1:[118,44], X2:[140,28], X3:[140,58], X4:[128,16], X5:[128,70], XG:[186,42.5]},
           puck:[
             112,
             12.5,
@@ -2639,7 +2639,7 @@ const SITUATIONS = [
           t:0.32,
           cue:'LW takes it wide and gains the line. RW drives HARD to the net - that pushes their D backward and opens the middle.',
           us:{LW:[132,9], RW:[132,60], C:[116,38], LD:[108,30]},
-          them:{X2:[142,26], X3:[146,56], X1:[124,44]},
+          them:{X2:[142,26], X3:[146,56], X1:[124,44], X4:[134,18], X5:[134,68]},
           puck:[
             132,
             9.5,
@@ -2650,7 +2650,7 @@ const SITUATIONS = [
           t:0.6,
           cue:'C is late ON PURPOSE. You arrive in the slot as the trailer, right where their D just backed out of.',
           us:{C:[136,36], LW:[146,10], RW:[160,52]},
-          them:{X2:[150,22], X3:[158,52], X1:[134,44]},
+          them:{X2:[150,22], X3:[158,52], X1:[134,44], X4:[142,20], X5:[142,64]},
           puck:[
             146,
             10.5,
@@ -2661,7 +2661,7 @@ const SITUATIONS = [
           t:0.85,
           cue:'Puck to the slot. Shoot it - you are inside the dots with your feet moving. That is the best shot in hockey.',
           us:{C:[148,36], LW:[156,14], RW:[172,48]},
-          them:{X2:[156,24], X3:[166,50], X1:[142,42]},
+          them:{X2:[156,24], X3:[166,50], X1:[142,42], X4:[150,22], X5:[150,60]},
           puck:[
             148,
             36.5,
@@ -2672,6 +2672,7 @@ const SITUATIONS = [
           t:1,
           cue:'Shot, and LW and RW both go straight to the net for the second chance.',
           us:{C:[152,38], LW:[170,44], RW:[180,48], LD:[132,32], RD:[118,54]},
+          them:{X1:[150,42], X2:[166,34], X3:[172,52], X4:[158,24], X5:[158,58], XG:[184,44]},
           puck:[176,44]
         }
       ]
@@ -2685,7 +2686,7 @@ const SITUATIONS = [
           t:0,
           cue:'You have the puck and you are all alone. Skating into three guys is a turnover. Delay instead.',
           us:{C:[114,42], LW:[104,14], RW:[100,64], LD:[92,32], RD:[88,54]},
-          them:{X1:[126,42], X2:[140,30], X3:[140,56], X4:[120,20], X5:[120,66]},
+          them:{X1:[126,42], X2:[140,30], X3:[140,56], X4:[120,20], X5:[120,66], XG:[186,42.5]},
           puck:[
             114,
             42.5,
@@ -2696,7 +2697,7 @@ const SITUATIONS = [
           t:0.35,
           cue:'C curls BACK toward his own end instead of forcing it. That buys two seconds - and two seconds is your whole team.',
           us:{C:[106,34], LW:[116,12], RW:[112,66], LD:[104,34]},
-          them:{X1:[124,34], X2:[140,28]},
+          them:{X1:[124,34], X2:[140,28], X3:[142,54], X4:[124,20], X5:[122,64]},
           puck:[
             106,
             34.5,
@@ -2707,7 +2708,7 @@ const SITUATIONS = [
           t:0.62,
           cue:'Now LW is beside you with speed. Hand it off and go to the net yourself.',
           us:{C:[118,20], LW:[122,12], RW:[124,64], LD:[112,34]},
-          them:{X1:[122,30], X2:[142,26]},
+          them:{X1:[122,30], X2:[142,26], X3:[144,52], X4:[128,22], X5:[126,62]},
           puck:[
             126,
             12.5,
@@ -2718,7 +2719,7 @@ const SITUATIONS = [
           t:1,
           cue:'Clean entry, three players in with speed. Same rush, ten times better - just because you waited.',
           us:{LW:[146,12], C:[140,34], RW:[148,58], LD:[122,32], RD:[112,54]},
-          them:{X2:[152,22], X3:[154,54], X1:[134,40]},
+          them:{X2:[152,22], X3:[154,54], X1:[134,40], X4:[138,24], X5:[136,58]},
           puck:[
             146,
             12.5,
@@ -2889,7 +2890,8 @@ const SITUATIONS = [
     X2:'their D',
     X3:'their D',
     X4:'their wing',
-    X5:'their wing'
+    X5:'their wing',
+    XG:'goalie'
   },
   tests:[
     {
@@ -4408,7 +4410,7 @@ const SITUATIONS = [
   ages:['12U','14U','16U','18U'],
   about:'Win it in the corner, move it up to the point, shoot through traffic.',
   focus:[125,-5,80,95],
-  roles:{X1:'on the wall', X2:'net front', X3:'in the slot', X4:'their D', XG:'goalie'},
+  roles:{X1:'on the wall', X2:'net front', X3:'in the slot', X4:'their D', X5:'weak side', XG:'goalie'},
   roster:['C','LW','RW','LD','RD'],
   variants:[
     { id:'point', name:'Up to the point and shoot',
@@ -4416,19 +4418,19 @@ const SITUATIONS = [
       frames:[
         {t:0, cue:'Right wing wins the puck below the dot. Two of theirs are on him.',
          us:{RW:[172,62], C:[164,48], LW:[176,24], LD:[140,30], RD:[142,56]},
-         them:{X1:[176,58], X2:[180,44], X3:[166,40], X4:[150,44], XG:[186,42.5]},
+         them:{X1:[176,58], X2:[180,44], X3:[166,40], X4:[150,44], X5:[168,26], XG:[186,42.5]},
          puck:[172,62,'RW']},
         {t:0.35, cue:'Instead of forcing it low, he moves it UP the wall to the right D.',
          us:{RD:[150,62]},
-         them:{X1:[172,58], X3:[160,50]},
+         them:{X1:[172,58], X3:[160,50], X5:[166,28]},
          puck:[150,62,'RD']},
         {t:0.65, cue:'D to D across the top. Their box has to slide, and it always slides late.',
          us:{LD:[148,26], RD:[152,58]},
-         them:{X3:[156,52], X4:[152,48]},
+         them:{X3:[156,52], X4:[152,48], X5:[158,30]},
          puck:[148,26,'LD']},
         {t:1, cue:'Shot from the point, low through the screen. Center is at the net.',
          us:{C:[176,40], LW:[170,22]},
-         them:{X2:[180,44], XG:[184,40]},
+         them:{X2:[180,44], X5:[172,28], XG:[184,40]},
          puck:[178,42]}
       ]},
     { id:'forcelow', name:'Force it low - turnover', wrong:true,
@@ -4436,15 +4438,15 @@ const SITUATIONS = [
       frames:[
         {t:0, cue:'Same puck below the dot, same two on him.',
          us:{RW:[172,62], C:[164,48], LW:[176,24], LD:[140,30], RD:[142,56]},
-         them:{X1:[176,58], X2:[180,44], X3:[166,40], X4:[150,44], XG:[186,42.5]},
+         them:{X1:[176,58], X2:[180,44], X3:[166,40], X4:[150,44], X5:[168,26], XG:[186,42.5]},
          puck:[172,62,'RW']},
         {t:0.5, cue:'He tries to force it behind the net into two sticks.',
          us:{RW:[178,58]},
-         them:{X1:[180,54], X2:[181,48]},
+         them:{X1:[180,54], X2:[181,48], X5:[170,30]},
          puck:[180,52,'X1']},
         {t:1, cue:'They chip it out and we are all below the puck. Long way back.',
          us:{RW:[180,56], C:[168,46]},
-         them:{X1:[150,54], X3:[130,48]},
+         them:{X1:[150,54], X3:[130,48], X5:[152,32]},
          puck:[130,48,'X3']}
       ]}
   ],
