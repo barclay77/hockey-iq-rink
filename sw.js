@@ -1,6 +1,6 @@
 /* Above The Puck - offline cache.
    Bump CACHE when you change any file, otherwise browsers keep serving the old one. */
-const CACHE = 'hockey-iq-v148';
+const CACHE = 'hockey-iq-v149';
 const ASSETS = [
   './',
   './index.html',
@@ -53,7 +53,9 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // everything else: cache first, fill the cache on a miss
+  // everything else: cache first, fill the cache on a miss. A miss with no network is
+  // left to reject, so the browser reports its own network error. Do not "fall back" to
+  // the miss value - it is always undefined, and respondWith(undefined) throws.
   e.respondWith(
     caches.match(req).then(hit => hit || fetch(req).then(res => {
       if (res && res.status === 200) {
@@ -61,6 +63,6 @@ self.addEventListener('fetch', e => {
         caches.open(CACHE).then(c => c.put(req, copy));
       }
       return res;
-    }).catch(() => hit))
+    }))
   );
 });

@@ -34,8 +34,17 @@ validator resolves `situations.js`, `index.html` and `audio/` relative to its ow
 location) — but its *contents* land at the repo root. A file uploaded to the repo root
 inside an `app/` folder does not serve.
 
-`pages.yml` does NOT run the validator — it only checks out and uploads. Nothing gates a
-bad deploy; run `node validate-situations.mjs` yourself before pushing.
+`pages.yml` gates the deploy as of commit 6b8f98d. Two steps run before anything is
+published, and a non-zero exit stops the deploy: **Validate situations**
+(`node validate-situations.mjs`) and **Validate audio manifest** — manifest.json must be a
+non-empty bare array of bare ids, every id must have a non-zero mp3 behind it, no
+committed clip may be missing from the manifest, and no mp3 may sit at the repo root. It
+also prints `manifest N | mp3s N | lines.json N` on every run, so the real file count is
+in the deploy log.
+
+Lines in `lines.json` with no clip are a NOTE, not a failure — per-line fallback to device
+speech is a legitimate shipping state. Run the validator locally anyway; failing in CI
+after a push is a slower way to learn the same thing.
 
 Upload from `.../upload/main/audio` so the breadcrumb reads *hockey-iq-rink / audio*.
 
