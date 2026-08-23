@@ -137,7 +137,14 @@ select,input{touch-action:manipulation}
 .rinkwrap{flex:1;min-height:0;width:auto;max-width:100%;margin:0 auto;position:relative;
   background:var(--bg2);border:1px solid var(--line);
   border-radius:13px;overflow:hidden;display:flex}
-.zoomb{position:absolute;right:8px;top:8px;z-index:4;min-width:52px;height:44px;padding:0 10px;
+/* ---- stacking tiers inside .rinkwrap, and the only place these numbers are decided ----
+   1  the ice itself (static)
+   4  informational overlay  .pov      - prompts and results, never takes pointer events
+   5  live controls          .zoomb    - must sit ABOVE the prompt layer so it stays visible
+   7  modal overlays         .stageover- must sit ABOVE controls: nothing is operable behind
+                                         a scrim the kid is meant to be answering
+   Picking these one at a time is what put the zoom control on top of the intro modal. */
+.zoomb{position:absolute;right:8px;top:8px;z-index:5;min-width:52px;height:44px;padding:0 10px;
   border-radius:12px;border:1px solid rgba(20,32,52,.18);background:rgba(255,255,255,.86);
   color:#25406b;font-size:12px;font-weight:800;letter-spacing:.06em;cursor:pointer;
   display:flex;align-items:center;justify-content:center}
@@ -210,8 +217,68 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
   color:var(--dim);font-size:12.5px;font-weight:750;padding:0 8px}
 .pacer button.on{background:var(--hi);border-color:var(--hi);color:#fff}
 
+/* ======== Play mode: the decision loop, drawn on the ice ======== */
+.pov{position:absolute;inset:0;z-index:4;display:none;flex-direction:column;
+  padding:8px 8px 13px;pointer-events:none;gap:8px}
+.pov.on{display:flex}
+/* The prompt bar has no interactive children, so it must not take pointer events: it
+   swallowed taps across its whole box, and the box grows with the prompt's length - which
+   made a longer lead sit on top of the DRAG ME token and block the drag entirely. Same
+   cause as the option tray, which was fixed and this was not. */
+.povtop{align-self:center;max-width:96%;display:flex;align-items:baseline;gap:9px;
+  background:rgba(6,11,20,.78);border:1px solid rgba(255,255,255,.14);border-radius:12px;
+  padding:8px 13px;pointer-events:none;backdrop-filter:blur(7px)}
+.povstep{flex:0 0 auto;font-size:10.5px;font-weight:800;letter-spacing:.09em;
+  text-transform:uppercase;color:#8fa4c4;white-space:nowrap}
+.povmsg{font-size:14.5px;font-weight:650;line-height:1.3;color:#eaf1fb;text-wrap:pretty}
+.povnudge{color:#ffc629;font-weight:700}
+/* pointer-events live on the CONTROLS, never on the tray: the tray spans the width of
+   the ice, and with auto it was a dead strip he could not drag his own man into. */
+.povopts{margin-top:auto;display:flex;flex-wrap:wrap;gap:9px;justify-content:center;
+  pointer-events:none}
+/* an empty tray kept its auto top margin, which pinned the result card to the lower half
+   of the ice however .attop was set - so the card could never actually move out of the
+   way of the thing it was describing */
+.povopts:empty{margin-top:0;display:none}
+.povopt{min-height:52px;min-width:112px;padding:8px 17px;border-radius:13px;
+  background:rgba(10,17,30,.86);border:1.5px solid rgba(255,255,255,.2);color:#eaf1fb;
+  font-size:15px;font-weight:750;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:1px;line-height:1.15;backdrop-filter:blur(7px);pointer-events:auto}
+.povopt small{font-size:10.5px;font-weight:650;letter-spacing:.03em;text-transform:uppercase}
+.povopt.open{border-color:rgba(127,214,162,.66)} .povopt.open small{color:#7fd6a2}
+.povopt.shut{border-color:rgba(191,30,46,.62)} .povopt.shut small{color:#ff8b96}
+.povopts.wait .povopt{animation:povp 1.7s ease-in-out infinite}
+@keyframes povp{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media (hover:hover){.povopt:hover{background:rgba(22,37,63,.94);border-color:#7a95c4}}
+.povopt:active{transform:scale(.97)}
+.povres{margin-top:auto;align-self:center;max-width:min(560px,88%);display:none;flex-direction:column;
+  gap:7px;background:rgba(6,11,20,.88);border:1px solid rgba(255,255,255,.15);
+  border-radius:13px;padding:11px 14px;pointer-events:auto;backdrop-filter:blur(8px);
+  max-height:44%;overflow:hidden}
+.povbody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;gap:7px}
+.povres.on{display:flex}
+/* the card is 84% of the ice on a phone, so which HALF it sits in decides whether he can
+   see the thing it is describing. Anchor it away from the action, not always at the boards. */
+.povres.attop{margin-top:0;margin-bottom:auto}
+.povres b{font-size:15.5px;font-weight:850;letter-spacing:.01em}
+.povres b.great{color:#7fd6a2} .povres b.good{color:#ffc629} .povres b.off{color:#ff8b96}
+.povres p{margin:0;font-size:13.5px;line-height:1.42;color:#cfdcee;text-wrap:pretty}
+.povaxes{display:flex;gap:13px;font-size:11.5px;font-weight:800;letter-spacing:.05em}
+.povaxes span.ok{color:#7fd6a2} .povaxes span.no{color:#ff8b96}
+.povrow{flex:0 0 auto;display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+.povrow button{min-height:46px;padding:8px 16px;border-radius:11px;border:1px solid var(--line);
+  background:var(--bg3);color:inherit;font-size:14px;font-weight:700}
+.povrow button.hot{background:var(--hi);border-color:var(--hi);color:#fff}
+.povsum{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#cfdcee}
+.povsum i{color:#8fa4c4;font-style:normal}
+@media (max-width:700px){
+  .povmsg{font-size:13.5px} .povopt{min-width:98px;font-size:14px;padding:8px 13px}
+  .povres p{font-size:13px}
+}
+
 /* ======== setting the stage: what is happening, then who you are ======== */
-.stageover{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;
+.stageover{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;
   padding:18px;background:rgba(6,11,20,.82)}
 .stageover.on{display:flex}
 .stagecard{width:100%;max-width:460px;text-align:center;display:flex;flex-direction:column;
@@ -256,9 +323,20 @@ input[type=range]{accent-color:var(--us2)}
 /* ======== right rail ======== */
 .railwrap{flex:0 0 372px;border-left:1px solid var(--line);background:var(--bg2);
   display:flex;flex-direction:column;min-height:0}
+/* The actions must stay reachable, and a .spacer{flex:1} collapses to zero once content
+   overflows so it can never pin them. First attempt moved overflow and gap off .rail onto a
+   new .railbody - but four of the six rail builders never emit that wrapper, so they
+   silently lost scrolling and spacing. So .rail keeps its own contract exactly as it was,
+   and the footer is made sticky instead: a rail that never opts in behaves as before. */
 .rail{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;
   padding:12px calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) 12px;
   overflow:auto;-webkit-overflow-scrolling:touch}
+.railbody{display:flex;flex-direction:column;gap:10px}
+.railfoot{flex:0 0 auto;background:var(--bg2);border-top:1px solid var(--line);
+  padding:10px calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) 12px;
+  display:flex;flex-direction:column;gap:8px}
+/* in the scroller (bottom sheet) it is ordinary content: no band, no second safe-area inset */
+.rail > .railfoot{background:none;border-top:0;padding:8px 0 0}
 .grab{display:none;align-items:center;gap:9px;width:100%;padding:9px 14px 7px;
   background:var(--bg2);border-bottom:1px solid var(--line)}
 .grab .bar{width:36px;height:4px;border-radius:99px;background:#41557d;flex:0 0 auto}
@@ -678,6 +756,11 @@ input[type=range]{accent-color:var(--us2)}
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
         <button class="zoomb" id="zoomb" title="Zoom in on the play">ZOOM</button>
         <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
+        <div class="pov" id="pov">
+          <div class="povtop"><span class="povstep" id="povstep">Step</span><span class="povmsg" id="povmsg"></span></div>
+          <div class="povopts" id="povopts"></div>
+          <div class="povres" id="povres"></div>
+        </div>
       </div>
       <div class="callbar" id="callbar"></div>
       <div class="readbar" id="readbar">
@@ -692,13 +775,13 @@ input[type=range]{accent-color:var(--us2)}
       <div class="quickbar" id="quickbar">
         <div class="qr"><span class="qlab">You are</span><div class="qpos" id="qposlist"></div></div>
         <div class="qr qr2">
-          <button class="qquiz alt" id="qgotry">Try it &#9654;</button>
-          <button class="qquiz" id="qgoquiz">Quiz me &#9654;</button>
+          <button class="qquiz" id="qgoplay">Run the play &#9654;</button>
+          <button class="qquiz alt" id="qgoquiz">Quiz me &#9654;</button>
         </div>
       </div>
       <div class="ctrl" id="ctrlrow">
         <button class="primary" id="play">Play &#9654;</button>
-        <button id="pause"><span class="ic">&#9646;&#9646;</span><span class="lbl"> Pause</span></button>
+        <button id="pause" disabled><span class="ic">&#9646;&#9646;</span><span class="lbl"> Pause</span></button>
         <button id="back">&#9664;</button>
         <button id="fwd">&#9654;</button>
         <button id="reset">Reset</button>
@@ -798,6 +881,17 @@ input[type=range]{accent-color:var(--us2)}
       <span id="ratelabel" style="width:36px;text-align:right"></span></label>
     <div class="help" id="voicehint" style="margin-top:7px"></div>
     <div class="help" id="speaknote" style="margin-top:5px"></div>
+    <h4>His progress</h4>
+    <div class="help" style="margin-bottom:7px">Every play he has run, as text. Copy it somewhere
+      safe - there is no account and no backup. Paste it back to restore.</div>
+    <div class="coachrow" style="margin-bottom:7px">
+      <button class="mbtn" id="progcopy" style="padding:9px 14px;font-size:13px">Copy his progress</button>
+      <button class="mbtn" id="progpaste" style="padding:9px 14px;font-size:13px">Restore from text</button>
+    </div>
+    <textarea id="progbox" class="cinput" spellcheck="false" style="width:100%;min-height:88px;
+      font-size:11.5px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.35;
+      resize:vertical"></textarea>
+    <div class="help" id="proghint" style="margin-top:5px"></div>
     <h4>Show on the ice</h4>
     <div class="toggles">
       <label class="chk"><input type="checkbox" id="t-roles" checked> Label the other team</label>
@@ -825,6 +919,7 @@ input[type=range]{accent-color:var(--us2)}
     <button class="mbtn" id="audiotest" style="padding:9px 14px;font-size:13px;margin-top:7px">Play a real voice file</button>
     <div class="help" style="margin-top:12px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px">
       Build <b id="buildstamp">-</b> &middot; if this is not the build you just pushed, the device is serving a cached copy: pull down to refresh, or close and reopen the app.</div>
+    <div class="help" id="cachestamp" style="margin-top:4px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px">Reading the offline cache&hellip;</div>
     <button class="closebtn" id="closeset">Done</button>
   </div>
 </div>
@@ -981,8 +1076,9 @@ function checkSituation(x){
   if(!str(x.about)) e.push('about is required');
   if(['D','T','O'].indexOf(x.phase)<0) e.push('phase must be D, T or O');
   if(!num(x.order)) e.push('order must be a number');
-  if(!Array.isArray(x.ages)||!x.ages.length) e.push('ages must be a non-empty array');
-  else x.ages.forEach(a=>{ if(AGEBANDS.indexOf(a)<0) e.push('illegal age band '+a); });
+  const lv=(x.level||x.ages);
+  if(!Array.isArray(lv)||!lv.length) e.push('level must be a non-empty array');
+  else lv.forEach(a=>{ if(AGEBANDS.indexOf(a)<0) e.push('illegal level '+a); });
   if(!Array.isArray(x.focus)||x.focus.length!==4||!x.focus.every(num)) e.push('focus must be [x,y,w,h]');
   if(!Array.isArray(x.roster)||!x.roster.length) e.push('roster must be a non-empty array');
   else x.roster.forEach(p=>{ if(ours.indexOf(p)<0) e.push('unknown roster code '+p); });
@@ -1194,6 +1290,25 @@ const FORMATIONS=[
   them:{X1:[101.5,42.5],X2:[108,22],X3:[108,63],X4:[120,34],X5:[120,52]},
   puck:[100,42.5,null]}
 ];
+/* Nine of these carried their own hand-copied coordinates of a play that situations.js
+   also teaches, and the copies drifted - fc212 had quietly become a mirror image of the
+   real 2-1-2, which cost an afternoon to diagnose. Derive them from the taught play so a
+   formation can never contradict the situation it is named after. Everything left literal
+   above is a builder-only template with no taught counterpart. */
+[['pp131','pp','131'],['pkbox','pk','box'],['fc122','forecheck','122'],
+ ['fc212','forecheck','212'],['nztrap','nztrap','122'],['bo','breakout','wall'],
+ ['r21','rushtwo','wide'],['fod','faceoff','dzone'],['foo','faceoff','ozone']
+].forEach(pair=>{
+  const f=FORMATIONS.find(x=>x.id===pair[0]); if(!f) return;
+  const all=(typeof SITUATIONS!=='undefined'&&SITUATIONS)||[];
+  const sit=all.find(x=>x.id===pair[1]);
+  const v=sit&&(sit.variants||[]).find(x=>x.id===pair[2]);
+  const fr=v&&v.frames&&v.frames[0];
+  if(!fr||!fr.us||!fr.puck) return;          // data missing: keep the literal it shipped with
+  f.us=Object.assign({},fr.us);
+  f.them=Object.assign({},fr.them||{});
+  f.puck=fr.puck.slice();
+});
 const FORMKEYS={
   blank:['blank','empty','from scratch','start fresh','nothing','my own'],
   pp131:['1-3-1','131','one three one','power play','powerplay','pp','5 on 4','man advantage','bumper'],
@@ -1245,7 +1360,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-22.71';
+const BUILD='2026-08-23.145';
+/* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
+   this against what the active worker reports, so a mismatch shows up on the device
+   instead of hiding. */
+const SWCACHE='hockey-iq-v148';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1402,6 +1521,32 @@ function puckAt(t){
   return {p,w};
 }
 function frameIdx(t){ const f=frames(); let i=0; for(let j=0;j<f.length;j++) if(t>=f[j].t-1e-9) i=j; return i; }
+/* Which way the carrier is facing, as a unit vector in DISPLAY space (so it survives
+   rotate and flip). His own motion first; if he is standing still, the puck's own
+   motion; if nothing is moving, the way he is attacking. Never a fixed corner - that
+   is what put the puck behind players skating the other way. */
+function carryDir(id,t){
+  const f=frames(), span=f.length?f[f.length-1].t:1;
+  /* frame t is normalised 0..1 per play, so a fixed window averaged most of the play
+     and pointed the puck sideways through every turn. Sample a short step INSIDE the
+     current leg, clamped so it never straddles a keyframe where the route bends. */
+  const i=frameIdx(t), a=f[i]?f[i].t:0, last=!f[i+1];
+  const b=last?a:f[i+1].t;
+  const lo=last?(f[i-1]?f[i-1].t:0):a, hi=last?a:b;
+  const dt=Math.max(span/600,(hi-lo)/24);
+  const t0=Math.max(lo,t-dt), t1=Math.min(hi>lo?hi:span,t+dt);
+  const unit=(p,q)=>{ if(!p||!q)return null;
+    const A=disp(p),B=disp(q),L=Math.hypot(B[0]-A[0],B[1]-A[1]);
+    return L<1e-4?null:[(B[0]-A[0])/L,(B[1]-A[1])/L]; };   // direction only - length is dt-dependent
+  let d=unit(shown(id,t0),shown(id,t1));                 // where he is skating
+  if(!d) d=unit(puckAt(t0).p,puckAt(t1).p);               // standing still, but moving it
+  if(!d){                                                // nothing moving: face the net he attacks
+    const here=shown(id,t)||[100,42.5];
+    const net=(OURPOS.includes(id)||id==='G')?[189,42.5]:[11,42.5];
+    d=unit(here,net)||[1,0];
+  }
+  return d;
+}
 function phaseAt(t){
   const a=(PHASEFRAMES[S.sit.id]||{})[variant().id];
   return (a&&a[frameIdx(t)])||S.sit.phase;
@@ -1447,7 +1592,7 @@ function landmark(key,t){
   return shown(key,t);
 }
 function eff(k){
-  if(S.mode==='build'||S.mode==='try'||S.mode==='coach')
+  if(S.mode==='build'||S.mode==='try'||S.mode==='coach'||S.mode==='play')
     return ['ghost','look','space','pass'].includes(k)?false:S.opt[k];
   if(TEST.active&&!TEST.done){
     const q=TEST.qs[TEST.i];
@@ -1483,7 +1628,24 @@ function camera(){
   const a=frameBox(i), b=frameBox(j);
   const t0=f[i].t, t1=f[j].t;
   const u=t1>t0?Math.max(0,Math.min(1,(S.t-t0)/(t1-t0))):0;
-  return a.map((n,k)=>+(n+(b[k]-n)*u).toFixed(2));
+  let box=a.map((n,k)=>+(n+(b[k]-n)*u).toFixed(2));
+  /* Play mode: the camera must contain the consequence. A pass that sails 15ft past the
+     receiver can die outside the frame the play was zoomed to, and then the kid is told
+     it went wrong somewhere he cannot see - clamping the label to the edge only hid it
+     more politely. Widen the box instead. */
+  if(S.mode==='play'&&PLAY.phase==='shown'&&PLAY.res&&PLAY.res.posFault&&PLAY.res.posFault.at)
+    box=includePt(box,PLAY.res.posFault.at,9);
+  if(S.mode==='play'&&PLAY.hold) box=includePt(box,PLAY.hold,7);
+  return box;
+}
+/* grow a viewBox so a point sits inside it with margin, keeping it on the rink */
+function includePt(box,p,pad){
+  let x0=box[0], y0=box[1], x1=box[0]+box[2], y1=box[1]+box[3];
+  x0=Math.min(x0,p[0]-pad); x1=Math.max(x1,p[0]+pad);
+  y0=Math.min(y0,p[1]-pad); y1=Math.max(y1,p[1]+pad);
+  x0=Math.max(-6,x0); y0=Math.max(-6,y0);
+  x1=Math.min(206,x1); y1=Math.min(91,y1);
+  return [+x0.toFixed(2),+y0.toFixed(2),+(x1-x0).toFixed(2),+(y1-y0).toFixed(2)];
 }
 
 /* Is a placement question live and still unanswered? Everything below hangs off this. */
@@ -1535,16 +1697,85 @@ function drawDragMe(p){
     dur:'1.6s',repeatCount:'indefinite'}));
   ring.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0.15;0.95',dur:'1.6s',repeatCount:'indefinite'}));
   g.appendChild(ring);
-  const vb=S.vb||FULLVIEW, below=p[1]<26;             // top of the ice belongs to the zone words
-  let ly=below?p[1]+r*4.4:p[1]-r*3.1;
-  ly=Math.max(vb[1]+FS(4.2),Math.min(vb[1]+vb[3]-FS(1.6),ly));
-  g.appendChild(el('path',{d:below
-    ?'M'+(p[0]-1.6)+','+(ly-2.6)+' L'+(p[0]+1.6)+','+(ly-2.6)+' L'+p[0]+','+(ly-4.7)+' z'
-    :'M'+(p[0]-1.6)+','+(ly+1.1)+' L'+(p[0]+1.6)+','+(ly+1.1)+' L'+p[0]+','+(ly+3.2)+' z',
-    fill:'#c98a00'}));
-  ['#fff','#8a6000'].forEach((col,i)=>g.appendChild(el('text',Object.assign(
-    {x:p[0],y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,fill:col},
-    i===0?{stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'}:{}),'DRAG ME')));
+  /* This label used to be placed by a hard-coded p[1]<26 flip that consulted nothing,
+     while the opponent role labels go through roleSpot's collision avoidance - two
+     independent rules for the same ice, so they overlapped and the primary instruction
+     came out as "DRA_ ME" with a role label struck through it. Ask the ice instead:
+     measure the labels already drawn and take the nearest slot that is clear. */
+  const vb=S.vb||FULLVIEW, lh=FS(4.4);
+  const boxes=[];
+  ['labels','tok','look','pass'].forEach(id=>{
+    const L=layer(id); if(!L) return;
+    [...L.querySelectorAll('text')].forEach(t=>{ try{ const b=t.getBBox();
+      if(b.width&&b.height) boxes.push(b); }catch(e){} });
+  });
+  /* The avoidance set was SVG text only, so it had no idea the HTML prompt bar sits over
+     the ice and happily chose a slot underneath a 78%-opaque panel - the drag still worked
+     but the words telling him to drag were unreadable. Map the overlay's client rect into
+     rink space and treat it as one more thing to dodge. */
+  const base=layer('tok')||svg;
+  let ctm=null; try{ ctm=base.getScreenCTM(); }catch(e){}
+  if(ctm){
+    const inv=ctm.inverse();
+    ['.povtop','.povres.on'].forEach(sel=>{
+      const nd=document.querySelector(sel); if(!nd) return;
+      const q=nd.getBoundingClientRect();
+      if(!q.width||!q.height) return;
+      const a=new DOMPoint(q.left,q.top).matrixTransform(inv);
+      const b=new DOMPoint(q.right,q.bottom).matrixTransform(inv);
+      boxes.push({x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),
+        width:Math.abs(b.x-a.x),height:Math.abs(b.y-a.y)});
+    });
+  }
+  const probe=el('text',{'font-size':FS(3),'text-anchor':'middle','font-weight':850,
+    'letter-spacing':0.2},'DRAG ME');
+  g.appendChild(probe);
+  let lw=0; try{ lw=probe.getComputedTextLength(); }catch(e){}
+  if(!lw) lw=FS(3)*5.4;
+  const clear=(x,y)=>{
+    const a={x:x-lw/2-0.5,y:y-lh*0.8,w:lw+1,h:lh};
+    if(a.x<vb[0]+0.5||a.x+a.w>vb[0]+vb[2]-0.5) return false;
+    if(a.y<vb[1]+0.5||a.y+a.h>vb[1]+vb[3]-0.5) return false;
+    return !boxes.some(b=>a.x<b.x+b.width&&a.x+a.w>b.x&&a.y<b.y+b.height&&a.y+a.h>b.y);
+  };
+  const cands=[[0,-r*3.1],[0,r*4.6],[-lw*0.62,-r*0.6],[lw*0.62,-r*0.6],
+    [0,-r*5.8],[0,r*7.2],[-lw*0.62,-r*4],[lw*0.62,-r*4],
+    [-lw*0.62,r*4.4],[lw*0.62,r*4.4],[0,-r*8.5],[0,r*9.8]];
+  let lx=p[0], ly=p[1]-r*3.1, found=false;
+  for(const [dx,dy] of cands){
+    const x=p[0]+dx, y=p[1]+dy;
+    if(clear(x,y)){ lx=x; ly=y; found=true; break; }
+  }
+  if(!found){
+    /* Nowhere on the ice is clear. The instruction telling him what to do outranks an
+       opponent's role tag, so clamp the label and fade whatever it lands on rather than
+       printing the two through each other. */
+    lx=Math.max(vb[0]+lw/2+1,Math.min(vb[0]+vb[2]-lw/2-1,p[0]));
+    ly=Math.max(vb[1]+lh,Math.min(vb[1]+vb[3]-lh*0.4,p[1]-r*3.1));
+    const a={x:lx-lw/2-0.5,y:ly-lh*0.8,w:lw+1,h:lh};
+    ['labels','tok','look','pass'].forEach(id=>{
+      const L=layer(id); if(!L) return;
+      [...L.querySelectorAll('text')].forEach(t=>{
+        try{ const b=t.getBBox();
+          if(a.x<b.x+b.width&&a.x+a.w>b.x&&a.y<b.y+b.height&&a.y+a.h>b.y)
+            t.setAttribute('opacity','0');
+        }catch(e){}
+      });
+    });
+  }
+  probe.setAttribute('x',lx); probe.setAttribute('y',ly);
+  probe.setAttribute('fill','#8a6000');
+  const halo=el('text',{x:lx,y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,
+    'letter-spacing':0.2,fill:'#fff',stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'},'DRAG ME');
+  g.insertBefore(halo,probe);
+  /* the pointer only makes sense when the label sits directly above or below him */
+  if(Math.abs(lx-p[0])<1.2){
+    const below=ly>p[1];
+    g.insertBefore(el('path',{d:below
+      ?'M'+(p[0]-1.6)+','+(ly-2.6)+' L'+(p[0]+1.6)+','+(ly-2.6)+' L'+p[0]+','+(ly-4.7)+' z'
+      :'M'+(p[0]-1.6)+','+(ly+1.1)+' L'+(p[0]+1.6)+','+(ly+1.1)+' L'+p[0]+','+(ly+3.2)+' z',
+      fill:'#c98a00'}),halo);
+  }
 }
 
 /* ---------------- Try mode: what his spot costs ----------------
@@ -1623,7 +1854,19 @@ function tryEval(i){
       why:sa<0?'You should be between the puck and our net, not up ice of it.'
               :'You should be up ice of the puck, not behind it.',
       say:'You were on the wrong side of the puck.'};
-  /* 4. the middle given away */
+  /* 4. no width. This test existed only on the decision path, so the position grader
+     could not name the one mistake rushtwo/narrow is authored to demonstrate - the
+     bidirectional check caught that. Width is a placement fault, so it belongs here. */
+  const wc=puckAt(t).w, cp=wc?shown(wc,t):null, ca=wc?target(wc,t):null;
+  if(cp&&ca&&wc!==S.pos){
+    const asep=Math.abs(auth[1]-ca[1]), sep=Math.abs(me[1]-cp[1]);
+    if(asep>=18&&sep<12)
+      return {at:me,msg:'NO WIDTH',
+        why:'You and the puck are '+Math.round(sep)+' feet apart, in the same lane. '+
+            'One defenceman covers both of you.',
+        say:'You were in the same lane as the puck.'};
+  }
+  /* 5. the middle given away */
   if(auth[1]>30&&auth[1]<55&&(me[1]<26||me[1]>59))
     return {at:[Math.min(188,Math.max(12,me[0])),42.5],msg:'MIDDLE IS OPEN',
       why:'Your spot is the middle lane. You left it, and the middle is the dangerous ice.',
@@ -2207,12 +2450,15 @@ function render(){
   const pq=placeQ();
   if(S.opt.them) THEMIDS.forEach(id=>{
     const p=shown(id,t); if(!p)return;
-    token(id,disp(p),'them',id==='XG'?'G':id.slice(1),(S.opt.roles&&!pq&&dist(p,puckPos)<=18)?roleText(roles[id]):null,pts,pq?true:dist(p,puckPos)>18);
+    token(id,disp(p),'them',id==='XG'?'G':id.slice(1),
+      (S.opt.roles&&!pq&&(S.mode==='play'||dist(p,puckPos)<=18))?roleText(roles[id]):null,
+      pts, pq?true:(S.mode!=='play'&&dist(p,puckPos)>18));
   });
   // draw YOU last so it is always the token on top and always grabbable
   sit.roster.filter(id=>id!==S.pos).forEach(id=>{
     const p=shown(id,t); if(!p)return;
-    token(id,disp(p),'us',id==='G'?'G':id,null,null,pq?true:(id!==pk.w&&dist(p,puckPos)>26));
+    token(id,disp(p),'us',id==='G'?'G':id,null,null,
+      pq?true:(S.mode!=='play'&&id!==pk.w&&dist(p,puckPos)>26));
   });
   if(pq&&TEST.clue>=1) drawClueZone(pq,TEST.clue);
   if(sit.roster.includes(S.pos)){
@@ -2225,6 +2471,7 @@ function render(){
     drawTry(t);
     paintRead();
   }
+  if(S.mode==='play') drawPlay(t);
 
   if(S.mode==='coach') drawPicks();
 
@@ -2263,11 +2510,13 @@ function render(){
     }
   }
 
-  // when somebody is carrying it, tuck the puck onto their stick side so the
-  // player's letter stays readable underneath
-  const carried=!S.manual.PUCK&&pk.w;
-  const pd0=disp(puckPos);
-  const pd=carried?[pd0[0]+2.4,pd0[1]-2.4]:pd0;
+  // when somebody is carrying it, the puck sits AHEAD of them in the direction they
+  // are skating - a player never carries it behind himself. Heading comes from his own
+  // motion, so it is right after a rotation, a flip or a reversal of the play.
+  const fly=(S.mode==='play'&&(PLAY.anim||PLAY.hold))?puckShown():null;
+  const carried=!S.manual.PUCK&&pk.w&&!fly;
+  const pd0=disp(fly||puckPos);
+  const pd=carried?[pd0[0]+carryDir(pk.w,t)[0]*3.4,pd0[1]+carryDir(pk.w,t)[1]*3.4]:pd0;
   const pg=layer('puck');
   const pgrp=el('g',{class:'tok','data-id':'PUCK',style:S.mode==='build'?'cursor:grab':'cursor:default'});
   if(carried) pgrp.appendChild(el('line',{x1:pd0[0],y1:pd0[1],x2:pd[0],y2:pd[1],
@@ -2335,7 +2584,7 @@ function token(id,p,kind,label,role,pts,mute){
   const fill=kind==='them'?(mute?'#e0a7ad':'#bf1e2e'):(kind==='me'?'#ffc629':(mute?'#9ca6c8':'#1b2a6b'));
   const r=TR();
   // an invisible pad so a fingertip can grab it even though the dot is small
-  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:Math.max(7,r*2.2),fill:'transparent','pointer-events':'all'}));
+  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:grabR(),fill:'transparent','pointer-events':'all'}));
   if(kind==='me')g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r*1.6,fill:'#12204f','fill-opacity':0.1}));
   g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r,fill,stroke:kind==='me'?'#12204f':'rgba(255,255,255,.7)','stroke-width':kind==='me'?0.4:0.4}));
   g.appendChild(el('text',{x:p[0],y:p[1]+r*0.35,'font-size':FS(kind==='me'?2.45:2.25),'font-weight':800,
@@ -2414,7 +2663,7 @@ function loadSituation(sitId,varId,keepPos){
   S.sit=s;
   const i=s.variants.findIndex(v=>v.id===varId); S.varIdx=i<0?0:i;
   if(!keepPos&&!s.roster.includes(S.pos)) S.pos=s.roster.includes('C')?'C':s.roster[0];
-  hardReset(); buildVars(); paintRail(); render();
+  hardReset(); buildVars(); paintRail(); render(); playSync();
 }
 
 /* ============================================================
@@ -2705,6 +2954,10 @@ function enumerateAudioScript(){
    'You were too far away to be an option.','You left your man alone.',
    'You were on the wrong side of the puck.','You left the middle of the ice open.',
    'You crossed the blue line before the puck.',
+   'You were in the same lane as the puck.',
+   'You were too far off your man.',
+   'Two of you took the same man.',
+   'You skated into him instead of moving it.',
    'Have another go.','That is a kid who knows where to be.',
    'Solid. Go back to the ones you missed and watch them again.',
    'Good start. Hit Listen in Learn mode and walk through it once more.',
@@ -2801,7 +3054,14 @@ function hardReset(){ stop(); S.t=0; S.manual={}; note(null);
   if(S.mode==='try') tryReset();
   if(S.mode==='coach'){ coachReset(); paintCall(); } }
 function startPlay(target){
-  S.target=Math.min(1,target); if(S.t>=S.target-1e-4)return;
+  S.target=Math.min(1,target);
+  /* At the end of a run this used to return here and do nothing, leaving Play inert and
+     Pause dimmed with no way back except Reset. Play at the end means run it again - only
+     the clock rewinds, his placement survives. */
+  if(S.t>=S.target-1e-4){
+    if(S.target<1-1e-4) return;
+    S.t=0;
+  }
   if(S.raf) cancelAnimationFrame(S.raf);        // never run two loops at once
   S.gen++;                                      // any speech callback still pending is stale now
   S.narrating=false;
@@ -2946,6 +3206,7 @@ function stagePositions(){
 function pickStagePos(pos){
   S.pos=pos; clearStage();
   hardReset(); paintRail(); render();
+  if(S.intent==='play'){ S.intent=null; playStart(); return; }
   const c=(S.sit.coach||{})[pos];
   let L=chunk('You are the '+POSNAMES[pos]+'.',{rate:0.95,pause:250});
   if(c&&c.job) L=L.concat(chunk('Your job. '+c.job,{rate:0.9,pause:200,tail:380}));
@@ -2963,7 +3224,7 @@ function showScreen(name){
 }
 $('p-back').onclick=()=>{
   clearStage(); stop();
-  if(S.mode==='quiz'||S.mode==='build'||S.mode==='try'||S.mode==='coach'){ setMode('learn'); return; }
+  if(S.mode==='quiz'||S.mode==='build'||S.mode==='try'||S.mode==='coach'||S.mode==='play'){ setMode('learn'); return; }
   showScreen('menu');
 };
 $('m-howto').onclick=()=>mask('help',true);
@@ -2976,6 +3237,59 @@ function syncQuizAllLabel(){
 function mask(which,on){ $('mask-'+which).classList.toggle('on',on); }
 $('closehelp').onclick=()=>{ mask('help',false); try{localStorage.setItem('hiq_seen','1');}catch(e){} };
 $('closeset').onclick=()=>mask('set',false);
+/* Progress export/import. 24 records is his entire history and the recovery path was
+   nothing, so this is the only backstop before the next shape change - and it is what a
+   real device snapshot can be handed to for testing a migration. */
+function progText(){
+  let play='{}', tryS='{}';
+  try{ play=localStorage.getItem(playKeyNS())||'{}'; }catch(e){}
+  try{ tryS=localStorage.getItem(TRYKEY)||'{}'; }catch(e){}
+  let lvl=null; try{ lvl=localStorage.getItem('hiq_level'); }catch(e){}
+  return JSON.stringify({v:1,build:BUILD,at:new Date().toISOString(),
+    play:JSON.parse(play),stars:JSON.parse(tryS),level:lvl},null,1);
+}
+function progCount(o){
+  try{ return Object.keys((o&&o.play)||{}).length; }catch(e){ return 0; }
+}
+$('progcopy').onclick=()=>{
+  const t=progText(), box=$('progbox');
+  box.value=t; box.focus(); box.select();
+  const n=progCount(JSON.parse(t));
+  const tail=n+' play'+(n===1?'':'s')+' saved.';
+  /* writeText returns a PROMISE: a try/catch only sees synchronous throws, so the old code
+     claimed "Copied." before it settled and swallowed the rejection. For the one control
+     that is his only backup, a false success is the worst possible failure - so the hint is
+     written from the outcome, never ahead of it. */
+  const say=ok=>{ $('proghint').textContent=(ok?'Copied. ':'Select the text above and copy it. ')+tail; };
+  let sync=false;
+  try{ sync=document.execCommand('copy'); }catch(e){}
+  if(sync){ say(true); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    say(false);                                  // truthful until proven otherwise
+    navigator.clipboard.writeText(t).then(()=>say(true),()=>say(false));
+    return;
+  }
+  say(false);
+};
+$('progpaste').onclick=()=>{
+  const raw=($('progbox').value||'').trim();
+  if(!raw){ $('proghint').textContent='Paste the text in the box first.'; return; }
+  let o=null;
+  try{ o=JSON.parse(raw); }catch(e){ $('proghint').textContent='That is not the progress text - nothing changed.'; return; }
+  if(!o||typeof o!=='object'||!o.play){ $('proghint').textContent='That text has no progress in it - nothing changed.'; return; }
+  const before=(()=>{ try{ return Object.keys(JSON.parse(localStorage.getItem(playKeyNS())||'{}')).length; }catch(e){ return 0; } })();
+  const merged=(()=>{ try{ return Object.assign(JSON.parse(localStorage.getItem(playKeyNS())||'{}'),o.play); }
+    catch(e){ return o.play; } })();
+  try{
+    localStorage.setItem(playKeyNS(),JSON.stringify(merged));
+    if(o.stars) localStorage.setItem(TRYKEY,JSON.stringify(o.stars));
+    if(o.level) localStorage.setItem('hiq_level',String(o.level));
+  }catch(e){ $('proghint').textContent='This browser would not let me save it.'; return; }
+  const after=Object.keys(merged).length;
+  $('proghint').textContent='Restored. '+before+' play'+(before===1?'':'s')+' before, '+
+    after+' now. Nothing was deleted.';
+  loadAge(); buildAgeBar(); buildMenu();
+};
 /* Which of the three things went wrong: no manifest entry, no file, or iOS refusing
    to play. The console cannot be read on a phone, so it goes on screen. */
 const PROBE='which-one-are-you-gusetl';
@@ -2990,6 +3304,43 @@ function audioDiag(msg){
     'Fell back to robot voice - locked '+(f.locked||0)+', missing '+(f.missing||0)+', other '+(f.other||0)+
     (lf?'<br>Last: <b>'+esc(String(lf.id))+'</b> '+esc(String(lf.reason||''))+(lf.kind?' ['+lf.kind+']':''):'');
 }
+/* Second line of the build receipt: did THIS bundle actually take over the device?
+   It is a comparison, not an inventory - SWCACHE is what this bundle expects, and the
+   serving name comes back from the active worker itself. Silence is reported as silence;
+   no branch infers "up to date" from the absence of an error. */
+function swServingCache(ms){
+  return new Promise(res=>{
+    const c=navigator.serviceWorker&&navigator.serviceWorker.controller;
+    if(!c) return res(null);
+    let done=false; const fin=v=>{ if(!done){ done=true; res(v); } };
+    const t=setTimeout(()=>fin(null), ms||1500);
+    try{
+      const ch=new MessageChannel();
+      ch.port1.onmessage=e=>{ clearTimeout(t); fin((e.data&&e.data.hiqCache)||null); };
+      c.postMessage({q:'hiq-cache'},[ch.port2]);
+    }catch(e){ clearTimeout(t); fin(null); }
+  });
+}
+function cacheStamp(){
+  const box=$('cachestamp'); if(!box)return;
+  swServingCache().then(serving=>{
+    const head = serving===SWCACHE
+      ? 'Expects '+SWCACHE+' and that is what is serving - this device has the new bundle.'
+      : (serving
+        ? 'Expects '+SWCACHE+' but '+serving+' is serving - the OLD bundle is still active. Close every tab of this app and reopen it.'
+        : 'Expects '+SWCACHE+'; nothing is serving it yet, so this page came off the network. Reopen the app to run it offline.');
+    if(!('caches' in window)){ box.textContent=head+' Stored copies: this browser will not let the page read them.'; return; }
+    caches.keys().then(ks=>{
+      const mine=ks.filter(k=>/^hockey-iq-v\d+$/.test(k))
+        .sort((a,b)=>parseInt(b.slice(11),10)-parseInt(a.slice(11),10));
+      const shown=mine.slice(0,3), rest=mine.length-shown.length;
+      box.textContent = head+' '+(mine.length
+        ? 'Stored: '+shown.join(', ')+(rest>0?' +'+rest+' older':'')+'.'
+        : 'Nothing stored offline yet.');
+    }).catch(e=>{ box.textContent=head+' Stored copies could not be read ('+((e&&e.name)||'error')+').'; });
+  });
+}
+
 function audioProbe(){
   const id=AUDIO.have[PROBE]?PROBE:Object.keys(AUDIO.have)[0];
   if(!id){ audioDiag('No baked lines at all - manifest.json is empty or did not load.'); return; }
@@ -3041,7 +3392,9 @@ function openSituation(s,mode){
   loadSituation(s.id,s.variants[0].id);
   showScreen('play');
   primeSpeech(); unlockAudioEl();
-  if(mode==='try'){ setMode('try'); paintRail(); render(); return; }
+  /* Play is the destination now, not a sibling of Watch. The stage still runs first - what
+     is happening, then who you are - and lands in the loop instead of the walkthrough. */
+  S.intent=(mode==='play')?'play':null;
   setMode('learn');
   stageSituation();
 }
@@ -3087,32 +3440,39 @@ function menuCard(sit,col,sub){
     +'<span class="mact"><span class="mgo">Watch it &#9654;</span>'
       +'<span class="mgo mplay">Play it &#9654;</span></span>'
     +'<span class="msub">'+esc(sub)+'</span>';
-  b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'try':null);
+  b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'play':null);
   return b;
 }
-/* Bands come from situations.js and nowhere else - no list of ages lives in this file.
-   Order is derived by reading the number off each band, so adding 6U needs no code. */
+/* Levels come from situations.js and nowhere else - no list lives in this file. Order is
+   derived by reading the number off each label, so adding 6U needs no code.
+   This is AUTHORED content metadata: which levels a situation is taught at. The app never
+   asks a player his age and stores nothing about him - the one saved value is the filter
+   he tapped, on his own device. */
 function ageBands(){
   const seen={};
-  SITUATIONS.forEach(s=>(s.ages||[]).forEach(a=>{ seen[a]=1; }));
+  SITUATIONS.forEach(s=>levelsOf(s).forEach(a=>{ seen[a]=1; }));
   return Object.keys(seen).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
 }
-const ageOk=s=>!S.age||(s.ages||[]).indexOf(S.age)>=0;
+const levelsOf=s=>(s&&(s.level||s.ages))||[];
+const ageOk=s=>!S.age||levelsOf(s).indexOf(S.age)>=0;
 function loadAge(){
-  try{ const v=localStorage.getItem('hiq_age');
-    if(v&&ageBands().indexOf(v)>=0) S.age=v; }catch(e){}
+  try{
+    let v=localStorage.getItem('hiq_level');
+    if(v==null){ v=localStorage.getItem('hiq_age'); if(v!=null) localStorage.setItem('hiq_level',v); }
+    if(v&&ageBands().indexOf(v)>=0) S.age=v;
+  }catch(e){}
 }
 function saveAge(){
-  try{ if(S.age) localStorage.setItem('hiq_age',S.age); else localStorage.removeItem('hiq_age'); }catch(e){}
+  try{ if(S.age) localStorage.setItem('hiq_level',S.age); else localStorage.removeItem('hiq_level'); }catch(e){}
 }
 function buildAgeBar(){
   const bar=$('agebar'); if(!bar) return;
   const shown=SITUATIONS.filter(ageOk).length, all=SITUATIONS.length;
-  bar.innerHTML='<span class="agelab">Age group</span>'+
-    '<button class="chip'+(S.age?'':' on')+'" data-age="">All ages</button>'+
+  bar.innerHTML='<span class="agelab">Level</span>'+
+    '<button class="chip'+(S.age?'':' on')+'" data-age="">All levels</button>'+
     ageBands().map(a=>'<button class="chip'+(S.age===a?' on':'')+'" data-age="'+a+'">'+a+'</button>').join('')+
     '<div class="agecount">'+(S.age
-      ? shown+' of '+all+' situations are taught at '+S.age+' &middot; tap <b>All ages</b> for the rest'
+      ? shown+' of '+all+' situations are taught at '+S.age+' &middot; tap <b>All levels</b> for the rest'
       : 'Showing all '+all+' situations')+'</div>';
   bar.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
     S.age=b.dataset.age||null; saveAge(); buildAgeBar(); buildMenu(); syncQuizAllLabel();
@@ -3176,8 +3536,10 @@ function buildVars(){
   vl.style.display='flex';
   S.sit.variants.forEach((v,i)=>{
     const b=document.createElement('button');
-    b.className='chip'+(i===S.varIdx?' on':''); b.textContent=v.name;
-    b.onclick=()=>{ S.varIdx=i; hardReset(); buildVars(); paintRail(); render(); if(SPK.on)speakIntro(); };
+    b.className='chip'+(i===S.varIdx?' on':'');
+    b.textContent=v.name+(v.wrong?' \u00b7 watch-only':'');
+    if(v.wrong) b.title='Shows the mistake on purpose - no right answer to score against';
+    b.onclick=()=>{ S.varIdx=i; hardReset(); buildVars(); paintRail(); render(); playSync(); if(SPK.on)speakIntro(); };
     vl.appendChild(b);
   });
 }
@@ -3188,16 +3550,48 @@ function note(cls,html){
   if(!cls){ f.className='feedback'; f.innerHTML=''; return; }
   f.className='feedback show '+cls; f.innerHTML=html;
 }
+/* one assembler, so no rail can grow its actions out of view again */
+function railHTML(body,foot){
+  return '<div class="railbody">'+body+'</div>'+(foot?'<div class="railfoot">'+foot+'</div>':'');
+}
+/* A sticky child always overlays whatever is beneath it - padding only extends the scroll
+   range, so at rest the scope toggle still sat under an opaque footer and a tap there hit
+   "Start the play over". So the footer LEAVES the scroll container: it is moved out to sit
+   beside .rail inside .railwrap, where .rail scrolls in the space that remains and nothing
+   can ever come to rest under it. Rails that emit no footer are untouched. */
+/* Where the footer belongs depends on whether the panel owns its height.
+   Side panel (wrap is static): the footer sits BESIDE the scroller, so nothing can come to
+   rest under it.
+   Bottom sheet (wrap is absolute, height capped by --peek): it must stay INSIDE the
+   scroller - a non-shrinking 132px sibling squeezed .rail's flex:1 basis to 22px and
+   overflowed the clip, so the collapsed peek showed the buttons and none of the content. */
+function railReserve(){
+  const rail=$('rail'), wrap=$('railwrap');
+  if(!rail||!wrap) return;
+  const sheet=getComputedStyle(wrap).position!=='static';
+  /* exactly one footer, wherever it belongs - the previous logic kept a stale outside node
+     AND appended the freshly built one, so footers accumulated on every repaint */
+  const all=[...wrap.querySelectorAll('.railfoot')];
+  const keep=rail.querySelector('.railfoot')||all[all.length-1]||null;
+  all.forEach(n=>{ if(n!==keep) n.remove(); });
+  if(keep) (sheet?rail:wrap).appendChild(keep);
+  const body=rail.querySelector('.railbody');
+  if(body) body.style.paddingBottom='';
+}
 function paintRail(){
   if(S.mode==='learn') railLearn();
   else if(S.mode==='quiz') railQuiz();
   else if(S.mode==='try') railTry();
   else if(S.mode==='coach') railCoach();
+  else if(S.mode==='play') railPlay();
   else railBuild();
+  railReserve();
 }
+/* Stopping at each step IS the premise of the app - a kid reacting, not watching. So it
+   leads, and running it through is the alternative. */
 const PACER='<div class="pacer" id="pacer">'+
-  '<button data-pace="try">Run it through</button>'+
-  '<button data-pace="coach">Stop each step</button></div>';
+  '<button data-pace="coach">Stop each step</button>'+
+  '<button data-pace="try">Run it through</button></div>';
 function wirePacer(){
   const p=$('pacer'); if(!p) return;
   [...p.querySelectorAll('button')].forEach(b=>{
@@ -3218,9 +3612,62 @@ function railCoach(){
   wirePacer();
   $('cstart').onclick=()=>{ coachReset(); paintCall(); render(); };
   $('cwatch').onclick=()=>{ setMode('learn'); };
-  const qt=$('qgotry'); if(qt){ qt.textContent='Start over'; qt.onclick=()=>{ coachReset(); paintCall(); render(); }; }
   const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
   paintCall();
+}
+/* The loop itself lives on the ice. This rail carries only what section E says may sit
+   off it: setup he is allowed to look away for, plus the running two-axis tally. */
+function railPlay(){
+  const c=(S.sit.coach||{})[S.pos];
+  const n=PLAY.pts.length||0;
+  const asks=playAsks();
+  const rd=PLAY.score.filter(s=>s&&s.asked&&s.read===1).length;
+  const ps=PLAY.score.filter(s=>s&&s.pos===1).length;
+  $('rail').innerHTML=railHTML(
+    '<div class="qtype place">Run the play</div>'+
+    '<div class="qtext">'+(PLAY.pace==='through'
+      ? 'The play runs all the way through. Every step still scores where you were standing.'
+      : PLAY.pts.some(p=>p.kind==='cover')
+      ? 'The play stops where you might be tempted to leave your man. Move yourself, then pick who you take.'
+      : (PLAY.pts.some(p=>p.kind==='repo')
+        ? 'The play stops at each spot that matters. Put yourself where you belong and run it.'
+        : 'The play stops at every decision. Move yourself, then pick what the puck should do.'))+'</div>'+
+    '<div class="railh">Reads and position</div>'+
+    '<div style="display:flex;gap:14px;font-size:13px;font-weight:750;margin:0 0 6px">'+
+      (asks?'<span style="color:#7fd6a2">READS '+rd+'/'+asks+'</span>':'')+
+      '<span style="color:#ffc629">POSITION '+ps+'/'+n+'</span></div>'+
+    /* where a resumed or replayed run says so - off the ice, where a long line is free */
+    (PLAY.restored&&PLAY.score.filter(x=>x).length
+      ? '<div style="font-size:12px;color:#93a3bd;margin:0 0 12px">Picked up where you left '+
+        'off &middot; back at decision '+(PLAY.di+1)+' of '+n+'</div>'
+      : (PLAY.last
+        ? '<div style="font-size:12px;color:#93a3bd;margin:0 0 12px">Last run '+
+          (PLAY.last.asks?PLAY.last.read+'/'+PLAY.last.asks+' reads &middot; ':'')+
+          PLAY.last.pos+'/'+PLAY.last.n+
+          ' position &middot; running it again from the top</div>'
+        : '<div style="margin:0 0 12px"></div>'))+
+    '<div class="railh">You are playing</div><div class="posrow" id="poslist"></div>'+
+    '<div class="railh">Coach controls</div>'+
+    '<div class="pacer" id="pacer">'+
+      '<button data-pace="step"'+(PLAY.pace==='step'?' class="on"':'')+'>Stop each step</button>'+
+      '<button data-pace="through"'+(PLAY.pace==='through'?' class="on"':'')+'>Run it through</button>'+
+    '</div>'+
+    '<div class="pacer" id="scoper" style="margin:6px 0 10px">'+
+      '<button data-scope="me"'+(PLAY.scope==='me'?' class="on"':'')+'>Move yourself</button>'+
+      '<button data-scope="any"'+(PLAY.scope==='any'?' class="on"':'')+'>Move anybody</button>'+
+    '</div>'+
+    (c&&c.job?'<div class="railh">Your job</div><p style="font-size:13px;color:#cfdcee;'+
+      'line-height:1.45;margin:0 0 10px">'+esc(c.job)+'</p>':''),
+    '<button class="bigbtn" id="plagain">Start the play over</button>'+
+    '<button class="bigbtn plain" id="plwatch">Watch the right way</button>');
+  buildPos();
+  const wire=(id,key)=>{ const box=$(id); if(!box) return;
+    [...box.querySelectorAll('button')].forEach(b=>{
+      b.onclick=()=>{ const v=b.getAttribute('data-'+key); if(v===PLAY[key]) return;
+        PLAY[key]=v; playScoreClear(); playStart(); }; }); };
+  wire('pacer','pace'); wire('scoper','scope');
+  $('plagain').onclick=()=>{ playScoreClear(); playStart(); };
+  $('plwatch').onclick=()=>{ setMode('learn'); S.t=0; S.manual={}; render(); };
 }
 function railTry(){
   const h='<div class="qtype place">Try it your way</div>'+
@@ -3235,7 +3682,6 @@ function railTry(){
     '<button class="bigbtn plain" id="trywatch">Watch the right way</button>';
   $('rail').innerHTML=h;
   buildPos(); wirePacer();
-  const qt2=$('qgotry'); if(qt2){ qt2.textContent='Try again'; qt2.onclick=()=>{ tryReset(); render(); }; }
   const qq2=$('qgoquiz'); if(qq2) qq2.onclick=()=>{ setMode('quiz'); startTest('sit'); };
   $('tryright').onclick=()=>{ tryReset(); render(); };
   $('trywatch').onclick=()=>{ setMode('learn'); };
@@ -3243,9 +3689,18 @@ function railTry(){
 /* Three stars, stored as names rather than a count, so the puck-decision star can be
    added later without invalidating what he has already earned. */
 const STARDEF=[['steps','Every step'],['call','Right call'],['first','First try']];
+/* Namespaced and versioned, so the next schema change does not have to guess what an
+   un-scoped "hiq_try" contained. NOTE this does NOT separate two kids on one iPad - that
+   needs a profile, and there isn't one. It only stops the key being a bare global. */
+const TRYKEY='hiq_try_v1';
 function tryStore(){
   try{
-    const o=JSON.parse(localStorage.getItem('hiq_try')||'{}');
+    let raw=localStorage.getItem(TRYKEY);
+    if(raw==null){                                  // one-time carry-over from the old key
+      const old=localStorage.getItem('hiq_try');
+      if(old!=null){ localStorage.setItem(TRYKEY,old); raw=old; }
+    }
+    const o=JSON.parse(raw||'{}');
     /* v1 counted any run that did not BREAK the play as clean, so a kid out of position
        on every step kept the streak forever. Those counters are inflated - zero them once. */
     if(o.v!==2&&o.v!==3){ o.streak=0; o.bestStreak=0; }
@@ -3261,7 +3716,7 @@ function tryStore(){
     return o;
   }catch(e){ return {v:3}; }
 }
-function tryStoreSave(o){ try{ localStorage.setItem('hiq_try',JSON.stringify(o)); }catch(e){} }
+function tryStoreSave(o){ try{ localStorage.setItem(TRYKEY,JSON.stringify(o)); }catch(e){} }
 function tryVerdict(){
   /* The record has to cover the whole play however he navigated it. Grading happens where
      the clock travels and he can jump the clock past a step, so fill in anything unvisited
@@ -3346,7 +3801,6 @@ function tryReset(){
   if(c){ S.manual[S.pos]=[c[0],c[1]]; TRY.start=[c[0],c[1]]; }
 }
 function railLearn(){
-  const tlbl=$('qgotry'); if(tlbl) tlbl.textContent='Try it \u25b6';
   const wrongDemo=!!variant().wrong;
   const sit=S.sit, c=(sit.coach||{})[S.pos], p=PHASE[sit.phase];
   let h=(wrongDemo?'<div class="feedback show off" style="margin:0 0 8px">'+
@@ -3363,16 +3817,16 @@ function railLearn(){
     h+='<div class="jobcard"><div class="who">'+POSNAMES[S.pos]+' &middot; your job</div><p>'+esc(c.job)+'</p></div>'+
        '<div class="tabs" id="tabs"></div><div class="tabbody" id="tabbody"></div>';
   }
-  h+='<div class="spacer"></div>'+
-     '<button class="bigbtn" id="goquiz">Quiz me on this &#9654;</button>'+
-     '<button class="bigbtn plain" id="gotry">Try it your way &#9654;</button>';
-  $('rail').innerHTML=h;
+  $('rail').innerHTML=railHTML(h,
+     (variant().wrong
+        ? '<button class="bigbtn plain" id="goplay" style="opacity:.55">Run the play - watch-only variant</button>'
+        : '<button class="bigbtn" id="goplay">Run the play &#9654;</button>')+
+     '<button class="bigbtn plain" id="goquiz">Quiz me on this &#9654;</button>');
   buildPos();
   if(sit.roster.includes(S.pos)&&c) buildTabs(c);
   $('goquiz').onclick=()=>{ setMode('quiz'); startTest('sit'); };
   const qq=$('qgoquiz'); if(qq) qq.onclick=()=>{ setMode('quiz'); startTest('sit'); };
-  const qt=$('qgotry'); if(qt) qt.onclick=()=>{ setMode('try'); paintRail(); render(); };
-  $('gotry').onclick=()=>{ setMode('try'); paintRail(); render(); };
+  const gp=$('goplay'); if(gp) gp.onclick=()=>playStart();
 }
 function buildPos(){
   const pl=$('poslist'); if(!pl)return; pl.innerHTML='';
@@ -3381,7 +3835,7 @@ function buildPos(){
     const b=document.createElement('button');
     b.className='pbtn'+(p===S.pos?' on':'')+(on?'':' off');
     b.innerHTML='<span class="ab">'+p+'</span><span class="nm">'+POSNAMES[p]+'</span>';
-    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); };
+    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); playSync(); };
     pl.appendChild(b);
   });
   buildQuickPos();
@@ -3397,7 +3851,7 @@ function buildQuickPos(){
     b.className='qp'+(p===S.pos?' on':'')+(S.sit.roster.includes(p)?'':' off');
     b.type='button'; b.textContent=p;
     b.title=POSNAMES[p];
-    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); };
+    b.onclick=()=>{ S.pos=p; if(S.mode==='try') tryReset(); paintRail(); render(); playSync(); };
     ql.appendChild(b);
   });
 }
@@ -3478,6 +3932,16 @@ svg.addEventListener('pointerdown',e=>{
   }
   /* Try mode moves ONE man: his own. Everybody else has to play it right, or the
      reads are computed against a play that never happens. */
+  /* Play mode: he moves his own man, and he may do it at EVERY decision point -
+     the old flow gave him one placement at step one and never let him react again. */
+  if(S.mode==='play'){
+    /* scope decides whose spot he may choose - a player moves himself, a coach walking a
+       team through moves anybody. Everyone he leaves alone still skates the authored route. */
+    const mine=(PLAY.scope==='any')?(OURPOS.indexOf(id)>=0||id==='G'):(id===S.pos);
+    if(!mine) return;
+    if(PLAY.phase!=='place'&&PLAY.phase!=='decide') return;
+    PLAY.nudge=false; playIdleArm();
+  }
   if(S.mode==='try'){
     if(id!==S.pos) return;
     TRY.fail=null; TRY.warn=null; TRY.first=null; TRY.running=false; TRY.ran=false;
@@ -3501,6 +3965,7 @@ svg.addEventListener('pointerup',()=>{
   if(!drag)return; const id=drag; drag=null;
   // a tap with no movement is a tap, not a drag - very common on a touch screen
   if(!dragMoved||!S.manual[id]){ tapToken(id); return; }
+  if(S.mode==='play'){ playPrompt(); render(); return; }   // lanes just changed - repaint the read
   if(S.mode==='build'){ markDirty(); return; }
   if(TEST.active&&!TEST.done)return;
   const c=target(id,S.t); if(!c)return;
@@ -3525,6 +3990,7 @@ function syncSheet(){
   if(isPhone()) setSheet(S.mode!=='learn'&&S.mode!=='coach');
 }
 $('grab').onclick=()=>setSheet(!$('railwrap').classList.contains('open'));
+const _qgp=$('qgoplay'); if(_qgp) _qgp.onclick=()=>playStart();
 
 /* tapping a player: pick that position, or ask who a red player is */
 function tapToken(id){
@@ -3541,6 +4007,1193 @@ function tapToken(id){
     ' The number is just a name tag, not a position.');
 }
 
+/* ============================================================
+   PLAY MODE - the decision loop.
+   A play is a sequence of decision points. At each one the ice freezes, he can move
+   his own man, and he picks what the puck should do. Two things are graded
+   INDEPENDENTLY: the READ (was that the right call here) and the POSITION (could that
+   call actually work from where he was standing). Both come out of the same geometry
+   the rest of the app uses, and the authored route is the answer key - so nothing here
+   is invented and a wrong-demo variant can never become the target.
+
+   Deterministic on purpose. A kid who repeats an input must see the same consequence,
+   or the mechanism text ("their D was in that lane") would be a lie the dice told.
+   ============================================================ */
+/* Pace and scope are settings, not modes: "runs through" and "move anybody" were never two
+   activities, only two knobs on one. A player never sees either - he gets stop-each-step and
+   move-yourself. The switches exist for a coach. */
+const PLAY={pace:'step',scope:'me',pts:[],di:0,phase:'idle',res:null,score:[],anim:null,tail:null,ghost:null,
+  own:null,hold:null,pending:null,label:null,raf:null,gen:0,idle:null,
+  nudge:false,tries:0,key:'',restored:false,last:null,_pos:null,_t:0,_rate:0,_legFt:0};
+/* Guard, because this exact bug came back once already: if the puck's holder changes
+   while nothing is animating it and nothing is holding it, the puck teleported. */
+/* A teleport is a discontinuity in the puck's POSITION. The first version watched the
+   OWNER id instead, which meant every legitimate hand-off had to be declared by hand -
+   and 75 of the ones the loop actually runs were not, including transitions to an
+   unowned puck, so it cried wolf on 65 playable combinations. A guard that fires on the
+   correct-answer path is worse than no guard: the next real teleport hides in the noise.
+   Position is the thing that must not jump, so measure position. */
+/* A fixed per-frame distance is the wrong test on a time-based animation: at 2fps under
+   load a legitimate frame moves the puck 14ft, and on a real phone worse - so the guard
+   fired on dropped frames rather than teleports, which is exactly the cry-wolf failure it
+   was rebuilt to avoid. Compare the observed step against what THIS leg could legitimately
+   cover in the time that actually elapsed. ease() peaks at 1.5x the average speed, so 3x
+   plus a small floor is generous without being blind. */
+function puckGuard(){
+  const p=puckShown(), now=performance.now();
+  if(p&&PLAY._pos&&PLAY._t&&!PLAY.anim&&!PLAY.hold&&!PLAY.tail){
+    /* bounded by the leg's OWN path length: the puck cannot travel further in a leg than
+       the leg goes, so a slow frame widens the budget only up to that ceiling. Without the
+       bound a 500ms frame on a fast leg allowed a 97ft "legitimate" jump - wide enough to
+       hide the 39ft snap-back this guard exists to catch. */
+    const dt=now-PLAY._t;
+    const budget=Math.min(PLAY._legFt||Infinity,(PLAY._rate||0)*dt*3)+4;
+    const d=dist(PLAY._pos,p);
+    if(d>budget){
+      window.__puckWarn=(window.__puckWarn||0)+1;
+      console.error('PUCK TELEPORT: '+Math.round(d)+'ft in '+Math.round(dt)+
+        'ms, budget '+Math.round(budget)+'ft, with no animation and no hold');
+    }
+  }
+  if(p){ PLAY._pos=p.slice(); PLAY._t=now; }
+}
+const cap=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
+const THEIRNET=[189,42.5], OURNET=[11,42.5];
+
+/* A finger is about 44px wide and the rink is not - so the invisible grab pad is sized
+   in SCREEN space. At full zoom a rink-foot is tiny, and a fixed 7ft pad was a 25px
+   target: unusable for a ten-year-old's thumb. */
+function grabR(){
+  const vb=S.vb||FULLVIEW, w=(svg&&svg.clientWidth)||360;
+  const ppf=w/((S.rot?vb[3]:vb[2])||212);
+  return Math.max(TR()*2.2, 23/(ppf||4));
+}
+function laneOf(from,to,t){
+  let m=99,who=null;
+  THEMIDS.forEach(id=>{ if(id==='XG')return; const p=shown(id,t); if(!p)return;
+    const d=segDist(p,from,to); if(d<m){m=d;who={id,p};} });
+  return {m,who};
+}
+function nextOwner(from){
+  const f=frames();
+  for(let j=from;j<f.length;j++) if(f[j].puck&&f[j].puck[2]) return f[j].puck[2];
+  return null;
+}
+/* What the authored play does between this keyframe and the next - the answer key,
+   derived rather than authored a second time. */
+function rightAt(i){
+  const f=frames(), a=f[i], b=f[i+1];
+  if(!a||!b||!a.puck||!b.puck) return null;
+  const w0=a.puck[2]||null, w1=b.puck[2]||null, to=[b.puck[0],b.puck[1]];
+  if(w1&&w1!==w0) return {kind:'pass',to:w1};
+  if(w1) return {kind:'carry',to:w1};
+  if(dist(to,THEIRNET)<32) return {kind:'shoot',to:null};
+  const rec=nextOwner(i+1);
+  if(rec&&rec!==w0) return {kind:'pass',to:rec};
+  if(to[0]>125&&(to[1]<17||to[1]>68)) return {kind:'dump',to:null};
+  return null;
+}
+/* Every option the carrier legally has here, so the menu is never a trick question. */
+function optionsAt(i){
+  const f=frames(); if(!f[i]) return [];
+  const t=f[i].t, pk=puckAt(t), w=pk.w;
+  if(!w||!(OURPOS.includes(w)||w==='G')) return [];
+  const from=pk.p, out=[{kind:'carry',to:w,label:'Carry it',hint:'keep skating'}];
+  S.sit.roster.forEach(id=>{
+    if(id===w||id==='G') return;
+    const p=shown(id,t); if(!p||dist(from,p)>78) return;
+    out.push({kind:'pass',to:id,label:'Pass to '+id,hint:POSNAMES[id]||''});
+  });
+  if(dist(from,THEIRNET)<58) out.push({kind:'shoot',to:null,label:'Shoot',hint:'at the net'});
+  if(from[0]>106&&from[0]<136) out.push({kind:'dump',to:null,label:'Dump it in',hint:'and chase'});
+  return out;
+}
+/* ---- DEFENSIVE decisions: who do you take ----------------------------------------
+   The answer key is the coverage map the authored route already implies - the same
+   computation tryEval does for "the man he was supposed to have". Nothing new is authored.
+
+   The trigger is the TEMPTATION, not the switch. In a youth defensive system the
+   assignment mostly does not change, and holding it IS the lesson - "nobody chases the
+   puck, everybody takes a job" is an instruction to stay. Firing only on a change would
+   ask the question at every moment except the one that matters. So we fire when the
+   assignment could plausibly change: the puck comes near him and is not his job, or a
+   teammate is closer to his man than he is. At most of those the right answer is "the
+   same man I already had", and choosing to stay is the most valuable read in the app.
+   Genuine switches still fire - they are the minority case, not the definition. */
+function coverAt(t){
+  const map={};
+  THEMIDS.forEach(id=>{
+    if(id==='XG') return;
+    const p=shown(id,t); if(!p) return;
+    let owner=null, od=99;
+    S.sit.roster.forEach(rid=>{
+      if(rid==='G') return;
+      const a=target(rid,t); if(!a) return;
+      const d=dist(a,p); if(d<od){ od=d; owner=rid; }
+    });
+    if(owner&&od<=14) map[id]=owner;
+  });
+  return map;
+}
+function myMan(t){
+  const m=coverAt(t), mine=Object.keys(m).filter(k=>m[k]===S.pos);
+  return mine.length===1?mine[0]:null;        // only ask where the answer is unambiguous
+}
+/* You cover a man when THEY have the puck. Loose in our own end counts - that is the
+   faceoff lesson. Loose in their end does not: on an offensive draw the question is where
+   you go on the win, which is a positioning step, not a coverage one. */
+function coverApplies(t){
+  const pk=puckAt(t), w=pk.w;
+  if(w&&THEMIDS.indexOf(w)>=0) return true;
+  if(!w&&pk.p[0]<100) return true;
+  return false;
+}
+function defPoints(){
+  const f=frames(), out=[];
+  let prev=null;
+  for(let i=0;i<f.length-(f.length>1?1:0);i++){
+    const t=f[i].t;
+    if(!coverApplies(t)){ prev=null; continue; }
+    const man=myMan(t);
+    if(!man){ prev=null; continue; }
+    const me=target(S.pos,t), pk=puckAt(t).p, mp=shown(man,t);
+    if(!me||!mp){ prev=man; continue; }
+    let why=null;
+    if(dist(me,pk)<26&&dist(mp,pk)>14) why='puck';        // the puck is near you, and not yours
+    if(!why){
+      const closer=S.sit.roster.some(rid=>{
+        if(rid===S.pos||rid==='G') return false;
+        const a=target(rid,t); return a&&dist(a,mp)<dist(me,mp)-2;
+      });
+      if(closer) why='teammate';                          // somebody is nearer your man
+    }
+    if(!why&&prev&&man!==prev) why='switch';              // a genuine handover
+    if(!why&&i===0) why='establish';
+    if(why) out.push({i,t,man,why,kind:'cover'});
+    prev=man;
+  }
+  return out.filter((p,k)=>k===0||p.man!==out[k-1].man||p.why!==out[k-1].why).slice(0,5);
+}
+/* Where there is no puck decision and no unambiguous man, the step is pure repositioning:
+   freeze, move, take the verdict. No question, so no read axis. */
+function repoPoints(){
+  const f=frames(), out=[];
+  let last=null;
+  f.forEach((fr,i)=>{
+    if(i>=f.length-1&&f.length>1) return;
+    const a=target(S.pos,fr.t); if(!a) return;
+    if(!last||dist(a,last)>8){ out.push({i,t:fr.t,kind:'repo'}); last=a; }
+  });
+  return out.slice(0,4);
+}
+/* "so slot had nobody on him" read like a fragment - name the player, then his job */
+function manName(id){
+  if(!id) return 'your man';
+  const r=roleText((ROLES[S.sit.id]||{})[id]);
+  return 'red '+String(id).slice(1)+(r?' ('+r+')':'');
+}
+const DEFWHY={puck:'The puck is close - and it is not your job.',
+  teammate:'Somebody is nearer your man than you are.',
+  switch:'The coverage hands over here.',
+  establish:'Before anything happens: know your man.'};
+function coverFault(pt,choice){
+  const t=frames()[pt.i].t, me=shown(S.pos,t), man=choice&&choice.to;
+  const mp=man?shown(man,t):null;
+  if(!me||!mp) return null;
+  const other=S.sit.roster.filter(rid=>{
+    if(rid===S.pos||rid==='G') return false;
+    const q=shown(rid,t); return q&&dist(q,mp)<11;
+  })[0];
+  if(other) return {msg:'DOUBLED UP',at:mp,stop:false,
+    why:cap(POSNAMES[other]||other)+' already has him. Two of you on one man leaves '+
+        'somebody else free.',
+    say:'Two of you took the same man.'};
+  const auth=target(S.pos,t), d=dist(me,mp), okD=auth?dist(auth,mp):d;
+  if(d>Math.max(16,okD+10)) return {msg:'TOO FAR OFF HIM',at:me,stop:true,
+    why:'You are '+Math.round(d)+' feet off him. He gets the puck and the shot away '+
+        'before you arrive.',
+    say:'You were too far off your man.'};
+  /* goal side, as a dot product: am I between him and our net */
+  const gx=OURNET[0]-mp[0], gy=OURNET[1]-mp[1], L=Math.hypot(gx,gy)||1;
+  if(((me[0]-mp[0])*gx+(me[1]-mp[1])*gy)/L < -1)
+    return {msg:'WRONG SIDE OF HIM',at:me,stop:true,
+      why:'He is between you and our net. From there he only has to turn and go.',
+      say:'You were on the wrong side of the puck.'};
+  return null;
+}
+function defOptions(pt){
+  const t=frames()[pt.i].t, me=shown(S.pos,t), roles=ROLES[S.sit.id]||{};
+  const cands=[];
+  THEMIDS.forEach(id=>{
+    if(id==='XG') return;
+    const p=shown(id,t); if(!p||!me) return;
+    cands.push({id,d:dist(me,p)});
+  });
+  cands.sort((a,b)=>a.d-b.d);
+  const keep=cands.slice(0,3).map(c=>c.id);
+  if(pt.man&&keep.indexOf(pt.man)<0) keep.push(pt.man);
+  return keep.map(id=>({kind:'cover',to:id,label:'Take red '+id.slice(1),
+    hint:roleText(roles[id])||'cover him'}));
+}
+
+/* Decision points are DERIVED: a keyframe qualifies when the carrier has more than one
+   legal option. Runs with the same right answer collapse into their first, so "do not
+   pass yet" gets asked once instead of at every frame where it stays true. */
+function playPoints(){
+  const f=frames(), raw=[];
+  for(let i=0;i<f.length-1;i++){
+    const opts=optionsAt(i); if(opts.length<2) continue;
+    const right=rightAt(i); if(!right) continue;
+    if(!opts.some(o=>o.kind===right.kind&&(o.to||null)===(right.to||null))) continue;
+    raw.push({i,t:f[i].t,opts,right,kind:'puck'});
+  }
+  const puck=raw.filter((p,k)=>k===0||whyKey(p)!==whyKey(raw[k-1]));
+  if(puck.length) return puck;
+  /* no puck decision: this is a defensive play. Ask who he takes, and if the coverage is
+     not unambiguous enough to ask, grade pure repositioning instead. */
+  const cover=defPoints();
+  cover.forEach(p=>{ p.opts=defOptions(p); p.right={kind:'cover',to:p.man}; });
+  const usable=cover.filter(p=>p.opts.length>1&&p.opts.some(o=>o.to===p.man));
+  if(usable.length) return usable;
+  const repo=repoPoints();
+  repo.forEach(p=>{ p.opts=[]; p.right=null; });
+  return repo;
+}
+/* What makes the right answer right HERE. Keying the collapse on kind+target alone merged
+   two frames that both answer "carry" - one because the defenceman has not committed, one
+   because every lane is shut. Those are two different reads and both deserve asking. */
+function whyKey(pt){
+  const t=frames()[pt.i].t, r=pt.right, bits=[r.kind,r.to||'-'];
+  bits.push('shut:'+pt.opts.filter(o=>laneShut(pt,o)).map(o=>o.kind+(o.to||'')).sort().join(','));
+  if(r.kind==='carry'){
+    const pk=puckAt(t), cp=pk.w?shown(pk.w,t):null;
+    let ev='-';
+    if(cp){
+      let near=null,nd=99;
+      THEMIDS.forEach(id=>{ if(id==='XG')return; const p=shown(id,t); if(!p)return;
+        const d=dist(p,cp); if(d<nd){nd=d;near=p;} });
+      const rec=pt.opts.filter(o=>o.kind==='pass'&&o.to)[0];
+      const rp=rec?shown(rec.to,t):null;
+      ev=(near&&rp)?(Math.abs(dist(near,cp)-dist(near,rp))<11?'uncommitted':'committed')
+                   :(near?'noreceiver':'nopressure');
+    }
+    bits.push(ev);
+  } else if(r.kind==='shoot'||r.kind==='dump'){
+    bits.push('d'+Math.round(dist(puckAt(t).p,THEIRNET)/12));
+  }
+  return bits.join('|');
+}
+function optTarget(o,i,t){
+  if(o.kind==='cover'&&o.to) return shown(o.to,t);
+  if(o.kind==='pass'&&o.to) return shown(o.to,t);
+  if(o.kind==='shoot') return THEIRNET;
+  if(o.kind==='dump') return [192, puckAt(t).p[1]<42.5?11:74];
+  if(o.kind==='carry'){ const f=frames(); return (f[i+1]&&shown(puckAt(t).w,f[i+1].t))||null; }
+  return null;
+}
+/* POSITION is graded by whether the chosen option can physically work from where he
+   stands - never by distance from an ideal spot. Distance punishes a kid who found a
+   different good spot, and it cannot explain itself. Screen text is free to word (it is
+   never spoken); a say: is only set where a recorded line already carries that meaning. */
+function optionFault(pt,choice){
+  const f=frames(), i=pt.i, t=f[i].t, pk=puckAt(t), from=pk.p, w=pk.w;
+  const cpos=shown(w,t);
+  if(choice.kind==='pass'&&choice.to){
+    const me=shown(choice.to,t), auth=target(choice.to,t);
+    if(!me||!auth) return null;
+    const mine=laneOf(from,me,t), ok=laneOf(from,auth,t);
+    if(mine.who&&mine.m<4.5&&mine.m<ok.m-0.6)
+      return {msg:'PASS BLOCKED',at:mine.who.p,stop:true,
+        why:cap(OPPNAME(mine.who.id))+' was standing in that lane. The puck never got there.',
+        say:'The pass never got there because somebody was in the lane.'};
+    const len=dist(from,me), okLen=dist(from,auth);
+    if(len>Math.max(46,okLen+18)){
+      /* it sails PAST him and off the line - that is what a too-long pass looks like */
+      const ux=(me[0]-from[0])/(len||1), uy=(me[1]-from[1])/(len||1);
+      const past=[Math.max(2,Math.min(198,me[0]+ux*15)),Math.max(2,Math.min(83,me[1]+uy*15))];
+      return {msg:'TOO FAR',at:past,stop:true,
+        why:'That pass is '+Math.round(len)+' feet - '+Math.round(len-okLen)+
+            ' further than it should be. It sails past him and off the ice.',
+        say:'You were too far away to be an option.'};
+    }
+    if(cpos){
+      const acp=target(w,t), sep=Math.abs(me[1]-cpos[1]);
+      const asep=(acp&&auth)?Math.abs(auth[1]-acp[1]):0;
+      if(asep>=18&&sep<12){
+        /* the man who gets to cover both of you is the one who ends up with it */
+        let cov=null,cd=99;
+        THEMIDS.forEach(id=>{ if(id==='XG')return; const p=shown(id,t); if(!p)return;
+          const d=dist(p,me); if(d<cd){cd=d;cov=p;} });
+        return {msg:'NO WIDTH',at:cov||me,stop:true,
+          why:'You and the puck are '+Math.round(sep)+' feet apart, in the same lane. '+
+              'One defenceman covers both of you - that is a 1 on 1 with a witness.',
+          say:'You were in the same lane as the puck.'};
+      }
+    }
+    return null;
+  }
+  if(choice.kind==='carry'){
+    const nx=f[i+1]&&shown(w,f[i+1].t);
+    if(nx){ const l=laneOf(from,nx,t);
+      if(l.who&&l.m<4.2) return {msg:'CLOSED OFF',at:l.who.p,stop:true,
+        why:cap(OPPNAME(l.who.id))+' is sitting in the ice you skated into. He takes it off you.',
+        say:'You skated into him instead of moving it.'}; }
+    return null;
+  }
+  if(choice.kind==='shoot'){
+    const l=laneOf(from,THEIRNET,t);
+    if(l.who&&l.m<4) return {msg:'SHOT BLOCKED',at:l.who.p,stop:true,
+      why:cap(OPPNAME(l.who.id))+' is in the shooting lane. That one never reaches the net.',
+      say:'The pass never got there because somebody was in the lane.'};
+    if(dist(from,THEIRNET)>48) return {msg:'TOO FAR OUT',at:from,stop:false,
+      why:'A '+Math.round(dist(from,THEIRNET))+' foot shot is a pass to their goalie.',
+      say:'Shoot for a rebound, not the corner.'};
+    return null;
+  }
+  return null;
+}
+function laneShut(pt,o){
+  if(pt.kind==='cover'){ const f=coverFault(pt,o); return !!(f&&(f.stop||f.msg==='DOUBLED UP')); }
+  const f=optionFault(pt,o);
+  return !!(f&&f.stop);
+}
+function playResolve(pt,choice){
+  if(pt.kind==='repo'||!askedAt(pt)){
+    /* nothing was asked, so there is no answer - not a null answer */
+    const f=tryEval(pt.i);
+    return {asked:false,posFault:f,stop:!!(f&&f.fatal),pt,choice:null};
+  }
+  if(pt.kind==='cover'){
+    const readOk=!!(choice&&choice.to===pt.man);
+    let fault=coverFault(pt,choice);
+    /* taking the wrong man means YOUR man is alone - that is the consequence, and it is
+       the whole lesson, so it always plays out */
+    if(!readOk){
+      const t=frames()[pt.i].t, mp=pt.man?shown(pt.man,t):null;
+      fault={msg:'YOUR MAN IS ALONE',at:mp||(shown(S.pos,t)||OURNET),stop:true,
+        why:'You went to somebody else, so '+manName(pt.man)+' had nobody on him at all.',
+        say:'You left your man alone.'};
+    }
+    return {asked:true,readOk,posFault:fault,stop:!!(fault&&fault.stop),pt,choice};
+  }
+  const readOk=choice.kind===pt.right.kind&&(choice.to||null)===(pt.right.to||null);
+  const fault=optionFault(pt,choice);
+  /* when the puck is not his, the thing being judged is his own placement */
+  const mine=(puckAt(frames()[pt.i].t).w!==S.pos)?tryEval(pt.i):null;
+  const posFault=fault||mine;
+  const stop=fault?!!fault.stop:!!(mine&&mine.fatal);
+  return {asked:true,readOk,posFault,stop,pt,choice};
+}
+function ownWay(pt,choice){
+  const t=frames()[pt.i].t, from=puckAt(t).p, w=puckAt(t).w;
+  const to=optTarget(choice,pt.i,t)||from;
+  let chase=null,cd=99;
+  THEMIDS.forEach(id=>{ if(id==='XG')return; const p=shown(id,t); if(!p)return;
+    const k=dist(p,to); if(k<cd){cd=k;chase=p;} });
+  const netD=dist(to,THEIRNET);
+  /* did the defender ever have to commit? if he is still even between the two of you,
+     an early pass just hands him the receiver - which is the authored mistake, derived */
+  const cpos=shown(w,t);
+  const even=(chase&&cpos)?Math.abs(dist(chase,cpos)-dist(chase,to))<11:false;
+  let verdict;
+  if(cd<14) verdict='He is already standing there. That is a covered man, not an option.';
+  else if(even&&choice.kind==='pass')
+    verdict='He had not committed to you yet, so he just slides over and covers the man you passed to.';
+  else if(choice.kind==='carry'&&cd<22)
+    verdict='He closes you off and you run out of ice. Best case is a shot from a bad angle.';
+  else if(netD<34)
+    verdict='You get a shot from '+Math.round(netD)+' feet - but nobody is at the net for the rebound.';
+  else verdict='It stays alive, but the chance you had is gone.';
+  return {from,to,chase,cd:Math.round(cd),verdict};
+}
+function playChase(done){
+  const o=PLAY.own; if(!o||!o.chase){ if(done)done(); return; }
+  o.t0=performance.now(); o.ms=900;
+  playAnim(o.ms,()=>{ if(!PLAY.own) return false; },done);
+}
+/* Every option lane, with its bearing and the bow needed to keep it distinct from a
+   lane it would otherwise hide inside. One source for the drawing and the check. */
+/* Occlusion is a distance question, not an angle one: a 19ft lane 10 degrees off a
+   70ft lane is only 3.3ft clear at its endpoint and vanishes, while two 70ft lanes
+   10 degrees apart are 12ft clear and perfectly legible. So measure the corridor.
+   7ft, not 4.6: an endpoint marker is up to 1.9ft of radius and the neighbouring line
+   another 0.4, so 4.6 left barely one marker of gap - and 321 pairs sat between 4.6 and
+   8, which is exactly the "the threshold got lucky" shape. 7ft clears the ink twice
+   over and costs 7 more bowed lanes out of 1163 than 4.6 did. */
+const LANE_CLEAR=7;
+/* true when the whole of the short lane sits within the long lane's corridor */
+function laneHides(short,long){
+  const mid=[(short.from[0]+short.d[0])/2,(short.from[1]+short.d[1])/2];
+  return segDist(short.d,long.from,long.d)<LANE_CLEAR &&
+         segDist(mid,long.from,long.d)<LANE_CLEAR;
+}
+function laneGeom(pt,t){
+  /* a cover line runs from the player to the man he would take; a puck lane runs from
+     the puck to where it would go */
+  const from=disp(pt.kind==='cover'?(shown(S.pos,t)||puckAt(t).p):puckAt(t).p), out=[];
+  pt.opts.forEach(o=>{
+    const to=optTarget(o,pt.i,t); if(!to) return;
+    const d=disp(to), dx=d[0]-from[0], dy=d[1]-from[1];
+    out.push({o,to,d,from,len:Math.hypot(dx,dy),ang:Math.atan2(dy,dx),
+      shut:laneShut(pt,o),fault:optionFault(pt,o),bow:0,cx:0,cy:0});
+  });
+  // longest first: a shorter lane sharing a bearing with a longer one gets bowed
+  const byLen=out.slice().sort((a,b)=>b.len-a.len);
+  byLen.forEach((L,i)=>{
+    let n=0;
+    for(let j=0;j<i;j++) if(laneHides(L,byLen[j])) n++;
+    if(!n) return;
+    L.bow=(n%2?1:-1)*(3.4+2.4*Math.floor((n-1)/2));
+    const mx=(L.from[0]+L.d[0])/2, my=(L.from[1]+L.d[1])/2, len=L.len||1;
+    const px=-(L.d[1]-L.from[1])/len, py=(L.d[0]-L.from[0])/len;
+    L.cx=mx+px*L.bow*2; L.cy=my+py*L.bow*2;      // control point: midpoint deflects by bow
+  });
+  return out;
+}
+/* Assertion, not a spot check: no option lane may hide inside another anywhere. */
+/* Every authored route must satisfy the grader, and every wrong demo must break it.
+   The pass direction is what would have caught the six continuity defects. */
+/* Every tri-state value and its consumers, checkable. readOk widened to true/false/null
+   while the branches still tested it as a boolean, and PLAY.settled did the same thing
+   earlier - so the shape is worth asserting rather than re-reading. */
+window.__triStateCheck=function(){
+  const bad=[];
+  PLAY.score.forEach((s,i)=>{
+    if(!s) return;
+    const pt=PLAY.pts[i];
+    if(typeof s.asked!=='boolean') bad.push('score['+i+'].asked='+s.asked);
+    if(s.asked&&s.read!==0&&s.read!==1) bad.push('score['+i+'] asked but read='+s.read);
+    if(!s.asked&&('read' in s)) bad.push('score['+i+'] unasked but carries a read');
+    /* a restored run always matches the current pace (playScoreLoad refuses a mismatch),
+       so this comparison is meaningful rather than a re-derivation of unrelated state */
+    if(pt&&s.asked!==askedAt(pt))
+      bad.push('score['+i+'] asked='+s.asked+' but askedAt says '+askedAt(pt));
+  });
+  /* The source-grep half is gone with the representation it policed: !r.readOk is now a
+     legitimate boolean test, gated by r.asked, so the pattern only produced false
+     positives. What remains is behavioural - an existence check passed while the cover
+     branch had no null path, so run every kind through the unasked case instead and
+     require that no verdict implies a choice he was never offered. */
+  const implies=/left your man|survives|Both wrong|the read|Right call|Right man/i;
+  const unasked=['puck','cover','repo'].map(kind=>{
+    const pt={kind,i:0,t:0,why:'puck',man:'X1',opts:[],
+      right:{kind:'pass',to:'LW'}};
+    let v=null,err=null;
+    try{ v=playOutcome({asked:false,posFault:null,stop:false,pt,choice:null}); }
+    catch(e){ err=String(e); }
+    return {kind, head:v&&v.head, threw:err, impliesChoice:!!(v&&implies.test(v.head+' '+v.body))};
+  });
+  return {scoreShapeErrors:bad,
+    unaskedVerdicts:unasked,
+    unaskedFailures:unasked.filter(u=>u.threw||u.impliesChoice).map(u=>u.kind)};
+};
+window.__graderCheck=function(){
+  const keep={s:S.sit,v:S.varIdx,p:S.pos,t:S.t,m:S.manual};
+  const passFail=[], demoQuiet=[], demoOk=[];
+  const posAt=(sit,vi,side,id,t)=>{
+    const o=[]; (sit.variants[vi].frames||[]).forEach(f=>{ if(f[side]&&f[side][id]) o.push({t:f.t,p:f[side][id]}); });
+    return at(o,t);
+  };
+  SITUATIONS.forEach(sit=>{
+    const vs=sit.variants||[], good=vs.findIndex(v=>!v.wrong);
+    vs.forEach((v,vi)=>{
+      if(v.wrong) return;
+      S.sit=sit; S.varIdx=vi;
+      sit.roster.forEach(pos=>{ S.pos=pos; S.manual={};
+        frames().forEach((f,i)=>{
+          const r=readAt(f.t);
+          if(r&&r.score<100) passFail.push(sit.id+'/'+v.id+' '+pos+' f'+i+' scores '+r.score+' - '+r.label);
+        });
+      });
+    });
+    if(good<0) return;
+    vs.forEach((v,vi)=>{
+      if(!v.wrong) return;
+      /* grade the demo's own coordinates against the CORRECT variant's answer key, by
+         feeding them in as a manual placement - reuses the real grader, no second copy */
+      S.sit=sit; S.varIdx=good;
+      let named=null;
+      (v.frames||[]).forEach((f,i)=>{
+        if(named) return;
+        /* place the WHOLE demo on the ice, not one player at a time: a mistake like two
+           men drifting into one lane only exists in the relationship between them, so a
+           single-player override could never see it. */
+        const man={};
+        sit.roster.forEach(pos=>{
+          const side=(OURPOS.indexOf(pos)>=0||pos==='G')?'us':'them';
+          const p=posAt(sit,vi,side,pos,f.t); if(p) man[pos]=p.slice();
+        });
+        const fi=frameIdx(f.t);
+        sit.roster.forEach(pos=>{
+          if(named||!man[pos]) return;
+          S.pos=pos; S.manual=Object.assign({},man);
+          const ev=tryEval(fi);
+          if(ev) named=pos+' f'+i+': '+ev.msg;
+        });
+      });
+      if(named) demoOk.push(sit.id+'/'+v.id+' breaks - '+named);
+      else demoQuiet.push(sit.id+'/'+v.id+' passes the grader (demo or grader is wrong)');
+    });
+  });
+  S.sit=keep.s; S.varIdx=keep.v; S.pos=keep.p; S.t=keep.t; S.manual=keep.m;
+  return {authoredRouteFailures:passFail.length, cases:passFail.slice(0,8),
+    demosThatBreak:demoOk.length, demosThatQuietlyPass:demoQuiet.length, quiet:demoQuiet};
+};
+window.__laneCheck=function(){
+  const bad=[], keepSit=S.sit, keepV=S.varIdx, keepPos=S.pos, keepT=S.t;
+  SITUATIONS.forEach(sit=>{
+    (sit.variants||[]).forEach((v,vi)=>{
+      if(v.wrong) return;
+      S.sit=sit; S.varIdx=vi;
+      sit.roster.forEach(pos=>{
+        S.pos=pos; S.manual={};
+        playPoints().forEach(pt=>{
+          S.t=frames()[pt.i].t;
+          const L=laneGeom(pt,S.t);
+          const byLen=L.slice().sort((a,b)=>b.len-a.len);
+          for(let a=0;a<byLen.length;a++) for(let b=a+1;b<byLen.length;b++){
+            if(laneHides(byLen[b],byLen[a])&&!byLen[b].bow&&!byLen[a].bow)
+              bad.push(sit.id+'/'+v.id+' '+pos+' f'+pt.i+' '+byLen[b].o.kind+' hides in '+
+                byLen[a].o.kind+', neither bowed');
+          }
+        });
+      });
+    });
+  });
+  S.sit=keepSit; S.varIdx=keepV; S.pos=keepPos; S.t=keepT; S.manual={};
+  return {occluded:bad.length,cases:bad.slice(0,12)};
+};
+function betterText(pt,terse){
+  const r=pt.right, t=frames()[pt.i].t;
+  if(r.kind==='pass'&&r.to){
+    const nm=POSNAMES[r.to]||r.to;
+    if(terse) return 'The pass to '+nm+' was the play.';
+    const p=target(r.to,t), pk=puckAt(t).p;
+    const wide=(p&&pk&&Math.abs(p[1]-pk[1])>18)
+      ? ' He was wide in his own lane, and one defenceman cannot cover two lanes.' : '';
+    return 'The pass to '+nm+' was the play.'+wide;
+  }
+  if(r.kind==='carry') return terse ? 'Carrying was the play here - make him commit first.'
+    : 'Carrying was the play here. He has not committed yet - pass now and he simply '+
+      'covers the man you passed to.';
+  if(r.kind==='shoot') return terse ? 'The shot was the play.'
+    : 'The shot was the play, with somebody going to the net for the second one.';
+  return 'Getting it in deep and chasing was the play.';
+}
+function playOutcome(r){
+  /* ONE unasked path for every kind - there is no null answer left to fall through a guard */
+  if(!r.asked){
+    const f=r.posFault;
+    return f?{cls:'off',head:'Not where you belong.',body:f.why}
+            :{cls:'great',head:'That is the spot.',
+              body:'The play ran its own route and you were where it needed you.'};
+  }
+  if(r.pt.kind==='cover'){
+    const f=r.posFault;
+    if(r.readOk&&!f) return {cls:'great',head:'That is your man.',
+      body:r.pt.why==='puck'
+        ? 'The puck came close and you stayed with him. That is the whole job.'
+        : 'Right man, and you are in a spot where you can actually cover him.'};
+    if(r.readOk&&f) return {cls:'off',head:'Right man - wrong place.',body:f.why};
+    /* the fault already names him, so do not name him twice */
+    return {cls:'off',head:'You left your man.',
+      body:(f?f.why:'You went to somebody else.')+' Staying with him was the play.'};
+  }
+  const f=r.posFault, better=betterText(r.pt,!!PLAY.own);
+  if(r.readOk&&!f) return {cls:'great',head:'That is the read.',
+    body:'Right call, and you were standing somewhere it works.'};
+  if(r.readOk&&f) return {cls:'off',head:'Right call - wrong place.',
+    body:f.why+' The call was right; you were not somewhere it could happen from.'};
+  /* explicit, not truthy: readOk is tri-state and only happens to be boolean here */
+  if(r.readOk===false&&!f) return {cls:'good',head:'It survives - but there was better.',
+    body:better};
+  return {cls:'off',head:'Both wrong - and this is what it costs.',
+    body:f.why+' '+better};
+}
+
+/* ---- what the puck does on screen -------------------------------------------
+   A pass used to vanish off one player and appear on another, which hides the thing
+   being taught. Now it travels the lane, and a failure dies visibly where it failed. */
+/* the puck's rendered position, in rink feet - used by the renderer AND the guard, so
+   there is only one answer to where the puck is */
+function puckShown(){
+  if(PLAY.anim) return flyPos(PLAY.anim);
+  if(PLAY.tail){
+    const k=Math.min(1,(performance.now()-PLAY.tail.t0)/(PLAY.tail.ms||1));
+    const a=PLAY.tail.at;
+    return [a[0]+(OURNET[0]-a[0])*k, a[1]+(OURNET[1]-a[1])*k];
+  }
+  if(PLAY.hold) return PLAY.hold;
+  return puckAt(S.t).p;
+}
+function flyPos(a){
+  if(!a) return null;
+  const k=Math.min(1,(performance.now()-a.t0)/a.ms);
+  const to=a.die||a.to;
+  return [a.from[0]+(to[0]-a.from[0])*k, a.from[1]+(to[1]-a.from[1])*k];
+}
+/* ONE scheduler for every animated leg.
+   Each leg used to own its own rAF loop and then call done() to launch the next, which
+   made a chain self-perpetuating and unkillable: resetting PLAY mid-flight left the old
+   chain rendering against state it no longer owned (it dereferenced PLAY.anim after
+   playStart nulled it), and two live chains overwrote each other's PLAY.raf so neither
+   could be cancelled. A generation token fixes the class of bug rather than the instance:
+   any reset bumps it, and a leg whose token is stale neither paints nor fires its done(). */
+/* A kid losing his run to a refresh is a real problem, so the score is written as it is
+   earned and restored when he reopens the same play in the same position. */
+/* Verification runs must never share a namespace with his saved progress. A probe sets
+   window.__hiqTestStore=true and every read and write moves to a throwaway key, so a test
+   that can destroy the data it is checking is no longer possible. */
+const PLAYKEY_REAL='hiq_play_v1', PLAYKEY_TEST='hiq_play_test';
+function playKeyNS(){ return window.__hiqTestStore?PLAYKEY_TEST:PLAYKEY_REAL; }
+/* A step asks a question when the pace stops for it AND it is not a bare repositioning
+   step. Everything that reports a read count derives it from here, so the score shape, the
+   denominator and the assertion can never drift apart again. */
+function askedAt(pt){ return !!pt&&pt.kind!=='repo'&&PLAY.pace!=='through'; }
+function playAsks(){ return PLAY.pts.filter(askedAt).length; }
+function playScoreKey(){ return S.sit.id+'|'+variant().id+'|'+S.pos; }
+function playScoreSave(){
+  try{
+    const all=JSON.parse(localStorage.getItem(playKeyNS())||'{}');
+    all[playScoreKey()]={score:PLAY.score,di:PLAY.di,tries:PLAY.tries,n:PLAY.pts.length,
+      asks:playAsks(),pace:PLAY.pace,at:Date.now()};
+    const keys=Object.keys(all);
+    if(keys.length>60) keys.sort((a,b)=>(all[a].at||0)-(all[b].at||0))
+      .slice(0,keys.length-60).forEach(k=>{ delete all[k]; });
+    localStorage.setItem(playKeyNS(),JSON.stringify(all));
+  }catch(e){}
+}
+function playScoreLoad(){
+  try{
+    const all=JSON.parse(localStorage.getItem(playKeyNS())||'{}'), r=all[playScoreKey()];
+    if(!r||r.n!==PLAY.pts.length) return false;     // the play changed under it: start clean
+    /* A run played at one pace answers different questions from a run played at the other,
+       so restoring it under today's pace produced a read score for steps that never asked.
+       Treat a pace mismatch as a different run. Legacy records carry no pace, so infer it
+       from whether anything was actually asked. */
+    const recPace=r.pace||((Array.isArray(r.score)&&r.score.some(s=>s&&(s.asked===true||s.read===0||s.read===1)))
+      ?'step':'through');
+    if(recPace!==PLAY.pace) return false;
+    /* Normalise on load. The score shape changed to {asked,read} and 25 records were
+       already on disk in the old {read:1|0|null} shape - the same class as the ages->level
+       custom-play bug: the representation moved and the persisted data did not, so every
+       consumer filtering s.asked silently discarded a read the kid had earned. */
+    const sc=(Array.isArray(r.score)?r.score:[]).map(s=>{
+      if(!s) return s;
+      if(typeof s.asked==='boolean'){
+        if(!s.asked&&('read' in s)) { const c=Object.assign({},s); delete c.read; return c; }
+        return s;
+      }
+      const asked=(s.read===0||s.read===1);
+      const out=Object.assign({},s,{asked});
+      if(!asked) delete out.read;
+      return out;
+    });
+    const done=sc.filter(x=>x).length;
+    /* A FINISHED run must replay from the first decision, not resume at its end. Resuming
+       a completed run skipped every decision but the last, and replaying is the commonest
+       thing a kid does. Keep the totals to show him, start the run clean. */
+    if(done>=PLAY.pts.length){
+      /* the denominator is the count that ASKED when it was played, not a re-derivation
+         from today's pace */
+      PLAY.last={read:sc.filter(x=>x&&x.asked&&x.read===1).length,
+        pos:sc.filter(x=>x&&x.pos===1).length,
+        asks:(typeof r.asks==='number')?r.asks
+             :sc.filter(x=>x&&x.asked).length,   // pre-asks record: count what actually asked
+        n:PLAY.pts.length};
+      PLAY.score=[]; PLAY.di=0; PLAY.tries=0;
+      return false;
+    }
+    PLAY.score=sc;
+    PLAY.tries=r.tries||0;
+    PLAY.di=Math.min(Math.max(0,r.di|0),PLAY.pts.length-1);
+    return done>0;
+  }catch(e){ return false; }
+}
+function playScoreClear(){
+  try{
+    const all=JSON.parse(localStorage.getItem(playKeyNS())||'{}');
+    delete all[playScoreKey()];
+    localStorage.setItem(playKeyNS(),JSON.stringify(all));
+  }catch(e){}
+}
+/* Every function that STARTS a leg must supersede whatever was running and take the result
+   card's buttons away with it. Three of them did neither, so a second tap during an
+   animation spawned an overlapping chain and a stale onDone ran against state that had
+   moved on - PLAY.res null, pt.i out of range, and the loop dead at phase "running". */
+function playBeginLeg(){
+  playInvalidate();
+  const rs=$('povres'); if(rs){ rs.classList.remove('on'); rs.innerHTML=''; }
+  PLAY.phase='running';
+}
+function playInvalidate(){
+  PLAY.gen=(PLAY.gen||0)+1;
+  PLAY._pos=null; PLAY._t=0; PLAY._rate=0; PLAY._legFt=0;
+  if(PLAY.raf){ cancelAnimationFrame(PLAY.raf); PLAY.raf=null; }
+}
+function playAnim(ms,onFrame,done){
+  const gen=PLAY.gen||0, t0=performance.now();
+  /* No per-leg reset. The teleport this guard exists for IS a seam between the flight and
+     the clock leg, so resetting here made exactly that jump unmeasurable - silencing a true
+     positive instead of fixing it. */
+  const step=()=>{
+    if(gen!==(PLAY.gen||0)) return;                 // superseded: drop this chain entirely
+    const k=ms>0?Math.min(1,(performance.now()-t0)/ms):1;
+    if(onFrame(k)===false){ PLAY.raf=null; return; }  // state pulled out from under the leg
+    puckGuard();
+    render();
+    if(k<1){ PLAY.raf=requestAnimationFrame(step); return; }
+    PLAY.raf=null;
+    if(gen===(PLAY.gen||0)&&done) done();
+  };
+  PLAY.raf=requestAnimationFrame(step);
+}
+function playFly(from,to,die,done){
+  PLAY.anim={from:from.slice(),to:to.slice(),die:die?die.slice():null,
+    t0:performance.now(),ms:die?380:520};
+  const ms=PLAY.anim.ms;
+  playAnim(ms,()=>{ if(!PLAY.anim) return false; },()=>{ PLAY.anim=null; if(done)done(); });
+}
+function playRun(toT,done){
+  const from=S.t, span=toT-from;
+  if(span<=0.0005){ if(done)done(); return; }
+  const ms=Math.max(430,span*2600);
+  /* how far the puck may travel on THIS leg, and how fast, in feet per millisecond */
+  PLAY._legFt=dist(puckAt(from).p,puckAt(toT).p);
+  PLAY._rate=PLAY._legFt/ms;
+  playAnim(ms,k=>{ S.t=from+span*ease(k); },
+    ()=>{ PLAY._rate=0; PLAY._legFt=0; if(done)done(); });
+}
+/* The consequence. Stopping at the mistake teaches that the mistake is the end of it -
+   he needs to see the rush the other way, which is the actual cost. */
+function playCounter(at,done){
+  const t=S.t, reds=THEMIDS.filter(id=>id!=='XG').map(id=>shown(id,t)).filter(Boolean)
+    .sort((a,b)=>dist(a,at)-dist(b,at)).slice(0,2);
+  PLAY.tail={at:at.slice(),reds,t0:performance.now(),ms:1250};
+  playAnim(PLAY.tail.ms,()=>{ if(!PLAY.tail) return false; },done);
+}
+function drawPlay(t){
+  const g=layer('pass');
+  const pt=PLAY.pts[PLAY.di];
+  /* he can re-place himself at every step, so the grab ring lives at every step */
+  if((PLAY.phase==='place'||PLAY.phase==='decide')&&S.sit.roster.includes(S.pos)){
+    const me=shown(S.pos,t); if(me) drawDragMe(disp(me));
+  }
+  /* the lane on every OPTION, before he picks - seeing whether it is open IS the read */
+  if(pt&&PLAY.phase==='decide'){
+    /* longest first, so a short lane paints ON TOP of a long one it shares a bearing
+       with. Carry and Dump at the reference decision were 1.6 degrees apart, identically
+       styled, and the 19ft carry lane vanished inside the 70ft dump lane - hiding the
+       lane of the CORRECT read, which is the one thing this drawing exists to show. */
+    laneGeom(pt,t).slice().sort((a,b)=>b.len-a.len).forEach(L=>{
+      const from=L.from, b=L.d, shut=L.shut, col=shut?'#bf1e2e':'#12855a';
+      /* a bowed lane keeps both true endpoints and still separates from its neighbour */
+      const d=L.bow
+        ? 'M'+from[0]+','+from[1]+' Q'+(L.cx)+','+(L.cy)+' '+b[0]+','+b[1]
+        : 'M'+from[0]+','+from[1]+' L'+b[0]+','+b[1];
+      g.appendChild(el('path',{d,fill:'none',stroke:'#fff','stroke-width':1.5,
+        'stroke-opacity':0.75,'stroke-linecap':'round'}));
+      /* dash pattern carries status as well as colour: red-green deficiency runs about
+         8% in boys, and open-vs-blocked is the core read of this whole mode. Open = long
+         even dashes, blocked = tight dots. The X marker below is the third channel. */
+      g.appendChild(el('path',{d,fill:'none',stroke:col,'stroke-width':0.8,
+        'stroke-opacity':0.95,'stroke-linecap':'round',
+        'stroke-dasharray':shut?'0.6 1.8':'2.4 1.9'}));
+      // a terminator per option kind, so a short lane is legible even when it overlaps
+      if(L.o.kind==='carry'){
+        g.appendChild(el('circle',{cx:b[0],cy:b[1],r:1.9,fill:'#fff','fill-opacity':0.9,
+          stroke:col,'stroke-width':0.7}));
+        g.appendChild(el('circle',{cx:b[0],cy:b[1],r:0.75,fill:col}));
+      } else if(L.o.kind==='dump'){
+        g.appendChild(el('rect',{x:b[0]-1.3,y:b[1]-1.3,width:2.6,height:2.6,fill:col,
+          'fill-opacity':shut?0.5:0.9,stroke:'#fff','stroke-width':0.35}));
+      } else {
+        g.appendChild(el('circle',{cx:b[0],cy:b[1],r:1.15,fill:col,'fill-opacity':shut?0.5:0.9,
+          stroke:'#fff','stroke-width':0.35}));
+      }
+      if(shut&&L.fault&&L.fault.at){
+        const p=disp(L.fault.at);
+        g.appendChild(el('circle',{cx:p[0],cy:p[1],r:2.4,fill:'none',stroke:'#bf1e2e','stroke-width':0.55}));
+        g.appendChild(el('line',{x1:p[0]-1.5,y1:p[1]-1.5,x2:p[0]+1.5,y2:p[1]+1.5,stroke:'#bf1e2e','stroke-width':0.55}));
+        g.appendChild(el('line',{x1:p[0]+1.5,y1:p[1]-1.5,x2:p[0]-1.5,y2:p[1]+1.5,stroke:'#bf1e2e','stroke-width':0.55}));
+      }
+    });
+  }
+  // the call he made that the play did not make
+  if(PLAY.ghost&&(PLAY.phase==='running'||PLAY.phase==='shown')){
+    const a=disp(PLAY.ghost.from), b=disp(PLAY.ghost.to);
+    g.appendChild(el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#ffc629',
+      'stroke-width':0.5,'stroke-opacity':0.55,'stroke-dasharray':'1.6 2.4'}));
+    const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2, tx=PLAY.ghost.label;
+    const lw=FS(tx.length*2.1+1.2), lh=FS(3.9);
+    g.appendChild(el('rect',{x:mx-lw/2,y:my-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
+      fill:'#3a2c05','fill-opacity':0.92,stroke:'#ffc629','stroke-width':0.3}));
+    g.appendChild(el('text',{x:mx,y:my,'font-size':FS(2.5),'text-anchor':'middle',
+      'font-weight':800,fill:'#ffc629','letter-spacing':0.2},tx));
+  }
+  // where the play died
+  const r=PLAY.res;
+  if(r&&r.posFault&&r.posFault.at&&PLAY.phase==='shown'){
+    const d=disp(r.posFault.at), fo=layer('focus');
+    fo.appendChild(el('circle',{cx:d[0],cy:d[1],r:3.4,fill:'#bf1e2e','fill-opacity':0.2,
+      stroke:'#bf1e2e','stroke-width':0.6}));
+    /* MEASURE the glyph run, do not estimate it from character count. A per-character
+       estimate runs short on bold caps with letter-spacing, so the clamp was computed
+       against a narrower pill than the one that renders and TOO FAR still hung off the
+       edge of the camera. Same fix Try mode already uses for its explanation. */
+    const tx=r.posFault.msg, lh=FS(4.2), vb=S.vb||FULLVIEW;
+    const txt=el('text',{'font-size':FS(2.8),'text-anchor':'middle','font-weight':850,
+      fill:'#fff','letter-spacing':0.25},tx);
+    fo.appendChild(txt);
+    let tw=0; try{ tw=txt.getComputedTextLength(); }catch(e){}
+    if(!tw) tw=tx.length*FS(2.8)*0.7;
+    const lw=Math.min(Math.max(6,vb[2]-2),tw+FS(3.4));
+    const lx=Math.max(vb[0]+lw/2+0.6,Math.min(vb[0]+vb[2]-lw/2-0.6,d[0]));
+    let ly=d[1]<vb[1]+20?d[1]+FS(7.6):d[1]-FS(5.2);
+    ly=Math.max(vb[1]+lh,Math.min(vb[1]+vb[3]-lh*0.4,ly));
+    const pill=el('rect',{x:lx-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
+      fill:'#bf1e2e','fill-opacity':0.95});
+    fo.insertBefore(pill,txt);
+    txt.setAttribute('x',lx); txt.setAttribute('y',ly);
+    if(dist([lx,ly],d)>lh*1.6)
+      fo.insertBefore(el('line',{x1:lx,y1:ly+lh*0.3,x2:d[0],y2:d[1],stroke:'#bf1e2e',
+        'stroke-width':0.35,'stroke-dasharray':'1 1','stroke-opacity':0.8}),pill);
+  }
+  // his own way: the man who gets to react
+  if(PLAY.own&&PLAY.own.chase&&(PLAY.phase==='running'||PLAY.phase==='shown')){
+    const o=PLAY.own, k=o.t0?Math.min(1,(performance.now()-o.t0)/(o.ms||900)):0;
+    const a=disp(o.chase), b=disp(o.to);
+    const cx=a[0]+(b[0]-a[0])*k*0.86, cy=a[1]+(b[1]-a[1])*k*0.86;
+    g.appendChild(el('line',{x1:a[0],y1:a[1],x2:cx,y2:cy,stroke:'#bf1e2e',
+      'stroke-width':0.6,'stroke-opacity':0.7,'stroke-dasharray':'1.8 1.6'}));
+    g.appendChild(el('circle',{cx,cy,r:TR()*0.95,fill:'#bf1e2e','fill-opacity':0.8,
+      stroke:'#fff','stroke-width':0.35}));
+  }
+  // the counter-attack, only while the step that caused it is on screen
+  if(PLAY.tail&&(PLAY.phase==='running'||PLAY.phase==='shown')){
+    const k=Math.min(1,(performance.now()-PLAY.tail.t0)/PLAY.tail.ms);
+    const a=disp(PLAY.tail.at), n=disp(OURNET);
+    const hx=a[0]+(n[0]-a[0])*k, hy=a[1]+(n[1]-a[1])*k;
+    g.appendChild(el('line',{x1:a[0],y1:a[1],x2:hx,y2:hy,stroke:'#bf1e2e','stroke-width':0.8,
+      'stroke-opacity':0.85}));
+    PLAY.tail.reds.forEach((p,j)=>{
+      const b=disp(p), tx=b[0]+(n[0]-b[0])*k*0.92, ty=b[1]+(n[1]-b[1])*k*0.92;
+      g.appendChild(el('circle',{cx:tx,cy:ty,r:TR()*0.9,fill:'#bf1e2e','fill-opacity':0.75+j*0}));
+    });
+    g.appendChild(el('circle',{cx:hx,cy:hy,r:1.7,fill:'#0b0b0b',stroke:'#fff','stroke-width':0.4}));
+  }
+}
+
+/* ---- the loop ---------------------------------------------------------------- */
+function playIdleClear(){ if(PLAY.idle){ clearTimeout(PLAY.idle); PLAY.idle=null; } }
+/* Doing nothing is allowed to take as long as he likes. A teaching tool that times out
+   punishes thinking, and it must never pick for him - so this only nudges. */
+function playIdleArm(){
+  playIdleClear();
+  PLAY.idle=setTimeout(()=>{ PLAY.nudge=true; playPrompt(); }, 7000);
+}
+function playTeardown(){
+  playIdleClear(); playInvalidate();
+  PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.phase='idle';
+  PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
+  const rs=$('povres'); if(rs) rs.classList.remove('on');
+  const ob=$('povopts'); if(ob) ob.innerHTML='';   // no stale buttons left in a hidden tray
+}
+function playStart(){
+  /* A wrong-demo variant exists to show the mistake, so there is no route to grade
+     against - and swapping him onto a different variant without saying so is worse than
+     refusing. Refuse, visibly, and leave him where he chose to be. */
+  if(variant().wrong){
+    /* Refusing has to TEAR DOWN, not just decline: leaving the overlay up kept a live
+       loop whose points were derived from a different variant, and leaving PLAY.key set
+       made playSync() a permanent no-op - so switching back to a gradeable variant
+       resumed mid-stream instead of re-deriving. */
+    PLAY.pts=[]; PLAY.di=0; PLAY.score=[]; PLAY.key='';
+    if(S.mode==='play') setMode('learn'); else playTeardown();
+    note('off','<b>'+esc(variant().name)+' is watch-only.</b> This one is here to show '+
+      'the mistake, so there is no right answer to score you against. Pick the other '+
+      'version to run it yourself.');
+    return;
+  }
+  setMode('play');
+  playInvalidate();
+  PLAY.pts=playPoints(); PLAY.di=0; PLAY.score=[]; PLAY.res=null; PLAY.tries=0;
+  PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
+  PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
+  PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
+  S.t=0; S.manual={};
+  if(!PLAY.pts.length){
+    PLAY.phase='idle';
+    note('off','This play has no decision in it yet - watch it instead.');
+    setMode('learn'); return;
+  }
+  PLAY.phase='place';
+  /* playStart must never be the thing that destroys a saved run. playSync() calls it on
+     any variant or position change, so clearing here wiped the progress of the play he
+     was switching TO - the exact loss this feature exists to prevent. Only the two
+     explicit start-over buttons clear. */
+  PLAY.last=null;
+  PLAY.restored=playScoreLoad();
+  paintRail(); playPrompt(); render(); playIdleArm();
+}
+/* The decision points are derived from ONE variant and one position. Switching either
+   underneath the loop left it pointing at frames that no longer exist, so any change
+   re-derives instead of limping on. */
+function playSync(){
+  if(S.mode!=='play') return;
+  /* hard-fail an impossible index rather than deriving against undefined. Not reachable
+     from the UI today - but neither was the empty manifest, and a silent wrong state costs
+     more than this check. */
+  if(!S.sit||!S.sit.variants||!S.sit.variants[S.varIdx]){
+    console.error('playSync: variant index '+S.varIdx+' does not exist on '+(S.sit&&S.sit.id));
+    S.varIdx=0;
+    if(!S.sit||!S.sit.variants||!S.sit.variants[0]){ setMode('learn'); return; }
+  }
+  if(PLAY.key===S.sit.id+'|'+variant().id+'|'+S.pos) return;
+  playStart();
+}
+function playPrompt(){
+  const top=$('povmsg'), st=$('povstep'), ob=$('povopts'), rs=$('povres');
+  if(!top) return;
+  rs.classList.remove('on'); ob.innerHTML=''; ob.classList.remove('wait');
+  const n=PLAY.pts.length;
+  if(PLAY.phase==='place'){
+    st.textContent='Before the whistle';
+    /* one line, always: state and history live in the rail, not over the ice */
+    top.innerHTML=(PLAY.scope==='any'
+      ? 'Drag <b>anybody</b> where they belong, then start the play.'
+      : 'Drag <b>YOU</b> where you belong, then start the play.')+
+      (PLAY.nudge?' <span class="povnudge">Take your time.</span>':'');
+    const b=document.createElement('button');
+    b.className='povopt open'; b.innerHTML='Start the play<small>go</small>';
+    b.onclick=()=>playAdvance();
+    ob.appendChild(b);
+    if(PLAY.nudge) ob.classList.add('wait');
+    return;
+  }
+  if(PLAY.phase==='decide'){
+    const pt=PLAY.pts[PLAY.di];
+    st.textContent='Decision '+(PLAY.di+1)+' of '+n;
+    if(pt.kind==='repo'){
+      top.innerHTML='Put yourself where you belong here, then run it.'+
+        (PLAY.nudge?' <span class="povnudge">No clock.</span>':'');
+      const b=document.createElement('button');
+      b.className='povopt open'; b.innerHTML='Run this step<small>go</small>';
+      b.onclick=()=>playPick(-1);
+      ob.appendChild(b);
+      if(PLAY.nudge) ob.classList.add('wait');
+      return;
+    }
+    if(pt.kind==='cover'){
+      top.innerHTML=(DEFWHY[pt.why]||'')+' Who do you take?'+
+        (PLAY.nudge?' <span class="povnudge">No clock.</span>':'');
+    } else {
+      const pk=puckAt(frames()[pt.i].t);
+      const who=(pk.w===S.pos)?'You have it.':((POSNAMES[pk.w]||pk.w)+' has it.');
+      top.innerHTML=who+' What is your play?'+
+        (PLAY.nudge?' <span class="povnudge">No clock - tap what you would do.</span>':'');
+    }
+    pt.opts.forEach((o,k)=>{
+      const shut=laneShut(pt,o);
+      const b=document.createElement('button');
+      b.className='povopt '+(shut?'shut':'open');
+      b.innerHTML=esc(o.label)+'<small>'+(shut?'lane covered':(o.hint||'open'))+'</small>';
+      b.onclick=()=>playPick(k);
+      ob.appendChild(b);
+    });
+    if(PLAY.nudge) ob.classList.add('wait');
+    return;
+  }
+}
+/* Run-it-through is the same loop with the waiting removed: the play executes its own route
+   and every step is still graded on position, so the read axis simply has nothing to ask. */
+function playThrough(){
+  const pt=PLAY.pts[PLAY.di]; if(!pt) return;
+  playBeginLeg(); playPrompt();
+  const f=frames(), nx=f[pt.i+1];
+  const r={asked:false,posFault:tryEval(pt.i),stop:false,pt,choice:null};
+  PLAY.res=r;
+  PLAY.score[PLAY.di]={asked:false,pos:r.posFault?0:1,
+    fault:r.posFault?r.posFault.msg:null,kind:pt.kind};
+  playScoreSave();
+  playRun(nx?nx.t:1,()=>{
+    if(PLAY.di>=PLAY.pts.length-1){ PLAY.phase='shown'; playShow(); return; }
+    PLAY.di++; playThrough();
+  });
+}
+function playAdvance(){
+  playIdleClear(); PLAY.nudge=false;
+  /* last step's consequence must not still be on the ice during this one - two phantom
+     reds were staying painted through every later decision */
+  PLAY.tail=null; PLAY.ghost=null; PLAY.res=null;
+  PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
+  const pt=PLAY.pts[PLAY.di];
+  if(!pt){ PLAY.phase='place'; playPrompt(); render(); return; }
+  playBeginLeg(); playPrompt();
+  if(PLAY.pace==='through'){ playRun(pt.t,()=>playThrough()); return; }
+  playRun(pt.t,()=>{ PLAY.phase='decide'; playPrompt(); render(); playIdleArm(); });
+}
+function playPick(k){
+  playIdleClear(); PLAY.nudge=false;
+  const pt=PLAY.pts[PLAY.di];
+  if(!pt) return;
+  const choice=(k<0?null:pt.opts[k]);
+  const r=playResolve(pt,choice);
+  PLAY.res=r;
+  /* idempotent: one entry per decision, replaced if he comes back to it */
+  PLAY.score[PLAY.di]=Object.assign(
+    {asked:!!r.asked, pos:r.posFault?0:1,
+     fault:r.posFault?r.posFault.msg:null, kind:choice?choice.kind:pt.kind},
+    r.asked?{read:r.readOk?1:0}:{});
+  playScoreSave();
+  playBeginLeg(); playPrompt();
+  const t=frames()[pt.i].t;
+  const from=(pt.kind==='cover'||pt.kind==='repo')?(shown(S.pos,t)||puckAt(t).p):puckAt(t).p;
+  const to=(choice?optTarget(choice,pt.i,t):null)||from;
+  const die=r.stop&&r.posFault&&r.posFault.at?r.posFault.at:null;
+  const f=frames(), nx=f[pt.i+1], onDone=()=>{ PLAY.phase='shown'; playShow(); };
+  /* Only fly the puck where the puck actually goes. A wrong call the play does not make
+     is drawn as a FORGONE lane and the puck stays on the carrier - flying it and then
+     letting the clock snap it back was a 39ft teleport, which is the exact thing this
+     rework exists to kill. */
+  /* readOk is THREE-valued - true, false, or null for a step that asks no question - and
+     these branches used to test it as a boolean. `!null` is true, so a clean repositioning
+     step fell into the wrong-answer path with a null choice and threw. Handle the three
+     states explicitly rather than null-guarding what they call. */
+  PLAY.ghost=null; PLAY.own=null; PLAY.hold=null; PLAY.label=null;
+
+  /* Only a PUCK decision moves the puck. A cover decision draws a line from him to the man
+     he takes - flying the puck along it teleported the puck onto that man, which is exactly
+     what the guard caught. A repositioning step asks nothing at all. */
+  if(pt.kind!=='puck'||!r.asked){
+    if(r.stop&&die) playCounter(die,onDone);
+    else playRun(nx?nx.t:1,onDone);
+    return;
+  }
+  if(r.asked&&!r.readOk&&!r.stop){            // survivable wrong call: play HIS way first
+    PLAY.own=ownWay(pt,choice); PLAY.label='YOUR WAY';
+    playFly(from,to,null,()=>{
+      PLAY.hold=to.slice();                   // it stays where he sent it
+      playChase(()=>{ PLAY.pending='authored'; onDone(); });
+    });
+    return;
+  }
+  /* On the correct answer the authored leg ALREADY carries the puck from the carrier to the
+     receiver, so flying it first meant it arrived, snapped 40ft back to the carrier, and
+     travelled the same lane a second time - the exact complaint this rework opened on, now
+     on the right answer. Fly only when the leg will not do it: a failure that dies early,
+     or a call the play does not make. */
+  if(r.asked&&r.readOk&&!r.stop){ playRun(nx?nx.t:1,onDone); return; }
+  playFly(from,to,die,()=>{
+    if(r.stop) playCounter(die||to,onDone);
+    else playRun(nx?nx.t:1,onDone);
+  });
+}
+function playAuthored(){
+  const pt=PLAY.pts[PLAY.di];
+  if(!pt) return;
+  const t=frames()[pt.i].t;
+  const back=puckAt(t).p, from=PLAY.hold?PLAY.hold.slice():back;
+  playBeginLeg();
+  PLAY.pending=null; PLAY.label='WHAT THE PLAY DOES';
+  $('povstep').textContent=PLAY.label;
+  $('povmsg').textContent='Same moment - here is the play.';
+  const f=frames(), nx=f[pt.i+1], last=PLAY.di>=PLAY.pts.length-1;
+  /* walk it back rather than snapping - the return is part of the comparison */
+  playFly(from,back,null,()=>{
+    PLAY.hold=null; PLAY.own=null; S.t=t; PLAY._pos=null;
+    playRun(nx?nx.t:1,()=>{
+      PLAY.label=null;
+      if(last) playFinish(); else { PLAY.di++; playAdvance(); }
+    });
+  });
+}
+function playShow(){
+  const o=playOutcome(PLAY.res), rs=$('povres'), r=PLAY.res;
+  /* keep the card out of the half the consequence is in */
+  const focusPt=(r.posFault&&r.posFault.at)||PLAY.hold||puckAt(S.t).p;
+  const fy=disp(focusPt)?disp(focusPt)[1]:42.5;
+  const vb=S.vb||FULLVIEW;
+  rs.classList.toggle('attop',fy>vb[1]+vb[3]*0.5);
+  /* a step with no question has no read to report - and a blank must not read as a zero */
+  const axes='<div class="povaxes">'+
+    (!r.asked?'<span style="color:#8fa4c4">NO CALL TO MAKE</span>'
+      :'<span class="'+(r.readOk?'ok':'no')+'">READ '+(r.readOk?'GOOD':'OFF')+'</span>')+
+    '<span class="'+(r.posFault?'no':'ok')+'">POSITION '+(r.posFault?'OFF':'GOOD')+
+    '</span></div>';
+  const last=PLAY.di>=PLAY.pts.length-1;
+  const own=PLAY.own?'<p><b style="color:#ffc629">Your way:</b> '+esc(PLAY.own.verdict)+'</p>':'';
+  const onLabel=PLAY.pending==='authored'?'Show me what the play does &#9654;'
+    :(last?'See how I did':'Next decision &#9654;');
+  rs.innerHTML='<div class="povbody"><b class="'+o.cls+'">'+esc(o.head)+'</b>'+axes+own+
+    '<p>'+esc(o.body)+'</p></div><div class="povrow">'+
+    '<button id="povagain">Try this step again</button>'+
+    '<button class="hot" id="povon">'+onLabel+'</button>'+
+    '</div>';
+  rs.classList.add('on');
+  $('povmsg').innerHTML=esc(o.head);
+  $('povstep').textContent=PLAY.label||('Decision '+(PLAY.di+1)+' of '+PLAY.pts.length);
+  $('povopts').innerHTML='';
+  paintRail();                       // the rail tally follows the score
+  $('povagain').onclick=()=>playRetry();
+  $('povon').onclick=()=>{
+    if(PLAY.pending==='authored'){ playAuthored(); return; }
+    if(last) playFinish(); else { PLAY.di++; playAdvance(); }
+  };
+  render();
+  const s=PLAY.res.posFault&&PLAY.res.posFault.say;
+  if(s&&SPK.on) say(s);
+}
+/* Retrying a step rewinds only the clock and this step's record - his placement stays,
+   because the placement is the thing he is deciding about. */
+function playRetry(){
+  playInvalidate();
+  PLAY.tries++;
+  const pt=PLAY.pts[PLAY.di];
+  PLAY.tail=null; PLAY.anim=null; PLAY.ghost=null; PLAY.res=null;
+  PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
+  delete PLAY.score[PLAY.di];
+  playScoreSave();
+  S.t=pt.t; PLAY.phase='decide';
+  playPrompt(); render(); playIdleArm();
+}
+function playFinish(){
+  playIdleClear(); PLAY.phase='done'; PLAY.tail=null;
+  const n=PLAY.pts.length;
+  const asks=playAsks();                                   // steps that carry a read axis
+  const rd=PLAY.score.filter(s=>s&&s.asked&&s.read===1).length;
+  const ps=PLAY.score.filter(s=>s&&s.pos===1).length;
+  const faults={};
+  PLAY.score.forEach(s=>{ if(s&&s.fault) faults[s.fault]=(faults[s.fault]||0)+1; });
+  const rep=Object.keys(faults).sort((a,b)=>faults[b]-faults[a]);
+  const lines=rep.length
+    ? rep.map(k=>'<div>'+esc(cap(k.toLowerCase()))+' <i>&middot; '+
+        (faults[k]>1?faults[k]+' times':'once')+'</i></div>').join('')
+    : (ps===n?'<div>You were in a workable spot every time.</div>'
+             :'<div>Nothing went wrong in the steps you played.</div>');
+  const rs=$('povres');
+  const head=asks
+    ? 'Reads '+rd+' of '+asks+' &middot; Position '+ps+' of '+n
+    : 'Position '+ps+' of '+n;                    // no questions asked: no read line at all
+  rs.innerHTML='<div class="povbody"><b class="'+
+    ((rd===asks&&ps===n)?'great':((asks?rd>=asks-1:ps>=n-1)?'good':'off'))+'">'+
+    head+'</b>'+
+    '<div class="povsum">'+lines+'</div>'+
+    '<p>'+(!asks
+      ? (ps===n?'You were in the right spot at every step.':'The spots you missed are the ones worth running again.')
+      : (rd===asks?'Every call was the right one.':'The calls you missed are the ones worth running again.'))+
+    (PLAY.tries?' You retried '+PLAY.tries+(PLAY.tries===1?' step.':' steps.'):'')+'</p></div>'+
+    '<div class="povrow"><button class="hot" id="povrun">Run it again</button>'+
+    '<button id="povwatch">Watch it done right</button></div>';
+  rs.classList.add('on');
+  $('povmsg').textContent='That is the play.';
+  $('povstep').textContent='Done';
+  $('povopts').innerHTML='';
+  $('povrun').onclick=()=>{ playScoreClear(); playStart(); };
+  $('povwatch').onclick=()=>{ setMode('learn'); S.t=0; S.manual={}; render(); };
+  render();
+}
+
 /* ---------------- modes ---------------- */
 function setMode(m){
   if(m!=='learn') clearStage();
@@ -3549,8 +5202,12 @@ function setMode(m){
   if(m==='coach'){ coachReset(); } else { const cb=$('callbar'); if(cb){ cb.classList.remove('on'); cb.innerHTML=''; } }
   /* coach mode has its own Run the step button, so the transport row would only be a
      way to scrub the legs out of sync */
-  $('ctrlrow').style.display=(m==='quiz'||m==='coach'||STAGE.active)?'none':'flex';
+  /* the decision loop owns its own transport, on the ice */
+  $('ctrlrow').style.display=(m==='quiz'||m==='coach'||m==='play'||STAGE.active)?'none':'flex';
   $('quickbar').style.display=((m!=='learn'&&m!=='try')||STAGE.active)?'none':'';
+  $('pov').classList.toggle('on',m==='play');
+  const cq=document.querySelector('.cue'); if(cq) cq.style.display=(m==='play')?'none':'';
+  if(m!=='play') playTeardown();
   /* stepping half-simulates in Try mode - everyone moves but him - so it stays a Learn tool */
   ['fwd','back','scrub'].forEach(k=>{ const e=$(k); if(e) e.style.display=(m==='try')?'none':''; });
   if(m==='try'||m==='coach'){
@@ -4017,6 +5674,18 @@ function loadCustom(){
     const raw=localStorage.getItem('hiq_custom');
     if(raw){ CUSTOM=JSON.parse(raw)||[]; }
   }catch(e){ CUSTOM=[]; }
+  /* Migrate on load, the way loadAge does for the filter value: a play saved by the
+     deployed build carries ages, and a play built before either name carries neither -
+     both must survive the rename rather than disappear from the menu. */
+  let moved=0;
+  CUSTOM.forEach(s=>{
+    if(!Array.isArray(s.level)||!s.level.length){
+      s.level=(Array.isArray(s.ages)&&s.ages.length)?s.ages.slice():AGEBANDS.slice();
+      moved++;
+    }
+    if(s.ages) delete s.ages;
+  });
+  if(moved) saveCustom();
   CUSTOM.forEach(s=>{ const n=+String(s.id).replace(/\D/g,''); if(n>=customSeq)customSeq=n+1; });
 }
 function saveCustom(){
@@ -4028,6 +5697,8 @@ function newPlay(form){
   const us=Object.assign({},f.us), them=Object.assign({},f.them);
   return {
     id:'custom_'+(customSeq++), name:f.id==='blank'?'My play':f.name, phase:f.phase, custom:true,
+    /* a play he built is his at every level - never filter his own work out of the menu */
+    level:AGEBANDS.slice(),
     about:'A play you built.', focus:f.focus.slice(),
     roster:Object.keys(us),
     coach:{},
@@ -4271,6 +5942,7 @@ step('render', ()=>render());
 step('screen', ()=>showScreen('menu'));
 step('install',()=>{ initInstallButton(); playCount(); syncSheet();
   const bs=$('buildstamp'); if(bs) bs.textContent=BUILD;
+  cacheStamp();
   const at=$('audiotest'); if(at) at.onclick=audioProbe; });
 step('resize', ()=>{
   /* iOS fires resize constantly - URL bar collapsing on scroll, keyboard opening on the

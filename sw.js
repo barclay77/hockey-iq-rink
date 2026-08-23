@@ -1,6 +1,6 @@
 /* Above The Puck - offline cache.
    Bump CACHE when you change any file, otherwise browsers keep serving the old one. */
-const CACHE = 'hockey-iq-v76';
+const CACHE = 'hockey-iq-v148';
 const ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,16 @@ self.addEventListener('activate', e => {
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
+});
+
+/* The Settings build receipt asks the ACTIVE worker which cache it is serving from.
+   Answering here is the only way the page can compare what it expects against what is
+   actually running - index.html cannot see this constant. */
+self.addEventListener('message', e => {
+  if (!e.data || e.data.q !== 'hiq-cache') return;
+  const reply = { hiqCache: CACHE };
+  if (e.ports && e.ports[0]) e.ports[0].postMessage(reply);
+  else if (e.source) e.source.postMessage(reply);
 });
 
 self.addEventListener('fetch', e => {

@@ -85,7 +85,7 @@ as inverted to anyone checking the cue text against the dots.
 | `phase` | `'D'` \| `'T'` \| `'O'` | ✅ | which of the three phase columns it lands in. Defence / Transition / Offence. |
 | `about` | string | ✅ | one line under the menu card, and spoken in the intro. |
 | `order` | number | ✅ | menu sort. Shipped data uses 10, 20, 30 … so a new situation can slot between two without renumbering. |
-| `ages` | string[] | ✅ | USA Hockey bands. Only `8U` `10U` `12U` `14U` `16U` `18U`. Several is fine. Drives the age filter. |
+| `level` | string[] | ✅ | USA Hockey levels. Only `8U` `10U` `12U` `14U` `16U` `18U`. Several is fine. Drives the level filter. Authored content metadata — never collected from a player. |
 | `focus` | `[x,y,w,h]` | ✅ | opening camera rect. |
 | `roster` | string[] | ✅ | which of ours are on the ice. Drives the position picker. |
 | `variants` | object[] | ✅ | one or more variations. See below. |
@@ -223,7 +223,7 @@ Every optional field, exercised.
   group:'T',                          // optional; defaults to phase
   order:75,                           // sorts between 70 and 80
   about:'One line the menu card and the intro both use.',
-  ages:['10U','12U'],                 // USA Hockey bands only
+  level:['10U','12U'],                // USA Hockey levels only
 
   /* ---- the ice ---- */
   focus:[80,-5,122,95],               // opening camera: neutral zone + their end

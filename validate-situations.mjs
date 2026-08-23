@@ -83,8 +83,8 @@ for (const s of SITUATIONS) {
   if (!PHASES.includes(s.phase)) err(`${at} phase must be one of ${PHASES.join('/')}, got ${JSON.stringify(s.phase)}`);
   if (!isNum(s.order)) err(`${at} order must be a number (menu sort)`);
 
-  if (!Array.isArray(s.ages) || !s.ages.length) err(`${at} ages must be a non-empty array`);
-  else for (const a of s.ages) if (!BANDS.includes(a)) err(`${at} illegal age band ${JSON.stringify(a)} — allowed: ${BANDS.join(', ')}`);
+  if (!Array.isArray(s.level) || !s.level.length) err(`${at} level must be a non-empty array`);
+  else for (const a of s.level) if (!BANDS.includes(a)) err(`${at} illegal level ${JSON.stringify(a)} — allowed: ${BANDS.join(', ')}`);
 
   if (!Array.isArray(s.focus) || s.focus.length !== 4 || !s.focus.every(isNum)) err(`${at} focus must be [x,y,w,h]`);
   else {

@@ -2,7 +2,7 @@
    HOCKEY IQ RINK - SITUATION DATA. This file is the ONLY source of truth.
    index.html names no situation and decides no order: add a situation here,
    reload, and it appears. Everything a situation needs lives on the situation: phase, about, order,
-   ages, roster, coach, variants, and its own quiz, roles, videos, keywords and
+   level, roster, coach, variants, and its own quiz, roles, videos, keywords and
    next-step links. See situations.SCHEMA.md for the format, the
    coordinate system and the rink landmark constants.
 
@@ -52,7 +52,7 @@ const SITUATIONS = [
   id:'dzone',
   name:'Defensive zone coverage',
   group:'D',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'They have it in our end. Five jobs, and nobody chases.',
   focus:[-5,-5,110,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -132,7 +132,7 @@ const SITUATIONS = [
         },
         {
           t:0.35,
-          cue:'He tries to come out the bottom side. RD holds the post, C takes away the wall lane.',
+          cue:'He tries to come out the near post side. RD holds the post, C takes away the wall lane.',
           us:{RD:[12,55], C:[22,62], LD:[15,38]},
           them:{X1:[9,57], X3:[28,64]},
           puck:[
@@ -200,7 +200,7 @@ const SITUATIONS = [
           cue:'Rebound covered, G leaves it in the corner, LD picks it up. Now we are the ones with the puck.',
           us:{LD:[18,24], C:[28,44], LW:[46,20], RW:[44,52], RD:[20,44]},
           them:{X3:[32,42]},
-          puck:[16,22]
+          puck:[16,18]
         }
       ]
     }
@@ -521,7 +521,7 @@ const SITUATIONS = [
   id:'forecheck',
   name:'Forecheck',
   group:'D',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'They have it in their end. We go get it back.',
   focus:[100,-5,107,95],
   roster:['C','LW','RW','LD','RD'],
@@ -649,7 +649,7 @@ const SITUATIONS = [
         },
         {
           t:0.3,
-          cue:'LW forces him up the TOP side. That is your key - go to the top wall, above and inside your man.',
+          cue:'LW forces him up the wall. That is your key - go to that same wall, above and inside your man.',
           us:{LW:[188,28], C:[174,14], RW:[160,46]},
           them:{X1:[192,28], X3:[178,10]},
           puck:[
@@ -881,7 +881,7 @@ const SITUATIONS = [
         'Wherever there is open ice'
       ],
       a:1,
-      why:'F2 reads F1. If F1 forced it up the top wall, you attack the top wall - above and inside your man.'
+      why:'F2 reads F1. If F1 forced it up the wall, you attack that same wall - above and inside your man.'
     }
   ],
   placeq:[
@@ -965,7 +965,7 @@ const SITUATIONS = [
   id:'rush',
   name:'Defending the rush',
   phase:'D',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'They are carrying it at us. Squeeze them at the line.',
   focus:[46,-5,112,95],
   roster:['C','LW','RW','LD','RD'],
@@ -1279,7 +1279,7 @@ const SITUATIONS = [
   id:'pk',
   name:'Penalty kill (4 on 5)',
   group:'D',
-  ages:['12U','14U','16U','18U'],
+  level:['12U','14U','16U','18U'],
   about:'Down a man. Four players, one box.',
   focus:[-5,-5,100,95],
   roster:['G','LD','RD','C','LW'],
@@ -1302,7 +1302,7 @@ const SITUATIONS = [
         },
         {
           t:0.3,
-          cue:'Puck goes to the top-side half wall. The whole box slides that way together. Nobody freelances.',
+          cue:'Puck goes to the strong-side half wall. The whole box slides that way together. Nobody freelances.',
           us:{C:[38,26], LW:[38,48], LD:[24,27], RD:[24,48]},
           them:{X2:[32,18]},
           puck:[
@@ -1515,7 +1515,7 @@ const SITUATIONS = [
     {
       pos:'C',
       fr:1,
-      ask:'The puck went to the top-side half wall. Where does your corner of the box slide to?'
+      ask:'The puck went to the strong-side half wall. Where does your corner of the box slide to?'
     },
     {
       pos:'LD',
@@ -1575,7 +1575,7 @@ const SITUATIONS = [
   id:'breakout',
   name:'Breakout',
   group:'T',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'We just won it. Now get out of our own end.',
   focus:[-5,-5,116,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -1610,7 +1610,7 @@ const SITUATIONS = [
         {
           t:0.55,
           cue:'Pass to the wall. C is already moving through the middle - BEHIND the puck, not ahead of it.',
-          us:{LD:[30,20], C:[28,40], RW:[72,74]},
+          us:{LD:[30,20], C:[22,40], RW:[72,74]},
           them:{X1:[28,24], X3:[46,42]},
           puck:[30,9]
         },
@@ -1675,7 +1675,7 @@ const SITUATIONS = [
         {
           t:0.8,
           cue:'RD to RW on the wall. Exact same play, just the other side of the ice.',
-          us:{RW:[40,77], C:[44,54], RD:[28,62]},
+          us:{RW:[40,77], C:[34,54], RD:[28,62]},
           them:{X3:[46,52], X1:[22,56]},
           puck:[40,77]
         },
@@ -1978,7 +1978,7 @@ const SITUATIONS = [
   id:'regroup',
   name:'Regroup',
   phase:'T',
-  ages:['12U','14U','16U','18U'],
+  level:['12U','14U','16U','18U'],
   about:'The play died. Reset and come again with speed.',
   focus:[46,-5,112,95],
   roster:['C','LW','RW','LD','RD'],
@@ -2278,7 +2278,7 @@ const SITUATIONS = [
   id:'offside',
   name:'Staying onside',
   group:'T',
-  ages:['8U','10U','12U','14U','16U','18U'],
+  level:['8U','10U','12U','14U','16U','18U'],
   about:'The puck goes in first, then you do.',
   focus:[80,-5,122,95],
   roster:['C','LW','RW','LD','RD'],
@@ -2614,7 +2614,7 @@ const SITUATIONS = [
   id:'entry',
   name:'Zone entry',
   group:'T',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'Crossing their blue line with the puck.',
   focus:[80,-5,122,95],
   roster:['C','LW','RW','LD','RD'],
@@ -2696,7 +2696,7 @@ const SITUATIONS = [
         {
           t:0.35,
           cue:'C curls BACK toward his own end instead of forcing it. That buys two seconds - and two seconds is your whole team.',
-          us:{C:[106,34], LW:[116,12], RW:[112,66], LD:[104,34]},
+          us:{C:[106,34], LW:[116,12], RW:[112,66], LD:[98,34]},
           them:{X1:[124,34], X2:[140,28], X3:[142,54], X4:[124,20], X5:[122,64]},
           puck:[
             106,
@@ -2995,7 +2995,7 @@ const SITUATIONS = [
   id:'faceoff',
   name:'Faceoffs',
   group:'T',
-  ages:['8U','10U','12U','14U','16U','18U'],
+  level:['8U','10U','12U','14U','16U','18U'],
   about:'The puck belongs to nobody yet.',
   focus:[-5,-5,96,95],
   roster:['G','LD','RD','C','LW','RW'],
@@ -3007,7 +3007,7 @@ const SITUATIONS = [
       frames:[
         {
           t:0,
-          cue:'D-zone draw on the top-side dot. Before the puck drops: know your man, and know where you go if we lose it.',
+          cue:'D-zone draw in our own end. Before the puck drops: know your man, and know where you go if we lose it.',
           us:{G:[13.5,42.5], C:[29.5,20.5], LD:[23,11], RD:[19,35], LW:[38,12], RW:[36,30]},
           them:{X1:[32.5,20.5], X2:[41,10], X3:[40,31], X4:[60,20], X5:[52,42]},
           puck:[31,20.5]
@@ -3349,7 +3349,7 @@ const SITUATIONS = [
   id:'ozone',
   name:'Offensive zone play',
   group:'O',
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'We have it in their end. Keep it and score.',
   focus:[117,-5,90,95],
   roster:['C','LW','RW','LD','RD'],
@@ -3720,7 +3720,7 @@ const SITUATIONS = [
   id:'pp',
   name:'Power play (5 on 4)',
   group:'O',
-  ages:['12U','14U','16U','18U'],
+  level:['12U','14U','16U','18U'],
   about:'One extra man. Hold your spot, move the puck.',
   focus:[117,-5,90,95],
   roster:['LD','LW','C','RW','RD'],
@@ -4013,7 +4013,7 @@ const SITUATIONS = [
 /* ---- Support the puck (T, order 5) ---- */
 {
   id:'support', name:'Support the puck', group:'T', phase:'T', order:5,
-  ages:['8U','10U','12U','14U'],
+  level:['8U','10U','12U','14U'],
   about:'Three of you, one puck. Nobody else chases it.',
   focus:[100,-5,105,95],
   roster:['C','LW','RW'],
@@ -4114,7 +4114,7 @@ const SITUATIONS = [
 /* ---- Go to the net (O, order 7) ---- */
 {
   id:'netfront', name:'Go to the net', group:'O', phase:'O', order:7,
-  ages:['8U','10U','12U','14U','16U','18U'],
+  level:['8U','10U','12U','14U','16U','18U'],
   about:'Somebody has to be there. Most goals are ugly.',
   focus:[130,-5,75,95],
   roster:['C','LW','RW'],
@@ -4214,7 +4214,7 @@ const SITUATIONS = [
 /* ---- First one back (D, order 8) ---- */
 {
   id:'firstback', name:'First one back', group:'D', phase:'D', order:8,
-  ages:['8U','10U','12U','14U','16U','18U'],
+  level:['8U','10U','12U','14U','16U','18U'],
   about:'They got it. Somebody turns around right now.',
   focus:[20,-5,150,95],
   roster:['C','LW','RW'],
@@ -4316,7 +4316,7 @@ const SITUATIONS = [
 /* ---- 2 on 1 rush (T, order 35) ---- */
 {
   id:'rushtwo', name:'2 on 1 rush', group:'T', phase:'T', order:35,
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'Two of you, one of him. Make him pick.',
   focus:[80,-5,125,95],
   roles:{X1:'the lone D', XG:'goalie'},
@@ -4407,7 +4407,7 @@ const SITUATIONS = [
 /* ---- Low to high (O, order 105) ---- */
 {
   id:'lowhigh', name:'Low to high', group:'O', phase:'O', order:105,
-  ages:['12U','14U','16U','18U'],
+  level:['12U','14U','16U','18U'],
   about:'Win it in the corner, move it up to the point, shoot through traffic.',
   focus:[125,-5,80,95],
   roles:{X1:'on the wall', X2:'net front', X3:'in the slot', X4:'their D', X5:'weak side', XG:'goalie'},
@@ -4532,7 +4532,7 @@ const SITUATIONS = [
 /* ---- Neutral zone trap (D, order 25) ---- */
 {
   id:'nztrap', name:'Neutral zone trap', group:'D', phase:'D', order:25,
-  ages:['14U','16U','18U'],
+  level:['14U','16U','18U'],
   about:'Give them the outside, take away the middle, wait for the mistake.',
   focus:[40,-5,120,95],
   roles:{X1:'their D with it', X2:'their other D', X3:'their center', X4:'their wing', X5:'their wing', XG:'goalie'},
@@ -4657,7 +4657,7 @@ const SITUATIONS = [
 /* ---- Stay between him and the net (D, order 6) ---- */
 {
   id:'oneone', name:'Stay between him and the net', group:'D', phase:'D', order:6,
-  ages:['8U','10U','12U','14U','16U','18U'],
+  level:['8U','10U','12U','14U','16U','18U'],
   about:'One on one. You do not need the puck, you need the inside.',
   focus:[-5,-5,110,95],
   roster:['G','LD','C'],
@@ -4754,7 +4754,7 @@ const SITUATIONS = [
 /* ---- Get open (O, order 9) ---- */
 {
   id:'getopen', name:'Get open', group:'O', phase:'O', order:9,
-  ages:['8U','10U','12U'],
+  level:['8U','10U','12U'],
   about:'Your teammate has it. Give him somewhere to pass.',
   focus:[110,-5,95,95],
   roster:['C','LW','RW'],
@@ -4854,7 +4854,7 @@ const SITUATIONS = [
 /* ---- Offensive faceoff plays (O, order 95) ---- */
 {
   id:'ozdraw', name:'Offensive faceoff plays', group:'O', phase:'O', order:95,
-  ages:['10U','12U','14U','16U','18U'],
+  level:['10U','12U','14U','16U','18U'],
   about:'You know where the puck is going before it drops. Nobody else does.',
   focus:[125,-5,80,95],
   roles:{X1:'their center', X2:'their wing', X3:'their wing', X4:'their D', X5:'their D', XG:'goalie'},
