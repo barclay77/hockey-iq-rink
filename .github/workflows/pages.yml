@@ -1,5 +1,9 @@
 # Publishes this folder to GitHub Pages on every push to main.
 # One-time setup: repo Settings > Pages > Build and deployment > Source = "GitHub Actions".
+#
+# Two gates run before anything is published. They exist because a bad deploy here
+# is silent: the site keeps serving and looks healthy while audio is dead or a
+# situation is unreachable. See CLAUDE.md rules 1 and 7.
 name: Deploy to GitHub Pages
 
 on:
@@ -24,6 +28,68 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Gate 1: the app's own situation validator. Warnings are fine; a non-zero
+      # exit stops the deploy.
+      - name: Validate situations
+        run: node validate-situations.mjs
+
+      # Gate 2: the audio contract. manifest.json must be a non-empty bare array of
+      # ids, every id must have a real non-zero mp3 behind it, and no committed clip
+      # may be missing from the manifest. A wrapper object or an empty array
+      # silently disables every clip in the app.
+      - name: Validate audio manifest
+        run: |
+          python3 - <<'PY'
+          import json, os, glob, sys
+          fail = []
+          man = json.load(open('audio/manifest.json'))
+          if not isinstance(man, list):
+              fail.append(f"manifest.json is {type(man).__name__}, not a bare array - this disables ALL audio")
+              print("\n".join(fail)); sys.exit(1)
+          if not man:
+              fail.append("manifest.json is an empty array - this disables ALL audio")
+          if not all(isinstance(x, str) for x in man):
+              fail.append("manifest.json contains a non-string entry")
+          bad_shape = [x for x in man if isinstance(x, str) and ('/' in x or x.endswith('.mp3'))]
+          if bad_shape:
+              fail.append(f"{len(bad_shape)} manifest entries carry a path or extension, e.g. {bad_shape[0]!r}")
+          dupes = len(man) - len(set(man))
+          if dupes:
+              fail.append(f"{dupes} duplicate ids in manifest.json")
+
+          mp3 = {os.path.basename(p)[:-4]: os.path.getsize(p) for p in glob.glob('audio/*.mp3')}
+          missing = sorted(set(man) - set(mp3))
+          empty   = sorted(i for i in man if mp3.get(i, 0) == 0)
+          unlisted = sorted(set(mp3) - set(man))
+          if missing:
+              fail.append(f"{len(missing)} manifest ids have no mp3 (would 404 to robot voice), e.g. {missing[:3]}")
+          if empty:
+              fail.append(f"{len(empty)} manifest ids point at a 0-byte mp3, e.g. {empty[:3]}")
+          if unlisted:
+              fail.append(f"{len(unlisted)} committed mp3s are absent from the manifest, e.g. {unlisted[:3]}")
+
+          lines = json.load(open('audio/lines.json'))
+          silent = sorted(set(lines) - set(man))
+          root_mp3 = glob.glob('*.mp3')
+          if root_mp3:
+              fail.append(f"{len(root_mp3)} mp3 files at the repo root - audio belongs in audio/")
+
+          print(f"manifest {len(man)} | mp3s {len(mp3)} | lines.json {len(lines)}")
+          print(f"missing {len(missing)} | 0-byte {len(empty)} | unlisted {len(unlisted)} | duplicates {dupes}")
+          # Lines without audio are a warning, not a failure: the app falls back to
+          # device speech per line, which is a legitimate shipping state.
+          if silent:
+              print(f"NOTE {len(silent)} lines have no clip and will use device speech")
+          if fail:
+              print("\nFAILED:"); [print("  - " + f) for f in fail]; sys.exit(1)
+          print("\nAudio contract OK.")
+          PY
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
