@@ -287,6 +287,13 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .povres p{margin:0;font-size:13.5px;line-height:1.42;color:#cfdcee;text-wrap:pretty}
 .povaxes{display:flex;gap:13px;font-size:11.5px;font-weight:800;letter-spacing:.05em}
 .povaxes span.ok{color:#7fd6a2} .povaxes span.no{color:#ff8b96}
+/* An explicit "there is more" beats a hard clip: measured on a phone, the card showed 78px of
+   a 168px explanation and gave no sign it scrolled, while three full-width buttons took 154px -
+   twice the room of the text they belong to. */
+.povmore{display:none;flex:0 0 auto;font-size:11.5px;font-weight:750;color:#ffc629}
+.povres.more .povmore{display:block}
+.povres.more .povbody{mask-image:linear-gradient(#000 calc(100% - 20px),transparent);
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 20px),transparent)}
 .povrow{flex:0 0 auto;display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
 .povrow button{min-height:46px;padding:8px 16px;border-radius:11px;border:1px solid var(--line);
   background:var(--bg3);color:inherit;font-size:14px;font-weight:700}
@@ -737,6 +744,18 @@ input[type=range]{accent-color:var(--us2)}
   /* the picker, Run the play and Quiz me all live in the sheet, one tap away */
   .quickbar{display:none!important}
   .rinkwrap{flex:1 1 auto;min-height:120px}
+  /* The explanation is the point of the verdict card, so it gets the room first: the cap
+     rises from 44% of the ice to 62%, the primary action keeps a full-width line and the other
+     two share a smaller one. Measured: 154px of buttons becomes ~101px and the 168px of text
+     fits without scrolling. */
+  .povres{max-height:62%}
+  .povrow{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .povrow button{min-height:44px;padding:7px 10px;font-size:13px}
+  /* order, not DOM order: the primary takes row one across both columns so the two secondary
+     actions can share row two. Without it the grid put all three on their own row and the
+     block came out taller than the three full-width buttons it replaced. */
+  .povrow button.hot{order:-1;grid-column:1 / -1;min-height:48px;font-size:14.5px}
+  .povnospot{grid-column:1 / -1}
   /* the step prompt and the zoom control stopped sharing the top-right corner - and the
      prompt stacks, so the sentence gets the card's whole width instead of a 160px column
      beside its own label */
@@ -1460,11 +1479,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.148';
+const BUILD='2026-08-24.149';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v151';
+const SWCACHE='hockey-iq-v152';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -4573,6 +4592,15 @@ function optTarget(o,i,t){
    stands - never by distance from an ideal spot. Distance punishes a kid who found a
    different good spot, and it cannot explain itself. Screen text is free to word (it is
    never spoken); a say: is only set where a recorded line already carries that meaning. */
+/* How much room the play's OWN next action has. Every lane test in this app is relative to
+   this, so no test can ever report the answer key as blocked. null when the authored action
+   has no lane to measure (nothing to compare against - the absolute test stands). */
+function rightClear(pt,t,from){
+  const r=pt&&(pt.right||rightAt(pt.i)); if(!r) return null;
+  const to=optTarget(r,pt.i,t); if(!to) return null;
+  const l=laneOf(from,to,t);
+  return l.who?l.m:99;
+}
 function optionFault(pt,choice){
   const f=frames(), i=pt.i, t=f[i].t, pk=puckAt(t), from=pk.p, w=pk.w;
   const cpos=shown(w,t);
@@ -4612,15 +4640,21 @@ function optionFault(pt,choice){
   }
   if(choice.kind==='carry'){
     const nx=f[i+1]&&shown(w,f[i+1].t);
-    if(nx){ const l=laneOf(from,nx,t);
-      if(l.who&&l.m<4.2) return {msg:'CLOSED OFF',at:l.who.p,stop:true,
+    if(nx){ const l=laneOf(from,nx,t), ok=rightClear(pt,t,from);
+      /* The play's OWN action sets the standard - the same rule the pass test above has always
+         used. Absolutely, this test called the answer key blocked: rightAt() reads carry
+         straight off the authored frames, so when the play skates through a tight lane the app
+         painted its own answer CLOSED OFF and the child ruled it out. Measured before the fix:
+         64 of 315 decisions marked the correct answer shut. Compared against its own clearance,
+         the right answer can no longer trip it. */
+      if(l.who&&l.m<4.2&&(ok==null||l.m<ok-0.6)) return {msg:'CLOSED OFF',at:l.who.p,stop:true,
         why:cap(OPPNAME(l.who.id))+' is sitting in the ice you skated into. He takes it off you.',
         say:'You skated into him instead of moving it.'}; }
     return null;
   }
   if(choice.kind==='shoot'){
-    const l=laneOf(from,THEIRNET,t);
-    if(l.who&&l.m<4) return {msg:'SHOT BLOCKED',at:l.who.p,stop:true,
+    const l=laneOf(from,THEIRNET,t), okS=rightClear(pt,t,from);
+    if(l.who&&l.m<4&&(okS==null||l.m<okS-0.6)) return {msg:'SHOT BLOCKED',at:l.who.p,stop:true,
       why:cap(OPPNAME(l.who.id))+' is in the shooting lane. That one never reaches the net.',
       say:'The pass never got there because somebody was in the lane.'};
     if(dist(from,THEIRNET)>48) return {msg:'TOO FAR OUT',at:from,stop:false,
@@ -4631,7 +4665,11 @@ function optionFault(pt,choice){
   return null;
 }
 function laneShut(pt,o){
-  if(pt.kind==='cover'){ const f=coverFault(pt,o); return !!(f&&(f.stop||f.msg==='DOUBLED UP')); }
+  /* Only a fault that makes the OPTION wrong may grey it out. WRONG SIDE OF HIM and TOO FAR
+     OFF HIM are about where HE is standing - painting the right man red because his own feet
+     are wrong is the same disagreement in another costume, and it hit 5 of 315 decisions.
+     Those faults still land as verdicts when he picks; they just no longer pre-judge the man. */
+  if(pt.kind==='cover'){ const f=coverFault(pt,o); return !!(f&&f.msg==='DOUBLED UP'); }
   const f=optionFault(pt,o);
   return !!(f&&f.stop);
 }
@@ -5424,12 +5462,17 @@ function playShow(){
         ? '<span class="povnospot">This variation shows the mistake on purpose - there is no taught spot to show you.</span>'
         : ''));
   rs.innerHTML='<div class="povbody"><b class="'+o.cls+'">'+esc(o.head)+'</b>'+axes+own+
-    '<p>'+esc(o.body)+'</p></div><div class="povrow">'+
+    '<p>'+esc(o.body)+'</p></div><div class="povmore">Scroll this card for the rest &#8595;</div>'+
+    '<div class="povrow">'+
     '<button id="povagain">Try this step again</button>'+
     '<button class="hot" id="povon">'+onLabel+'</button>'+
     spot+
     '</div>';
   rs.classList.add('on');
+  /* claim it scrolls only when it does - measured after layout, never assumed */
+  rs.classList.remove('more');
+  requestAnimationFrame(()=>{ const bd=rs.querySelector('.povbody');
+    if(bd) rs.classList.toggle('more',bd.scrollHeight>bd.clientHeight+1); });
   $('povmsg').innerHTML=esc(o.head);
   $('povstep').textContent=PLAY.label||('Decision '+(PLAY.di+1)+' of '+PLAY.pts.length);
   $('povopts').innerHTML='';

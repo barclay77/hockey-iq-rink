@@ -1,6 +1,6 @@
 /* Above The Puck - offline cache.
    Bump CACHE when you change any file, otherwise browsers keep serving the old one. */
-const CACHE = 'hockey-iq-v151';
+const CACHE = 'hockey-iq-v152';
 const ASSETS = [
   './',
   './index.html',
