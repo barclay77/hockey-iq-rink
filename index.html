@@ -260,6 +260,20 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .pov{position:absolute;inset:0;z-index:4;display:none;flex-direction:column;
   padding:8px 8px 13px;pointer-events:none;gap:8px}
 .pov.on{display:flex}
+/* Docked, the panel set is an ordinary block in a column - not an overlay. Same three
+   children, same code, one class. The teaching panels stop covering the players they are
+   describing because they are no longer over the ice at all. */
+.pov.docked{position:static;inset:auto;padding:0;gap:8px;height:auto;
+  pointer-events:auto;justify-content:flex-start}
+.pov.docked .povtop{align-self:stretch;max-width:100%;background:var(--bg2);
+  border-color:var(--line);pointer-events:auto;backdrop-filter:none}
+.pov.docked .povopts{margin-top:0;pointer-events:auto;justify-content:stretch}
+.pov.docked .povopt{flex:1 1 44%}
+.pov.docked .povres{margin-top:0;align-self:stretch;max-width:100%;max-height:none;
+  background:var(--bg2);border-color:var(--line);backdrop-filter:none}
+.povdock{display:none;flex:0 0 auto;min-height:0}
+.povdock.on{display:flex;flex-direction:column}
+#dock-desk.on{padding:12px 14px 0;border-bottom:1px solid var(--line);padding-bottom:12px}
 /* The prompt bar has no interactive children, so it must not take pointer events: it
    swallowed taps across its whole box, and the box grows with the prompt's length - which
    made a longer lead sit on top of the DRAG ME token and block the drag entirely. Same
@@ -772,11 +786,12 @@ input[type=range]{accent-color:var(--us2)}
   /* the picker, Run the play and Quiz me all live in the sheet, one tap away */
   .quickbar{display:none!important}
   .rinkwrap{flex:1 1 auto;min-height:120px}
-  /* The explanation is the point of the verdict card, so it gets the room first: the cap
-     rises from 44% of the ice to 62%, the primary action keeps a full-width line and the other
-     two share a smaller one. Measured: 154px of buttons becomes ~101px and the 168px of text
-     fits without scrolling. */
-  .povres{max-height:62%}
+  /* No cap on the card any more: docked below the ice it is not competing with the rink for
+     the same pixels, so there is nothing to cap it against. The dock's own fixed reservation
+     (38% of the stage, held for the whole run) is what bounds it now - and unlike the cap, it
+     also stops the rink resizing between steps. The over-ice fallback still needs a cap, so
+     the rule stays on the undocked card only. */
+  .pov:not(.docked) .povres{max-height:62%}
   .povrow{display:grid;grid-template-columns:1fr 1fr;gap:7px}
   .povrow button{min-height:44px;padding:7px 10px;font-size:13px}
   /* order, not DOM order: the primary takes row one across both columns so the two secondary
@@ -891,6 +906,7 @@ input[type=range]{accent-color:var(--us2)}
           <div class="povres" id="povres"></div>
         </div>
       </div>
+      <div class="povdock" id="dock-phone"></div>
       <div class="callbar" id="callbar"></div>
       <div class="readbar" id="readbar">
         <div class="rbtop">
@@ -930,6 +946,7 @@ input[type=range]{accent-color:var(--us2)}
 
     <div id="sheetscrim"></div>
     <aside class="railwrap" id="railwrap">
+      <div class="povdock" id="dock-desk"></div>
       <button class="grab" id="grab"><span class="bar"></span><span class="glabel" id="glabel"></span><span class="gchev">&#9650;</span></button>
       <div class="rail" id="rail"></div>
     </aside>
@@ -1539,11 +1556,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false, role:'player',
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.154';
+const BUILD='2026-08-24.155';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v157';
+const SWCACHE='hockey-iq-v158';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2099,6 +2116,86 @@ function paintStepRail(){
     html+='<i class="'+cls+'"></i>';
   }
   r.innerHTML=html; r.classList.add('on');
+}
+/* ============ ONE decision about where the teaching panels live ============
+   Two layouts, one code path. Divergent paths are this project's recurring failure mode -
+   orientation deciding per crop, the cue strip existing in three modes but not the fourth,
+   spotFault versus tryEval, laneShut versus rightAt - so the placement rule lives here and
+   both layouts consume it. Phone docks below the ice, desktop uses the sidebar it already
+   has, and a viewport too short for either says so instead of quietly covering the play. */
+const DOCKSHARE=0.38, DOCKFLOOR=150;
+function povPlacement(){
+  const phone=isPhone();
+  if(!phone) return {host:$('dock-desk'),overIce:false,phone:false,px:0};
+  const st=document.querySelector('.stage');
+  const sh=st?st.getBoundingClientRect().height:0;
+  const px=Math.round(sh*DOCKSHARE);
+  /* A blanket reservation would leave 224px of empty dock at the placement step - the one step
+     that most wants the whole rink to drag on. So the dock sizes to its content but RATCHETS:
+     it only ever grows within a run. The rink shrinks once, at the first verdict, and never
+     jumps back - one forward adjustment instead of a resize at every step, and the viewBox is
+     the variant's union box either way, so this scales the ice and never pans it. */
+  return px>=DOCKFLOOR?{host:$('dock-phone'),overIce:false,phone:true,px}
+                      :{host:null,overIce:true,phone:true,px:0};
+}
+function povPlace(){
+  const pov=$('pov'), rw=document.querySelector('.rinkwrap'),
+        dp=$('dock-phone'), dd=$('dock-desk');
+  if(!pov||!rw||!dp||!dd) return;
+  const overIce=(S.mode!=='play')||povPlacement().overIce;
+  const p=povPlacement();
+  if(overIce){
+    dp.classList.remove('on'); dd.classList.remove('on'); dp.style.height='';
+    if(pov.parentElement!==rw) rw.appendChild(pov);
+    pov.classList.remove('docked');
+    return;
+  }
+  if(pov.parentElement!==p.host) p.host.appendChild(pov);
+  pov.classList.add('docked');
+  dp.classList.toggle('on',p.phone); dd.classList.toggle('on',!p.phone);
+  if(p.phone){
+    dp.style.height='';
+    const need=Math.min(p.px,Math.ceil(pov.getBoundingClientRect().height));
+    PLAY.dock=Math.max(PLAY.dock||0,need);
+    dp.style.minHeight=PLAY.dock+'px';
+  } else { dp.style.height=''; dp.style.minHeight=''; }
+}
+/* The rule itself, in one place: does a visible panel overlap a man, the puck, a net, or the
+   BE HERE marker the card names? Enforcement and the count come from the same function, so
+   the number in the report cannot drift from the behaviour it describes. */
+function povCollisions(){
+  const pov=$('pov');
+  if(!pov||!pov.classList.contains('on')) return [];
+  const panels=[...pov.children].filter(n=>{
+    if(getComputedStyle(n).display==='none') return false;
+    const b=n.getBoundingClientRect(); return b.width>2&&b.height>2;
+  });
+  if(!panels.length) return [];
+  /* Clip every target to the rink before testing it. The crop routinely leaves men outside the
+     frame and .rinkwrap hides them, but getBoundingClientRect still reports the UNCLIPPED
+     geometry - so a naive test flagged 21 collisions against players nobody can see. Comparing
+     against what is drawn rather than what exists is the whole point of this check. */
+  const rw=document.querySelector('.rinkwrap');
+  const rb=rw?rw.getBoundingClientRect():null;
+  const clip=b=>{
+    if(!rb) return b;
+    const x=Math.max(b.left,rb.left), y=Math.max(b.top,rb.top);
+    const r=Math.min(b.right,rb.right), bo=Math.min(b.bottom,rb.bottom);
+    return (r-x>1&&bo-y>1)?{left:x,top:y,right:r,bottom:bo}:null;
+  };
+  const targets=[];
+  document.querySelectorAll('#g-tok g.tok circle,#g-puck circle,#g-ghost circle,#g-net line,#g-net rect')
+    .forEach(c=>{ const raw=c.getBoundingClientRect();
+      if(raw.width>1&&raw.height>1){ const b=clip(raw); if(!b) return;
+        const g=c.closest('g.tok');
+        targets.push({b,what:(g&&g.dataset.id)||(c.closest('#g-ghost')?'BE HERE marker':
+          (c.closest('#g-puck')?'puck':'net'))}); } });
+  const hits=[];
+  panels.forEach(n=>{ const p=n.getBoundingClientRect();
+    targets.forEach(t=>{ if(p.right>t.b.left+1&&p.left<t.b.right-1&&
+                            p.bottom>t.b.top+1&&p.top<t.b.bottom-1)
+      hits.push((n.className||'panel').split(' ')[0]+' over '+t.what); }); });
+  return hits.filter((v,i)=>hits.indexOf(v)===i);
 }
 function playMarkSpot(){
   if(S.mode!=='play') return;
@@ -2900,7 +2997,7 @@ function render(){
   if(zb){ zb.textContent=S.wide?'ZOOM':'WIDE';
     zb.title=S.wide?'Zoom in on the play':'See the whole zone';
     zb.classList.toggle('off',!S.opt.zoom); }
-  paintCue(); paintJob(); paintStepRail();
+  paintCue(); paintJob(); paintStepRail(); povPlace();
   $('scrub').value=Math.round(t*1000);
   renderTopbar(); renderNext();
 }
@@ -5551,7 +5648,7 @@ function playStart(){
   PLAY.pts=playPoints(); PLAY.di=0; PLAY.score=[]; PLAY.res=null; PLAY.tries=0;
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
-  PLAY.reveal=false; PLAY.placed=[];
+  PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0;
   PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
   S.t=0; S.manual={};
   if(!PLAY.pts.length){
