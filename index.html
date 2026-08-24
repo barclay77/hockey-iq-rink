@@ -1460,11 +1460,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.147';
+const BUILD='2026-08-24.148';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v150';
+const SWCACHE='hockey-iq-v151';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -3095,6 +3095,18 @@ function sayBaked(L,done){
     const p=a.play();
     if(p&&p.then) p.then(()=>{ AUDIO.unlocked=true; })
       .catch(err=>{ const n=(err&&err.name)||'play() rejected';
+        /* An abort is somebody stopping us ON PURPOSE - hush() pausing the element, or the
+           next line taking it over. It is not a failed clip, and treating it as one had two
+           costs: the fallback spoke the line the child had just shushed, in the robot voice,
+           with the Listen button already showing stopped; and audioNote counted a fault in
+           the Settings receipt that never happened, which is the one number there to find
+           real faults. Detach and let go instead. done() is safe either way - the queue's own
+           generation check swallows it when the queue is dead, and calling it keeps a genuine
+           mid-queue abort from stalling the rest. */
+        if(n==='AbortError'){
+          if(!moved){ moved=true; a.onended=null; a.onerror=null; done(); }
+          return;
+        }
         bail(n, n==='NotAllowedError'?'locked':(n==='NotSupportedError'?'missing':'other')); });
   }catch(err){ bail('throw: '+((err&&err.message)||'unknown'),'other'); }
 }
