@@ -1502,11 +1502,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.152';
+const BUILD='2026-08-24.153';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v155';
+const SWCACHE='hockey-iq-v156';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1623,6 +1623,41 @@ const ZF=()=>Math.pow(Math.min(1,((S.zf!=null?S.zf:((S.vb&&S.vb[2])||212))||212)
    of a defensive-zone frame. Standing up, screen-x is rink-y, so the axis that gets the room is
    up-ice, which is also the axis most likely to bring a net or a line into frame. */
 const LANDMARKS=[11,75,100,125,189];
+/* Pixels per foot a box would draw at in this panel - the only fair way to compare two crops. */
+const boxPPF=(b,bw,bh,rot)=>rot?Math.min(bw/b[3],bh/b[2]):Math.min(bw/b[2],bh/b[3]);
+/* ONE box for the whole variant: the union of everything drawn across every step, so it is as
+   tight as the play ever gets AND it never moves between steps. Rule 5 asks for both, and
+   per-step frameBox can only ever give the first - it satisfies "crop from the union of the men,
+   the puck and the consequence" while breaking "move the frame as little as possible". */
+const UNIONBOX={};
+function playUnionBox(){
+  const key=S.sit.id+'|'+variant().id+'|'+(S.opt.them?1:0)+'|'+JSON.stringify(S.manual||{});
+  if(UNIONBOX.k===key) return UNIONBOX.v;
+  const f=frames(); let out=null;
+  if(f.length){
+    const xs=[], ys=[];
+    f.forEach(fr=>{ const t=fr.t, pk=puckAt(t).p; xs.push(pk[0]); ys.push(pk[1]);
+      S.sit.roster.forEach(id=>{ const p=shown(id,t); if(p){ xs.push(p[0]); ys.push(p[1]); } });
+      if(S.opt.them) THEMIDS.forEach(id=>{ const p=shown(id,t);
+        if(p&&dist(p,pk)<26){ xs.push(p[0]); ys.push(p[1]); } });
+    });
+    if(xs.length){
+      const M=8;                       // margin, each side, so nobody is drawn on the boards
+      let x=Math.min.apply(null,xs)-M, y=Math.min.apply(null,ys)-M;
+      let w=Math.max.apply(null,xs)+M-x, hh=Math.max.apply(null,ys)+M-y;
+      /* the orientation anchor has to survive the crop: a zone word needs 26ft of one zone in
+         frame, and a window narrower than about 52ft can straddle two boundaries with neither
+         side wide enough to name. */
+      if(w<52){ x-=(52-w)/2; w=52; }
+      if(x<-6) x=-6; if(y<-6) y=-6;
+      if(x+w>206) x=Math.max(-6,206-w);
+      if(y+hh>91) y=Math.max(-6,91-hh);
+      out=[+x.toFixed(2),+y.toFixed(2),+w.toFixed(2),+hh.toFixed(2)];
+    }
+  }
+  UNIONBOX.k=key; UNIONBOX.v=out;
+  return out;
+}
 /* The men and the puck, along the up-ice axis - the subject the frame is supposed to be about.
    Same membership rule frameBox uses, so the camera and this agree on what "the play" is. */
 function subjectSpanX(t){
@@ -2595,7 +2630,7 @@ function drawFocus(t){
 /* ---------------- render ---------------- */
 function render(){
   const t=S.t, sit=S.sit, v=variant();
-  const crop=camera();
+  let crop=camera();
   const wrap=svg.parentElement;
   const b=wrap?wrap.getBoundingClientRect():null;
   const bw=(b&&b.width)||760, bh=(b&&b.height)||300;
@@ -2608,6 +2643,15 @@ function render(){
   const rot = isPhone() && bh > bw;
   S.rot=rot;
   S.port=portrait();
+  /* Watch mode used to sit on the authored focus box, which is 95ft across in every situation -
+     so every play drew at the same 3.94 px/ft however local it was. Take the variant's own union
+     box instead, but ONLY when it actually draws bigger: faceoff/ozone's subject spans nearly the
+     whole rink, and there the authored focus wins. Never ship a frame smaller than the one it
+     replaces. */
+  if(S.wide&&S.opt.zoom){
+    const u=playUnionBox();
+    if(u&&boxPPF(u,bw,bh,rot)>boxPPF(crop,bw,bh,rot)) crop=u;
+  }
   const vb=fitPanel(crop,bw,bh,rot,subjectSpanX(t));
   S.vb=vb; S.zf=crop[2];
   const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
