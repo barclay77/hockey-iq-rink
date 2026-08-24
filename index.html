@@ -328,6 +328,16 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
   background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--hi);border-radius:11px}
 .cue .n{flex:0 0 auto;background:var(--hi);color:#ffffff;font-weight:800;font-size:11px;padding:3px 8px;border-radius:5px}
 .cue .t{font-size:15.5px;line-height:1.3}
+/* "What is happening right now", beside the sentence that says it - Listen answers the other
+   question ("what is this drill and what is my job") and keeps the top bar. */
+.cuesay{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:center;
+  gap:6px;min-height:44px;min-width:44px;
+  padding:0 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--line);
+  color:var(--ink);font-size:12.5px;font-weight:700}
+.cuesay .csl{white-space:nowrap}
+.cuesay.speaking{background:var(--hi);border-color:var(--hi);color:#fff}
+@media (hover:hover){.cuesay:hover{border-color:#5a79ad}}
+@media (max-width:430px){ .cuesay{padding:0 10px;font-size:12px} }
 
 .ctrl{display:flex;gap:8px;align-items:center;flex:0 0 auto}
 .ctrl button{background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:8px 14px;font-size:13.5px}
@@ -871,7 +881,7 @@ input[type=range]{accent-color:var(--us2)}
         </div>
         <div class="rbwhy" id="rbwhy"></div>
       </div>
-      <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span></div>
+      <div class="cue"><span class="n" id="cuen">Step 1</span><span class="t" id="cuetext"></span><button class="cuesay" id="cuereplay" title="Hear this step again" aria-label="Hear this step again"><span aria-hidden="true">&#9654;</span><span class="csl">Hear it</span></button></div>
       <div class="quickbar" id="quickbar">
         <div class="qr"><span class="qlab">You are</span><div class="qpos" id="qposlist"></div></div>
         <div class="qr qr2">
@@ -1479,11 +1489,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.150';
+const BUILD='2026-08-24.151';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v153';
+const SWCACHE='hockey-iq-v154';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -3049,7 +3059,15 @@ function chunk(txt,opt){
 
 /* ---- 3. the queue ------------------------------------------------- */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function setSpeakUI(on){ const b=$('p-listen'); if(b) b.classList.toggle('speaking',!!on); }
+/* Two controls, two queues. The lamp follows the SOURCE, so a control never shows "speaking"
+   over a queue it does not own - and whichever is lit is the one that stops it. Anything that
+   speaks without declaring a source counts as the opener, which is what Listen has always
+   shushed. */
+function setSpeakUI(on){
+  const src=on?(SPK.src||'intro'):null;
+  const l=$('p-listen'); if(l) l.classList.toggle('speaking',src==='intro');
+  const r=$('cuereplay'); if(r) r.classList.toggle('speaking',src==='step');
+}
 /* Netflix's rule: offered while the intro is talking, gone the moment it is not. */
 function syncSkip(){ const b=$('skipintro'); if(b) b.classList.toggle('on',!!SPK.skipAvail); }
 function hush(){
@@ -3277,7 +3295,20 @@ $('p-listen').onclick=()=>{
   unlockAudioEl();                     // retries every tap until it actually succeeds
   if($('p-listen').classList.contains('speaking')){ stop(); return; }   // tap again to shush it
   if(!SPK.on){ SPK.on=true; $('t-speak').checked=true; saveVoicePrefs(); speakNote(); }
+  SPK.src='intro';
   speakLines(introLines());
+};
+/* The step he is looking at, not the opener. Tapping Listen at step three used to replay the
+   whole introduction while the rink stayed on step three - the voice and the picture describing
+   different moments. Two explicit controls beat one that guesses which he meant. */
+$('cuereplay').onclick=()=>{
+  if(!SPK.ok){ note('off','This browser cannot read out loud. Try Chrome, Edge or Safari.'); return; }
+  primeSpeech(); unlockAudioEl();      // rule 8: unlock inside THIS tap, same as Listen
+  if($('cuereplay').classList.contains('speaking')){ stop(); return; }
+  if(!SPK.on){ SPK.on=true; $('t-speak').checked=true; saveVoicePrefs(); speakNote(); }
+  SPK.src='step';
+  /* two lines, already in lines.json - no skip boundary belongs on something this short */
+  speakLines(stepLines(frameIdx(S.t)));
 };
 function speakNote(){
   $('speaknote').textContent=!SPK.ok?''
