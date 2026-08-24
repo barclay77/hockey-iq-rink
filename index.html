@@ -1556,11 +1556,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false, role:'player',
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.155';
+const BUILD='2026-08-24.156';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v158';
+const SWCACHE='hockey-iq-v159';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2117,6 +2117,86 @@ function paintStepRail(){
   }
   r.innerHTML=html; r.classList.add('on');
 }
+/* ============ Three spots, tapped, instead of a free drag ============
+   The drag was a fine-motor target on a phone, skippable with no consequence, and it snapped
+   toward something workable anyway - hard AND pointless. A spot chosen from a vetted set is
+   judgeable by construction, and pickOptions already attaches a NAMED fault to each wrong one,
+   which is the teaching material. */
+function placeChoices(){
+  const pt=PLAY.pts[PLAY.di];
+  if(!pt||!S.sit.roster.includes(S.pos)) return null;
+  const vb=S.vb||FULLVIEW, t=frames()[pt.i].t, pad=5;
+  const puck=puckAt(t).p;
+  const drawn=[];
+  S.sit.roster.concat(S.opt.them?THEMIDS:[]).forEach(id=>{
+    if(id===S.pos) return; const p=shown(id,t); if(p) drawn.push(p);
+  });
+  const inFrame=p=>{
+    if(p[0]<vb[0]+pad||p[0]>vb[0]+vb[2]-pad) return false;
+    if(p[1]<vb[1]+pad||p[1]>vb[1]+vb[3]-pad) return false;
+    /* a circle on a man, the puck or the net is not a choice - it is a collision (.155 is 0 of
+       720 and these markers must not be what puts it back above zero) */
+    if(dist(p,puck)<7) return false;
+    if(dist(p,OURNET)<7||dist(p,THEIRNET)<7) return false;
+    return !drawn.some(q=>dist(q,p)<8);
+  };
+  inFrame.tag=[vb[0],vb[1],vb[2],vb[3]].map(n=>Math.round(n)).join(',');
+  const opts=pickOptions(S.pos,pt.i,PLAY.tries||0,inFrame);
+  /* Validate the finished set here rather than trust the generator. The filter shapes the SEARCH
+     for wrong spots; it cannot move the authored one, and the authored spot really can fall
+     outside the crop (faceoff/ozone as the goalie - the one variant whose union box lost to the
+     authored focus box). A set that is unusable degrades to the drag rather than offering a
+     circle he cannot see or a single choice that is not a question. */
+  if(!opts||opts.length<2) return null;
+  const ok=opts.every(o=>{
+    const p=o.p;
+    if(!inFrame(p)&&!o.right) return false;
+    if(p[0]<vb[0]+pad||p[0]>vb[0]+vb[2]-pad) return false;
+    if(p[1]<vb[1]+pad||p[1]>vb[1]+vb[3]-pad) return false;
+    if(o.right) return true;
+    if(dist(p,puck)<7) return false;
+    return !drawn.some(q=>dist(q,p)<8);
+  });
+  return ok?opts:null;
+}
+/* radius in FEET that draws at least a 44px target, whatever the crop's scale */
+function spotR(){
+  const rw=document.querySelector('.rinkwrap');
+  const vb=S.vb||FULLVIEW;
+  const b=rw?rw.getBoundingClientRect():null;
+  const ppf=b?(S.rot?Math.min(b.width/vb[3],b.height/vb[2]):Math.min(b.width/vb[2],b.height/vb[3])):4;
+  /* 23 measured 43px at one desktop crop - one pixel under the 44 minimum, which is exactly the
+     kind of "close enough" this project keeps paying for. 25 puts the floor at 47-48px. */
+  return Math.max(TR()*1.9, 25/(ppf||4));
+}
+function drawPlaceChoices(){
+  const opts=placeChoices(); if(!opts) return false;
+  const g=layer('focus'), r=spotR();
+  const chosen=PLAY.spot;
+  opts.forEach((o,k)=>{
+    const d=disp(o.p), on=(chosen===k);
+    const c=el('circle',{class:'spotpick',cx:d[0],cy:d[1],r:r,
+      fill:on?'#ffc629':'rgba(244,248,253,0.13)','fill-opacity':on?0.9:1,
+      stroke:on?'#fff':'#f4f8fd','stroke-width':on?0.9:0.7,'stroke-dasharray':on?'':'2.2 1.8'});
+    c.style.cursor='pointer'; c.style.pointerEvents='auto';
+    c.addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); playChoose(k); });
+    g.appendChild(c);
+    if(on){ g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.95),'font-size':FS(2.5),
+      'text-anchor':'middle','font-weight':850,fill:'#241c02'},'YOU')); }
+  });
+  return true;
+}
+/* Tap commits the spot for this decision, and he may tap a different one before starting - the
+   last choice is what runs, exactly as re-dragging worked. A wrong pick names its own reason
+   straight away rather than waiting for the consequence: being told why is the point. */
+function playChoose(k){
+  const opts=placeChoices(); if(!opts||!opts[k]) return;
+  PLAY.spot=k;
+  S.manual[S.pos]=opts[k].p.slice();
+  const o=opts[k];
+  PLAY.spotWhy=o.right?null:(o.fault?o.fault.why:null);
+  playPrompt(); render();
+}
 /* ============ ONE decision about where the teaching panels live ============
    Two layouts, one code path. Divergent paths are this project's recurring failure mode -
    orientation deciding per crop, the cue strip existing in three modes but not the fourth,
@@ -2406,12 +2486,16 @@ function spotFault(id,p,t){
   return null;
 }
 /* Three circles, seeded off the play so they are the same every single time he sees it. */
-function pickOptions(id,fi){
-  const ck=S.sit.id+'|'+variant().id+'|'+fi+'|'+id;
+function pickOptions(id,fi,attempt,inFrame){
+  /* Rule 15: presentation order is seeded on (play, variant, ATTEMPT), not the play alone, or a
+     fixed slot teaches the button rather than the read. Coach mode passes no attempt and gets
+     attempt 0 - byte-identical to what it had before. */
+  const att=attempt||0;
+  const ck=S.sit.id+'|'+variant().id+'|'+fi+'|'+id+'|'+att+(inFrame?('|'+inFrame.tag):'');
   if(COACH.opts[ck]) return COACH.opts[ck];
   const f=frames(); if(!f[fi]) return null;
   const t=f[fi].t, right=correct(id,t); if(!right) return null;
-  const rnd=rngFrom(hash32(S.sit.id+'|'+variant().id+'|'+fi+'|'+id));
+  const rnd=rngFrom(hash32(S.sit.id+'|'+variant().id+'|'+fi+'|'+id+'|'+att));
   const dirs=[]; for(let k=0;k<12;k++) dirs.push(k*Math.PI/6);
   for(let i=dirs.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const tmp=dirs[i]; dirs[i]=dirs[j]; dirs[j]=tmp; }
   const out=[];
@@ -2422,6 +2506,10 @@ function pickOptions(id,fi){
       for(let k=0;k<dists.length;k++){
         const d=dists[k], p=[right[0]+Math.cos(a)*d, right[1]+Math.sin(a)*d];
         if(p[0]<11||p[0]>189||p[1]<6||p[1]>79) continue;
+        /* A spot outside the drawn frame is a choice he can neither see nor tap. The crop
+           routinely leaves ice out - the same unclipped-versus-drawn distinction that produced
+           21 phantom collisions last build - so the filter tests the frame, not the rink. */
+        if(inFrame&&!inFrame(p)) continue;
         if(dist(p,right)<13) continue;
         const fault=spotFault(id,p,t); if(!fault) continue;
         if(namedOnly&&fault.msg==='OUT OF THE PLAY') continue;
@@ -5502,9 +5590,11 @@ function playCounter(at,done){
 function drawPlay(t){
   const g=layer('pass');
   const pt=PLAY.pts[PLAY.di];
-  /* he can re-place himself at every step, so the grab ring lives at every step */
+  /* he re-chooses at every step, so the circles live at every step. The grab ring is gone with
+     the drag it belonged to; if no vetted set can be built here, fall back to it rather than
+     leave him with no way to place himself at all. */
   if((PLAY.phase==='place'||PLAY.phase==='decide')&&S.sit.roster.includes(S.pos)){
-    const me=shown(S.pos,t); if(me) drawDragMe(disp(me));
+    if(!drawPlaceChoices()){ const me=shown(S.pos,t); if(me) drawDragMe(disp(me)); }
   }
   /* the lane on every OPTION, before he picks - seeing whether it is open IS the read */
   if(pt&&PLAY.phase==='decide'){
@@ -5648,7 +5738,7 @@ function playStart(){
   PLAY.pts=playPoints(); PLAY.di=0; PLAY.score=[]; PLAY.res=null; PLAY.tries=0;
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
-  PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0;
+  PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0; PLAY.spot=null; PLAY.spotWhy=null;
   PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
   S.t=0; S.manual={};
   if(!PLAY.pts.length){
@@ -5688,14 +5778,26 @@ function playPrompt(){
   const n=PLAY.pts.length;
   if(PLAY.phase==='place'){
     st.textContent='Before the whistle';
+    const tapping=(PLAY.spot!=null||!!placeChoices());
     /* one line, always: state and history live in the rail, not over the ice */
     top.innerHTML=(PLAY.scope==='any'
       ? 'Drag <b>anybody</b> where they belong, then start the play.'
-      : 'Drag <b>YOU</b> where you belong, then start the play.')+
+      : (tapping
+        ? (PLAY.spot==null
+          ? 'Tap the circle where <b>you</b> belong.'
+          : (PLAY.spotWhy
+            ? 'Not there. '+esc(PLAY.spotWhy)+' Tap another circle, or start it and see.'
+            : 'That is your spot. Start the play.'))
+        : 'Drag <b>YOU</b> where you belong, then start the play.'))+
       (PLAY.nudge?' <span class="povnudge">Take your time.</span>':'');
     const b=document.createElement('button');
-    b.className='povopt open'; b.innerHTML='Start the play<small>go</small>';
-    b.onclick=()=>playAdvance();
+    /* A skip used to be free, which is why the drag was pointless. Nothing advances until he
+       has chosen: grading a spot he never picked is a verdict with no evidence behind it, and
+       the button says WHY it is waiting rather than sitting there dead. */
+    const wait=tapping&&PLAY.spot==null;
+    b.className='povopt '+(wait?'shut':'open');
+    b.innerHTML=(wait?'Pick a circle first':'Start the play')+'<small>'+(wait?'nothing chosen yet':'go')+'</small>';
+    if(!wait) b.onclick=()=>playAdvance();
     ob.appendChild(b);
     if(PLAY.nudge) ob.classList.add('wait');
     return;
@@ -5704,11 +5806,20 @@ function playPrompt(){
     const pt=PLAY.pts[PLAY.di];
     st.textContent='Decision '+(PLAY.di+1)+' of '+n;
     if(pt.kind==='repo'){
-      top.innerHTML='Put yourself where you belong here, then run it.'+
+      const tapping=(PLAY.spot!=null||!!placeChoices());
+      top.innerHTML=(tapping
+        ? (PLAY.spot==null
+          ? 'Tap the circle where <b>you</b> belong here.'
+          : (PLAY.spotWhy
+            ? 'Not there. '+esc(PLAY.spotWhy)+' Tap another circle, or run it and see.'
+            : 'That is your spot. Run it.'))
+        : 'Put yourself where you belong here, then run it.')+
         (PLAY.nudge?' <span class="povnudge">No clock.</span>':'');
       const b=document.createElement('button');
-      b.className='povopt open'; b.innerHTML='Run this step<small>go</small>';
-      b.onclick=()=>playPick(-1);
+      const wait=tapping&&PLAY.spot==null;
+      b.className='povopt '+(wait?'shut':'open');
+      b.innerHTML=(wait?'Pick a circle first':'Run this step')+'<small>'+(wait?'nothing chosen yet':'go')+'</small>';
+      if(!wait) b.onclick=()=>playPick(-1);
       ob.appendChild(b);
       if(PLAY.nudge) ob.classList.add('wait');
       return;
@@ -5759,6 +5870,7 @@ function playAdvance(){
   PLAY.tail=null; PLAY.ghost=null; PLAY.res=null;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   PLAY.reveal=false;                      // a new decision is a new question
+  PLAY.spot=null; PLAY.spotWhy=null;      // and a new placement
   const pt=PLAY.pts[PLAY.di];
   if(!pt){ PLAY.phase='place'; playPrompt(); render(); return; }
   playBeginLeg(); playPrompt();
