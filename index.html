@@ -1571,11 +1571,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false, role:'player',
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.158';
+const BUILD='2026-08-24.163';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v161';
+const SWCACHE='hockey-iq-v166';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2137,10 +2137,22 @@ function paintStepRail(){
    toward something workable anyway - hard AND pointless. A spot chosen from a vetted set is
    judgeable by construction, and pickOptions already attaches a NAMED fault to each wrong one,
    which is the teaching material. */
+/* At frame 0 the play DEFINES where everybody stands - `target(pos,0)` is exactly where
+   `shown()` puts him - so "where do you belong" has no answer he could get wrong yet, and
+   offering two wrong circles asks him to introduce an error the play had not given him. On
+   firstback/turn the first decision is a COVER question whose answer is "stay with your man",
+   and the app was demanding a move first. Placement is a real question from frame 1 on, once
+   the play has moved and standing still is a choice. */
+const placeAsked=pt=>!!pt&&pt.i>0;
 function placeChoices(){
   const pt=PLAY.pts[PLAY.di];
-  if(!pt||!S.sit.roster.includes(S.pos)) return null;
+  if(!pt||!placeAsked(pt)||!S.sit.roster.includes(S.pos)) return null;
   const vb=S.vb||FULLVIEW, t=frames()[pt.i].t, pad=5;
+  /* pickOptions builds its circles from correct(), which still answers on a wrong:true variant
+     while target() - the answer key everything else uses - returns null. Two functions disagreeing
+     about whether an authored spot exists is how a demonstration ends up with a right answer
+     drawn on it. Defer to the answer key. */
+  if(!target(S.pos,t)) return null;
   const puck=puckAt(t).p;
   const drawn=[];
   S.sit.roster.concat(S.opt.them?THEMIDS:[]).forEach(id=>{
@@ -2188,6 +2200,20 @@ function drawPlaceChoices(){
   const opts=placeChoices(); if(!opts) return false;
   const g=layer('focus'), r=spotR();
   const chosen=PLAY.spot;
+  /* "The correct answer is to stay in the spot I was in" - so where he is standing has to be
+     visible while he chooses. A STAY label on the coinciding circle was tried and measured as a
+     100% tell (28 of 28 times it sat on the answer), because a child who was right last step is
+     still standing on a spot the play often has not moved. This says where he IS and lets him
+     draw his own conclusion - it fires on his carried placement whether or not a circle is
+     anywhere near it, so it correlates with nothing. */
+  const mine=(PLAY.spot==null)?S.manual[S.pos]:null;
+  if(mine){
+    const md=disp(mine);
+    g.appendChild(el('circle',{cx:md[0],cy:md[1],r:r*0.82,fill:'none',stroke:'#eaf1fb',
+      'stroke-width':0.55,'stroke-dasharray':'2 2','stroke-opacity':0.9}));
+    g.appendChild(el('text',{x:md[0],y:md[1]-r*1.05,'font-size':FS(2.0),'text-anchor':'middle',
+      'font-weight':800,fill:'#eaf1fb'},'YOU ARE HERE'));
+  }
   opts.forEach((o,k)=>{
     const d=disp(o.p), on=(chosen===k);
     /* "I can barely see the circles" was not a size complaint - they measured 47-71px, above
@@ -2212,8 +2238,13 @@ function drawPlaceChoices(){
     g.appendChild(c);
     if(on){ g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.95),'font-size':FS(2.5),
       'text-anchor':'middle','font-weight':850,fill:'#241c02'},'YOU')); }
-    else { g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.85),'font-size':FS(2.2),
-      'text-anchor':'middle','font-weight':850,fill:'#ffd75e'},'TAP')); }
+    else {
+      /* "the correct answer is to stay in the spot I was in" - so when a circle sits on the ice
+         he is already standing on, it must say STAY rather than TAP. Same choice either way;
+         the word is what tells him not moving is on the table. */
+      g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.85),'font-size':FS(2.2),
+        'text-anchor':'middle','font-weight':850,fill:'#ffd75e'},'TAP'));
+    }
   });
   return true;
 }
@@ -2222,7 +2253,7 @@ function drawPlaceChoices(){
    straight away rather than waiting for the consequence: being told why is the point. */
 function playChoose(k){
   const opts=placeChoices(); if(!opts||!opts[k]) return;
-  PLAY.spot=k;
+  PLAY.spot=k; PLAY.spotDi=PLAY.di;
   S.manual[S.pos]=opts[k].p.slice();
   const o=opts[k];
   PLAY.spotWhy=o.right?null:(o.fault?o.fault.why:null);
@@ -3170,10 +3201,17 @@ function drawLabels(){
      it, in the colours the app already uses for the two teams. */
   const endBand=Math.max(3.6,FS(3.9));
   [[x0,'OUR END','#2a4fa8',1],[x1,'THEIR END','#bf1e2e',-1]].forEach(([ex,txt,col,dir])=>{
-    const bx=dir>0?ex:ex-endBand;
+    const bx=dir>0?ex:ex-endBand, cx=bx+endBand*0.5, cy=(y0+y1)/2;
     g.appendChild(el('rect',{x:bx,y:y0,width:endBand,height:y1-y0,fill:col,'fill-opacity':0.9}));
-    g.appendChild(el('text',{x:bx+endBand*0.5,y:(y0+y1)/2+FS(0.85),'font-size':FS(2.45),
-      fill:'#fff','text-anchor':'middle','font-weight':850,'letter-spacing':0.5},txt));
+    const t=el('text',{x:cx,y:cy+FS(0.85),'font-size':FS(2.45),
+      fill:'#fff','text-anchor':'middle','font-weight':850,'letter-spacing':0.5},txt);
+    /* The band is thin along rink-x and long along rink-y. Stood up that is a horizontal strip
+       and el() has already uprighted the word to match. Lying down it is a VERTICAL strip, and a
+       word drawn horizontally overflows a four-foot band and reads straight across the middle of
+       the ice - which is why the words did not sit on their own colour on desktop. Turn it to run
+       along the band it belongs to. */
+    if(!S.rot) t.setAttribute('transform','rotate(-90 '+cx+' '+cy+')');
+    g.appendChild(t);
   });
   const full=!S.opt.zoom||S.wide, zy=full?5.2:y0+5.4, zs=full?2.7:2.4;
   [[0,75,'OUR ZONE'],[75,125,'NEUTRAL ZONE'],[125,200,'THEIR ZONE']].forEach(([a,b,txt])=>{
@@ -4942,19 +4980,51 @@ function rightAt(i){
   if(to[0]>125&&(to[1]<17||to[1]>68)) return {kind:'dump',to:null};
   return null;
 }
-/* Every option the carrier legally has here, so the menu is never a trick question. */
-function optionsAt(i){
+/* Every option the carrier legally has here, so the menu is never a trick question - then cut to
+   THREE, because rule 15 is "right answer, tempting near-miss, one clear blunder" and the raw
+   list ran to four and five (measured: 235 of 310 decisions offered four or more, and the owner
+   counted six on forecheck). Four options is not a harder question, it is a longer one.
+
+   Which two survive is measured, not authored: of everything that is not the answer, the
+   TEMPTING one is the option with the most open lane and the BLUNDER is the one with the least.
+   Both are things the ice can be checked against, and neither needs new content.
+
+   Order is reshuffled per (play, variant, frame, ATTEMPT) - the raw list always led with "Carry
+   it", which is a fixed slot teaching the button rather than the read. */
+const OPTCACHE={};
+function optionsAt(i,attempt){
   const f=frames(); if(!f[i]) return [];
   const t=f[i].t, pk=puckAt(t), w=pk.w;
   if(!w||!(OURPOS.includes(w)||w==='G')) return [];
-  const from=pk.p, out=[{kind:'carry',to:w,label:'Carry it',hint:'keep skating'}];
+  const att=(attempt==null?(S.mode==='play'?(PLAY.tries||0):0):attempt);
+  const ck=S.sit.id+'|'+variant().id+'|'+i+'|'+w+'|'+att;
+  if(OPTCACHE[ck]) return OPTCACHE[ck];
+  const from=pk.p, all=[{kind:'carry',to:w,label:'Carry it',hint:'keep skating'}];
   S.sit.roster.forEach(id=>{
     if(id===w||id==='G') return;
     const p=shown(id,t); if(!p||dist(from,p)>78) return;
-    out.push({kind:'pass',to:id,label:'Pass to '+id,hint:POSNAMES[id]||''});
+    all.push({kind:'pass',to:id,label:'Pass to '+id,hint:POSNAMES[id]||''});
   });
-  if(dist(from,THEIRNET)<58) out.push({kind:'shoot',to:null,label:'Shoot',hint:'at the net'});
-  if(from[0]>106&&from[0]<136) out.push({kind:'dump',to:null,label:'Dump it in',hint:'and chase'});
+  if(dist(from,THEIRNET)<58) all.push({kind:'shoot',to:null,label:'Shoot',hint:'at the net'});
+  if(from[0]>106&&from[0]<136) all.push({kind:'dump',to:null,label:'Dump it in',hint:'and chase'});
+  let out=all;
+  if(all.length>3){
+    const key=rightAt(i);
+    const same=(a,b)=>!!a&&!!b&&a.kind===b.kind&&(a.to||null)===(b.to||null);
+    const answer=key?all.find(o=>same(o,key)):null;
+    const rest=all.filter(o=>o!==answer);
+    const clear=o=>{ const to=optTarget(o,i,t); if(!to) return 0;
+      const l=laneOf(from,to,t); return l.who?l.m:99; };
+    rest.sort((a,b)=>clear(b)-clear(a));
+    const keep=[];
+    if(answer) keep.push(answer);
+    if(rest.length) keep.push(rest[0]);
+    if(rest.length>1) keep.push(rest[rest.length-1]);
+    out=keep.length>=2?keep:all.slice(0,3);
+  }
+  const rnd=rngFrom(hash32(ck));
+  for(let k=out.length-1;k>0;k--){ const j=Math.floor(rnd()*(k+1)); const tmp=out[k]; out[k]=out[j]; out[j]=tmp; }
+  OPTCACHE[ck]=out;
   return out;
 }
 /* ---- DEFENSIVE decisions: who do you take ----------------------------------------
@@ -5089,6 +5159,11 @@ function defOptions(pt){
    legal option. Runs with the same right answer collapse into their first, so "do not
    pass yet" gets asked once instead of at every frame where it stays true. */
 function playPoints(){
+  /* A wrong:true variant exists to show the mistake. playStart already refuses to enter it, but
+     it was still MANUFACTURING decisions (16 of 171 cells), and anything that reached them would
+     be asking a question about a play with no right answer - target() returns null there, so no
+     verdict it produced could be supported. Refuse at the source. */
+  if(variant().wrong) return [];
   const f=frames(), raw=[];
   for(let i=0;i<f.length-1;i++){
     const opts=optionsAt(i); if(opts.length<2) continue;
@@ -5510,8 +5585,14 @@ function playOutcome(r){
       body:(f?f.why:'You went to somebody else.')+' Staying with him was the play.'};
   }
   const f=endFault(r), better=betterText(r.pt,!!PLAY.own);
+  /* "and you were standing somewhere it works" is a POSITION verdict, and on a step where the
+     puck was on his own stick there is no authored spot to be off - so the sentence claimed
+     something nothing had measured (6 of 240 right-answer outcomes). Praise the read, which IS
+     evidenced by a positive comparison against the answer key, and say nothing about his feet
+     unless they were graded. */
   if(r.readOk&&!f) return {cls:'great',head:'That is the read.',
-    body:'Right call, and you were standing somewhere it works.'};
+    body:r.posGraded?'Right call, and you were standing somewhere it works.'
+                    :'Right call. You had the puck, so there was no spot to grade.'};
   if(r.readOk&&f) return {cls:'off',head:'Right call - wrong place.',
     body:f.why+' The call was right; you were not somewhere it could happen from.'};
   /* explicit, not truthy: readOk is tri-state and only happens to be boolean here */
@@ -5844,7 +5925,7 @@ function playStart(){
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
   PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0;
-  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;
+  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null; PLAY.spotDi=null;
   PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
   S.t=0; S.manual={};
   if(!PLAY.pts.length){
@@ -5884,6 +5965,18 @@ function playPrompt(){
   const n=PLAY.pts.length;
   if(PLAY.phase==='place'){
     st.textContent='Before the whistle';
+    const opening=!placeAsked(PLAY.pts[PLAY.di]);
+    if(opening){
+      /* say what is true rather than asking a question with one answer */
+      top.innerHTML='You start where the play starts you. Watch what happens, then make the call.'+
+        (PLAY.nudge?' <span class="povnudge">Take your time.</span>':'');
+      const b0=document.createElement('button');
+      b0.className='povopt open'; b0.innerHTML='Start the play<small>go</small>';
+      b0.onclick=()=>playAdvance();
+      ob.appendChild(b0);
+      if(PLAY.nudge) ob.classList.add('wait');
+      return;
+    }
     const tapping=(PLAY.spot!=null||!!placeChoices());
     /* one line, always: state and history live in the rail, not over the ice */
     top.innerHTML=(PLAY.scope==='any'
@@ -5913,6 +6006,14 @@ function playPrompt(){
     st.textContent='Decision '+(PLAY.di+1)+' of '+n;
     if(pt.kind==='repo'){
       const tapping=(PLAY.spot!=null||!!placeChoices());
+      if(!placeAsked(pt)){
+        top.innerHTML='This is where the play starts you. Run it and see what the ice does.';
+        const b0=document.createElement('button');
+        b0.className='povopt open'; b0.innerHTML='Run this step<small>go</small>';
+        b0.onclick=()=>playPick(-1);
+        ob.appendChild(b0);
+        return;
+      }
       top.innerHTML=(tapping
         ? (PLAY.spot==null
           ? 'Tap the circle where <b>you</b> belong here.'
@@ -5977,7 +6078,12 @@ function playAdvance(){
   PLAY.tail=null; PLAY.ghost=null; PLAY.res=null;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   PLAY.reveal=false;                      // a new decision is a new question
-  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;   // and a new placement
+  /* playAdvance is called for TWO different things: leaving the placement phase (same decision
+     index) and moving on to the next decision. Clearing the pick unconditionally threw away the
+     circle he had just tapped and asked him to place himself again at the same frame - which is
+     what "there is no right answer after I pick my spot" was. The pick belongs to a decision
+     index, so it is cleared only when that index actually changes. */
+  if(PLAY.spotDi!==PLAY.di){ PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null; }
   const pt=PLAY.pts[PLAY.di];
   if(!pt){ PLAY.phase='place'; playPrompt(); render(); return; }
   playBeginLeg(); playPrompt();
@@ -6155,7 +6261,7 @@ function playRetry(){
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   delete PLAY.score[PLAY.di];
   if(PLAY.placed) delete PLAY.placed[PLAY.di];   // this decision is unjudged again
-  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;  // and unplaced: the order reseeds
+  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null; PLAY.spotDi=null;  // the order reseeds
   playScoreSave();
   S.t=pt.t; PLAY.phase='decide';
   playPrompt(); render(); playIdleArm();

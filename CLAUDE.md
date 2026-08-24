@@ -97,11 +97,22 @@ anchor in frame, **expand** the box to fit aspect (never shrink, or the goalie g
 out of a defensive-zone frame), and move the frame as little as possible between steps,
 because a hard cut at every decision wipes the spatial memory the app exists to train.
 
-The zone word (OUR ZONE / NEUTRAL ZONE / THEIR ZONE) IS that anchor, and it is drawn at
-every crop, zoomed or not. It used to be dropped whenever the camera zoomed in, which left
-tight frames with no words at all — measured: 5 of 44 defensive frames hold neither a net
-nor a line. `frameBox` never goes narrower than 74 feet, so the widest visible zone slice
-is always at least 37: naming every slice that fits is a guaranteed anchor, not a lucky one.
+The anchor is a pair of strips pinned to the FRAME, not to the ice: **OUR END** in team blue
+at the low-x edge of whatever is visible and **THEIR END** in red at the high-x edge, drawn at
+every crop in every mode whether or not a net is in shot. Position carries the direction (ours
+at the bottom of a stood-up rink), the words name it. Measured: both visible on 1836 of 1836
+renders across all six modes.
+
+The zone word (OUR ZONE / NEUTRAL ZONE / THEIR ZONE) is drawn at every crop too, and it says
+where the PUCK is — it is not an orientation anchor and must not be relied on as one. Blue
+lines are symmetric; 79 of 289 decisions crop both nets out and 9 hold no line at all, which
+is how "the ice is sideways" kept coming back on a rink that was upright the whole time.
+
+Note the two cameras. `frameBox` (ZOOM/WIDE, and the per-step camera) never goes narrower
+than 74 feet — measured, still true. Watch mode does NOT default to it: it crops from
+`playUnionBox()`, one box unioned across every step of the variant, which floors at 52 feet
+(support/triangle). That is why the anchor cannot be a function of what the crop happens to
+contain.
 
 ## 6. Never break audio ids
 
