@@ -1479,11 +1479,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.149';
+const BUILD='2026-08-24.150';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v152';
+const SWCACHE='hockey-iq-v153';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1591,7 +1591,28 @@ const isPhone=()=>window.matchMedia('(max-width:1000px)').matches;
 /* on a phone the rink is physically small, so scale the on-ice type up */
 /* everything on the ice is sized against how much ice is on screen, so following the play
    makes the play bigger without turning the dots into blobs */
-const ZF=()=>Math.pow(Math.min(1,((S.vb&&S.vb[2])||212)/212),0.45);
+/* How tight the PLAY's own crop is - not how much ice ends up on screen. Since the box is now
+   expanded to fill the panel (rule 5), those two numbers are different, and it is the first one
+   that should decide how big a dot is: the expansion adds ice at the same pixels-per-foot, so
+   compensating for it would inflate every token instead of leaving it alone. */
+const ZF=()=>Math.pow(Math.min(1,((S.zf!=null?S.zf:((S.vb&&S.vb[2])||212))||212)/212),0.45);
+/* Grow a viewBox to the panel's shape, never shrink it - shrinking is what cuts the goalie out
+   of a defensive-zone frame. Standing up, screen-x is rink-y, so the axis that gets the room is
+   up-ice, which is also the axis most likely to bring a net or a line into frame. */
+function fitPanel(box,bw,bh,rot){
+  if(!bw||!bh) return box;
+  let x=box[0], y=box[1], w=box[2], hh=box[3];
+  const want = rot ? (bh/bw) : (bw/bh);        // rink-x over rink-y, in the panel's terms
+  const cur = w/hh;
+  if(cur<want){ const nw=hh*want; x-=(nw-w)/2; w=nw; }
+  else if(cur>want){ const nh=w/want; y-=(nh-hh)/2; hh=nh; }
+  if(w>212){ x=-6; w=212; }
+  if(hh>97){ y=-6; hh=97; }
+  if(x<-6) x=-6; if(y<-6) y=-6;
+  if(x+w>206) x=Math.max(-6,206-w);
+  if(y+hh>91) y=Math.max(-6,91-hh);
+  return [+x.toFixed(2),+y.toFixed(2),+w.toFixed(2),+hh.toFixed(2)];
+}
 const FS=n=>+(n*S.fs*ZF()).toFixed(2);
 /* Phone portrait: measured, the number on an opponent drew at 8.9px inside a 16.8px dot -
    not a size a nine-year-old reads at arm's length, and the whole app is about reading who
@@ -2498,21 +2519,22 @@ function drawFocus(t){
 /* ---------------- render ---------------- */
 function render(){
   const t=S.t, sit=S.sit, v=variant();
-  const vb=camera();
-  S.vb=vb;
+  const crop=camera();
   const wrap=svg.parentElement;
   const b=wrap?wrap.getBoundingClientRect():null;
   const bw=(b&&b.width)||760, bh=(b&&b.height)||300;
-  /* the ice is 2.2:1; a phone held upright is 1:2.2. Work out which way round draws
-     the ice bigger in the panel we actually have, and stand the rink up if that wins
-     - their net at the top, ours at the bottom. */
-  const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
-  /* the panel's own shape decides first: a landscape panel never stands the rink up, no
-     matter how square the zoom-to-zone crop is (a near-square crop could otherwise clear
-     the scale test by a couple of percent and turn the ice sideways) */
-  const rot = isPhone() && bh > bw && perV > perH*1.05;
+  /* ONE orientation on a phone, chosen here rather than derived from how wide a focus box
+     happens to be: our net at the bottom, up-ice up the screen, in every drill. The old test
+     compared the crop's aspect to the panel's and flipped at about 1.0, which laid every
+     offensive-zone play on its side while every defensive one stood up - and, because the crop
+     is per step, rotated the whole rink MID-PLAY in 50 of 171 runs. A ninety-degree cut at a
+     decision point is the opposite of the spatial memory this app exists to build. */
+  const rot = isPhone() && bh > bw;
   S.rot=rot;
   S.port=portrait();
+  const vb=fitPanel(crop,bw,bh,rot);
+  S.vb=vb; S.zf=crop[2];
+  const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
   svg.setAttribute('viewBox', rot ? [vb[1],-(vb[0]+vb[2]),vb[3],vb[2]].join(' ') : vb.join(' '));
   [...svg.children].forEach(n=>{
     if(n.tagName==='defs')return;
@@ -2521,7 +2543,10 @@ function render(){
   if(wrap){
     // on a wide screen the panel hugs the rink; on a phone it just fills the space
     wrap.style.aspectRatio = isPhone() ? '' : (vb[2]/vb[3]).toFixed(3);
-    const w=(rot?perV:perH)*vb[2];       // how wide the ice actually draws, in px
+    /* how wide the ice actually draws, in px - standing up that is the rink's WIDTH across the
+       screen, not its length. Measuring the length here made the type shrink as soon as the box
+       was allowed to expand up-ice. */
+    const w=rot?(perV*vb[3]):(perH*vb[2]);
     S.fs = w<360?1.5 : w<440?1.36 : w<560?1.24 : w<700?1.1 : 1;
   }
   ['fade','labels','lanes','trail','pass','space','ghost','pick','focus','tok','look','puck'].forEach(k=>layer(k).innerHTML='');
