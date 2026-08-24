@@ -80,34 +80,45 @@ select,input{touch-action:manipulation}
   color:var(--dim);margin-right:3px}
 .agebar .chip{min-height:38px;display:inline-flex;align-items:center;font-weight:650}
 .agebar .agecount{flex:0 0 100%;text-align:center;font-size:12.5px;color:var(--dim);margin-top:3px}
-.mcol .mnone{font-size:12.5px;color:var(--dim);padding:2px 2px 6px;line-height:1.4}
-.menucols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;text-align:left}
-.mcol{background:var(--bg2);border:1px solid var(--line);border-top:4px solid var(--def);
-  border-radius:14px;padding:14px}
+.mcol .mnone{flex:0 0 auto;font-size:12.5px;color:var(--dim);padding:2px 2px 6px;line-height:1.4}
+/* A poster wall, not a control panel. One row per phase, flicked sideways: he is nine and
+   browsing for something that looks fun, and two buttons on each of twenty cards is twenty
+   decisions before the first one. */
+.menucols{display:flex;flex-direction:column;gap:20px;text-align:left}
+.mcol{background:none;border:0;border-radius:0;padding:0}
 .mcol h3{font-size:14px;letter-spacing:.09em;text-transform:uppercase}
 .mcol .mq{font-size:12.5px;color:var(--dim);margin:3px 0 11px}
-.mhead{display:block;width:100%;background:none;border:0;padding:0;text-align:left;cursor:default}
-.mchev{display:none}
-.mtaphint{display:none}
-.mitem{display:block;width:100%;text-align:left;background:#f3f7fb;border:1px solid #d6e0ec;
-  border-radius:13px;padding:0;overflow:hidden;transition:.14s;color:#14243f}
-.mrow{display:flex;flex-direction:column;gap:10px}
-.mitem .mtitle{display:block;font-size:15.5px;font-weight:750;letter-spacing:-.2px;
-  padding:11px 13px 9px;color:#14243f}
-.mdot{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:7px;vertical-align:1px}
-.mitem .mthumb{display:flex;align-items:center;justify-content:center;position:relative;background:#fff;
-  width:100%;aspect-ratio:2.26;overflow:hidden;
-  border-top:1px solid #e4ebf4;border-bottom:1px solid #e4ebf4}
+.mhead{display:block;width:100%;background:none;border:0;padding:0 0 9px;text-align:left;cursor:default}
+.mchev,.mtaphint{display:none}
+/* the row scrolls, snaps, and hides its bar - the peeking edge of the next poster is the
+   only affordance a kid needs */
+.mrow{display:flex;flex-direction:row;gap:12px;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  padding:3px 3px 7px}
+.mrow::-webkit-scrollbar{display:none}
+.mitem{flex:0 0 232px;scroll-snap-align:start;display:block;text-align:left;background:#f3f7fb;
+  border:1px solid #d6e0ec;border-radius:14px;padding:0;overflow:hidden;transition:.14s;color:#14243f}
+/* the thumbnail was a decoration under a title; it is the subject of the card now */
+.mitem .mthumb{display:flex;align-items:center;justify-content:center;position:relative;
+  background:#fff;width:100%;aspect-ratio:2.26;overflow:hidden;border-bottom:1px solid #e4ebf4}
 .mitem .mthumb svg{display:block;width:100%;height:100%}
-.mitem .mact{display:flex;gap:8px;padding:9px 13px 0}
-.mitem .mgo{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;
-  min-height:40px;padding:0 12px;border-radius:10px;background:#1e2c48;border:1px solid #2f4066;
-  color:var(--ink);font-size:13px;font-weight:750;transition:.14s}
-.mitem .msub{display:block;font-size:12.5px;color:#4b5d79;padding:9px 13px 11px;line-height:1.4}
-.mitem .mgo.mplay{background:#bf1e2e;border-color:#bf1e2e;color:#fff}
+.mitem .mtitle{display:block;font-size:14px;font-weight:700;letter-spacing:-.1px;
+  padding:9px 11px 10px;color:#14243f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* it has to be reachable without a finger: the browser scrolls a focused card into its row */
+.mitem:focus-visible{outline:3px solid var(--tra);outline-offset:2px}
 @media (hover:hover){.mitem:hover{border-color:#8fb0d8;transform:translateY(-2px);
-  box-shadow:0 10px 22px rgba(3,10,25,.38)}
-  .mitem:hover .mgo{border-color:#5a79ad}}
+  box-shadow:0 10px 22px rgba(3,10,25,.38)}}
+/* Choosing a play and choosing what to do with it are two decisions. The card makes the
+   first; this sheet makes the second, once, instead of twenty times across the wall. */
+.pickcard{text-align:left}
+.pickposter{display:block;background:#fff;border:1px solid #d6e0ec;border-radius:12px;
+  overflow:hidden;aspect-ratio:2.26;margin-bottom:12px}
+.pickposter svg{display:block;width:100%;height:100%}
+.pickphase{display:inline-block;font-size:10px;font-weight:850;letter-spacing:.1em;
+  text-transform:uppercase;color:#fff;border-radius:6px;padding:4px 9px;margin-bottom:7px}
+.pickcard h2{font-size:20px;margin:0 0 5px}
+.pickabout{font-size:14px;line-height:1.4;color:var(--dim);margin:0 0 14px}
+.pickacts{display:flex;flex-direction:column;gap:9px}
 .menufoot{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
 .mbtn{background:var(--bg3);border:1px solid var(--line);border-radius:11px;padding:11px 20px;font-size:14px;font-weight:600}
 @media (hover:hover){.mbtn:hover{border-color:#5a79ad}}
@@ -150,6 +161,14 @@ select,input{touch-action:manipulation}
   display:flex;align-items:center;justify-content:center}
 .zoomb:active{transform:scale(.96)}
 .zoomb.off{display:none}
+/* bottom left: the zoom control owns the top right and the option tray owns the bottom
+   middle, so this is the one corner of the ice nothing else claims */
+.skipintro{position:absolute;left:8px;bottom:8px;z-index:6;display:none;
+  min-height:46px;padding:0 17px;border-radius:13px;border:1px solid rgba(255,255,255,.22);
+  background:rgba(6,11,20,.86);color:#eaf1fb;font-size:14.5px;font-weight:750;
+  align-items:center;gap:8px;backdrop-filter:blur(7px);cursor:pointer}
+.skipintro.on{display:flex}
+.skipintro:active{transform:scale(.97)}
 svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none}
 
 /* ======== Try mode: the read meter ======== */
@@ -215,7 +234,9 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .pacer{display:flex;gap:6px;margin:0 0 10px}
 .pacer button{flex:1 1 0;min-height:42px;border-radius:10px;background:#1a2350;border:1px solid #2a3566;
   color:var(--dim);font-size:12.5px;font-weight:750;padding:0 8px}
-.pacer button.on{background:var(--hi);border-color:var(--hi);color:#fff}
+/* a selected setting is OUR setting, so it wears the team blue. Red was marking both the
+   DEFENSE category and every selected control, which makes neither learnable. */
+.pacer button.on{background:var(--us);border-color:var(--us2);color:#fff}
 
 /* ======== Play mode: the decision loop, drawn on the ice ======== */
 .pov{position:absolute;inset:0;z-index:4;display:none;flex-direction:column;
@@ -270,6 +291,7 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .povrow button{min-height:46px;padding:8px 16px;border-radius:11px;border:1px solid var(--line);
   background:var(--bg3);color:inherit;font-size:14px;font-weight:700}
 .povrow button.hot{background:var(--hi);border-color:var(--hi);color:#fff}
+.povnospot{flex:1 1 100%;font-size:12px;line-height:1.4;color:#ffd98a}
 .povsum{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#cfdcee}
 .povsum i{color:#8fa4c4;font-style:normal}
 @media (max-width:700px){
@@ -356,7 +378,7 @@ input[type=range]{accent-color:var(--us2)}
 .quickbar .qpos{flex:1 1 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;min-width:0}
 .quickbar .qp{background:#1e2c48;border:1px solid #2f4066;border-radius:9px;min-height:42px;
   font-size:14px;font-weight:800;color:var(--ink)}
-.quickbar .qp.on{background:var(--hi);border-color:var(--hi);color:#fff}
+.quickbar .qp.on{background:var(--you);border-color:#ffd75e;color:#241c02}
 .quickbar .qp.off{opacity:.32}
 .quickbar .qr{display:flex;align-items:center;gap:7px;min-width:0}
 .quickbar .qr2{gap:7px}
@@ -367,10 +389,35 @@ input[type=range]{accent-color:var(--us2)}
 .pbtn .ab{display:block;font-size:16px;font-weight:800}
 .pbtn .nm{display:block;font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
 @media (hover:hover){.pbtn:hover{border-color:#5a79ad;background:#243457}}
-.pbtn.on{background:var(--hi);border-color:#e0566a;color:#fff}
-.pbtn.on .nm{color:#ffd4da}
+/* which position you ARE is yellow, the same yellow the app has always used for YOU */
+.pbtn.on{background:var(--you);border-color:#ffd75e;color:#241c02}
+.pbtn.on .nm{color:#5c4a06}
 .pbtn.off{opacity:.3}
 
+/* YOUR JOB is the most important sentence on the screen. On a phone it is pinned under the
+   top bar (see the portrait block at the end of this sheet); on a wide screen the rail's
+   job card still carries it and this strip stays hidden. */
+/* label on its own line: with it inline, the longest authored job (dzone/C) wrapped to four
+   lines and 98px. Its own line gives the sentence the full width - 74px worst case across
+   all 90 jobs, and no job scrolls. */
+.jobstrip{display:none;flex:0 0 auto;flex-direction:column;align-items:stretch;gap:2px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:7px 11px 9px}
+.jobstrip.off{display:none!important}
+.jobstrip .jslab{flex:0 0 auto;font-size:9.5px;font-weight:850;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--you);white-space:nowrap}
+.jobstrip p{margin:0;font-size:15.5px;line-height:1.28;text-wrap:pretty}
+.jobstrip.none .jslab{color:#ff9aa8}
+.jobstrip.none p{color:#ffb3bd}
+/* one compact affordance for everything that is not the ice */
+.pbar{display:none;flex:0 0 auto;justify-content:center;
+  padding:0 0 calc(4px + env(safe-area-inset-bottom))}
+.pbar button{flex:0 0 auto;min-height:52px;padding:0 22px;border-radius:13px;
+  background:var(--hi);border:1px solid var(--hi);color:#fff;font-size:15px;font-weight:800;
+  display:flex;align-items:center;gap:9px}
+.pbar .pbchev{font-size:10px}
+#sheetscrim{position:absolute;inset:0;z-index:19;background:rgba(4,8,16,.55);
+  display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#sheetscrim.on{opacity:1;pointer-events:auto}
 .jobcard{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:12px}
 .jobcard .who{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--hi);font-weight:800;margin-bottom:4px}
 .jobcard p{margin:0;font-size:15px;line-height:1.35}
@@ -572,9 +619,8 @@ input[type=range]{accent-color:var(--us2)}
   .nextbar .nlbl{display:none}
   .chk{font-size:11.5px}
 
-  .menucols{grid-template-columns:1fr;gap:12px}
-  /* a plain vertical stack inside each phase card - no scroll affordance to explain */
-  .mcol{padding:0 0 0}
+  .menucols{gap:16px}
+  .mcol{padding:0}
   .mhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:14px;min-height:44px;cursor:pointer}
   .mhead .mheadl{min-width:0}
@@ -582,12 +628,12 @@ input[type=range]{accent-color:var(--us2)}
   .mcol .mq{margin:2px 0 0}
   .mchev{display:block;flex:0 0 auto;font-size:15px;line-height:1;color:var(--dim);transition:transform .18s}
   .mcol.open .mchev{transform:rotate(180deg)}
-  .mrow{display:none;gap:10px;padding:0 14px 14px}
-  /* one phone-width column, centered: the cards are phone furniture, and letting them
-     run 850px wide is what left the rink thumbnails swimming in white */
-  .menuwrap{max-width:500px}
-  .mcol.open .mrow{display:flex}
-  .mtaphint{display:inline}
+  .mrow{gap:10px}
+  /* the 500px cap was there because full-width cards left the rink thumbnails swimming in
+     white. The posters are a fixed 232px now, so width buys visible posters instead of
+     stretched ones - three across on a tablet, one and a peek on a phone. */
+  .menuwrap{max-width:780px}
+
   .coachbox{padding:14px;margin-top:14px}
   .coachhead h3{font-size:14.5px}
   .coachrow{flex-wrap:wrap}
@@ -675,6 +721,39 @@ input[type=range]{accent-color:var(--us2)}
   #pause .lbl{display:none}
   .cue .n{display:none}
 }
+
+/* ============ PHONE PORTRAIT: the ice owns the screen ============
+   Measured in a 390x844 harness. Before: the sheet was parked open over the bottom 540px
+   of an ice panel 624px tall, so two thirds of the rink - including our net at the bottom
+   of a stood-up sheet - was behind a panel, and YOUR JOB was the last thing in its scroll.
+   Now: the job is pinned under the top bar, the rink takes every pixel between it and one
+   52px affordance, and the sheet floats over the ice only while it is asked for.
+   Last block in the sheet on purpose: the 430px block above also sets .stage padding. */
+@media (max-width:699px) and (max-aspect-ratio:1/1){
+  .stage{padding:6px 8px 0!important;gap:6px}
+  #jobstrip{display:flex}
+  #pbar{display:flex}
+  #sheetscrim{display:block}
+  /* the picker, Run the play and Quiz me all live in the sheet, one tap away */
+  .quickbar{display:none!important}
+  .rinkwrap{flex:1 1 auto;min-height:120px}
+  /* the step prompt and the zoom control stopped sharing the top-right corner - and the
+     prompt stacks, so the sentence gets the card's whole width instead of a 160px column
+     beside its own label */
+  .povtop{align-self:flex-start;margin-right:70px;max-width:100%;
+    flex-direction:column;align-items:flex-start;gap:2px}
+  /* a title a player cannot read is not a title: two lines, and the variant name is the
+     selected chip in the row under it */
+  .tbtitle b{font-size:14.5px;white-space:normal;line-height:1.15;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* closed, the sheet takes nothing at all */
+  .railwrap{max-height:0;border-top:0;box-shadow:none}
+  .railwrap.open{max-height:72dvh;border-top:1px solid var(--line);
+    box-shadow:0 -18px 40px -16px rgba(0,0,0,.72)}
+  .grab{min-height:52px}
+  .grab .glabel{color:#ffb3bd}
+  .grab .gchev{color:#ff8a9b;font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -751,10 +830,12 @@ input[type=range]{accent-color:var(--us2)}
 
   <div class="body">
     <div class="stage">
+      <div class="jobstrip" id="jobstrip"><span class="jslab" id="jslab">YOUR JOB</span><p id="jstext"></p></div>
       <div class="varrow" id="varrow"></div>
       <div class="rinkwrap">
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
         <button class="zoomb" id="zoomb" title="Zoom in on the play">ZOOM</button>
+        <button class="skipintro" id="skipintro">Skip the intro &#9197;</button>
         <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
         <div class="pov" id="pov">
           <div class="povtop"><span class="povstep" id="povstep">Step</span><span class="povmsg" id="povmsg"></span></div>
@@ -794,8 +875,12 @@ input[type=range]{accent-color:var(--us2)}
         <label class="chk"><input type="checkbox" id="t-follow"> Auto</label>
         <button class="nextbtn" id="nextbtn">Go &#9654;</button>
       </div>
+      <div class="pbar" id="pbar">
+        <button id="pbmore" aria-expanded="false"><span class="pbchev" id="pbchev">&#9650;</span><span id="pblbl">Controls</span></button>
+      </div>
     </div>
 
+    <div id="sheetscrim"></div>
     <aside class="railwrap" id="railwrap">
       <button class="grab" id="grab"><span class="bar"></span><span class="glabel" id="glabel"></span><span class="gchev">&#9650;</span></button>
       <div class="rail" id="rail"></div>
@@ -815,6 +900,21 @@ input[type=range]{accent-color:var(--us2)}
     <button class="bigbtn plain" id="r-menu" style="width:100%">Menu</button>
   </div>
 </section>
+
+<!-- =============== PICK: watch it or play it =============== -->
+<div class="mask" id="mask-pick">
+  <div class="modal pickcard" style="max-width:420px">
+    <span class="pickposter" id="pickposter"></span>
+    <span class="pickphase" id="pickphase"></span>
+    <h2 id="picktitle"></h2>
+    <p class="pickabout" id="pickabout"></p>
+    <div class="pickacts">
+      <button class="bigbtn" id="pickplay">Play it &#9654;</button>
+      <button class="bigbtn plain" id="pickwatch">Watch it &#9654;</button>
+      <button class="bigbtn plain" id="pickclose" style="background:none;border:0">Back to the plays</button>
+    </div>
+  </div>
+</div>
 
 <!-- =============== HELP =============== -->
 <div class="mask" id="mask-help">
@@ -1357,14 +1457,14 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const S={
   sit:SITUATIONS[0], varIdx:0, pos:'C',
   t:0, target:1, playing:false, raf:null, lastTs:null, gen:0,
-  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null,
+  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-23.146';
+const BUILD='2026-08-24.147';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v149';
+const SWCACHE='hockey-iq-v150';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1474,7 +1574,12 @@ const isPhone=()=>window.matchMedia('(max-width:1000px)').matches;
    makes the play bigger without turning the dots into blobs */
 const ZF=()=>Math.pow(Math.min(1,((S.vb&&S.vb[2])||212)/212),0.45);
 const FS=n=>+(n*S.fs*ZF()).toFixed(2);
-const TR=()=>+(2.45*Math.min(1.18,S.fs)*ZF()).toFixed(2);
+/* Phone portrait: measured, the number on an opponent drew at 8.9px inside a 16.8px dot -
+   not a size a nine-year-old reads at arm's length, and the whole app is about reading who
+   is where. The dot and the word inside it grow by the same factor so the glyphs still sit
+   inside the circle; S.port is sampled once per render rather than per token. */
+const PB=()=>S.port?1.42:1;
+const TR=()=>+(2.45*Math.min(1.18,S.fs)*ZF()*PB()).toFixed(2);
 /* on a phone the long role words collide, so use short ones */
 const SHORTROLE={'in the corner':'corner','net front':'net','in the slot':'slot','on the wall':'wall',
   'weak side':'weak','goalie':'G',
@@ -1689,6 +1794,22 @@ function drawClueZone(q,level){
   g.appendChild(el('circle',{cx:b[0],cy:b[1],r,fill:'none',stroke:'#5f697f',
     'stroke-width':0.5,'stroke-dasharray':'2.4 1.8'}));
 }
+/* The taught spot, named on the ice. Quiz mode colours it by whether he got there; Play
+   mode asks for it and colours it in the team blue, because a reveal is not a verdict -
+   the position axis has no positive test to make one with. */
+function drawBeHere(b,col,txt){
+  const g=layer('ghost');
+  const pulse=el('circle',{cx:b[0],cy:b[1],r:3.6,fill:'none',stroke:col,'stroke-width':0.7});
+  pulse.appendChild(el('animate',{attributeName:'r',values:'3.6;7.6;3.6',dur:'1.8s',repeatCount:'indefinite'}));
+  pulse.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0;0.95',dur:'1.8s',repeatCount:'indefinite'}));
+  g.appendChild(pulse);
+  g.appendChild(el('circle',{cx:b[0],cy:b[1],r:3.4,fill:col,'fill-opacity':0.22,stroke:col,'stroke-width':0.6}));
+  const ly=b[1]<20?b[1]+FS(8.2):b[1]-FS(5.8), lh=FS(4.2), lw=FS(txt.length*2.35+0.6);
+  g.appendChild(el('rect',{x:b[0]-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
+    fill:col,'fill-opacity':0.95}));
+  g.appendChild(el('text',{x:b[0],y:ly,'font-size':FS(2.8),'text-anchor':'middle','font-weight':850,
+    fill:'#fff','letter-spacing':0.25},txt));
+}
 /* The dot he is meant to grab: a ring that never stops pulsing, and the words on the ice. */
 function drawDragMe(p){
   const g=layer('focus'), r=TR();
@@ -1765,6 +1886,11 @@ function drawDragMe(p){
   }
   probe.setAttribute('x',lx); probe.setAttribute('y',ly);
   probe.setAttribute('fill','#8a6000');
+  /* el() keeps a word upright on a stood-up rink only when it is GIVEN x and y - this one
+     gets them afterwards, so the label came out sideways while its halo, built through el()
+     with x and y, came out straight: one white lozenge with nothing in it, and one vertical
+     DRAG ME beside it. Same rotation, same slot. */
+  if(S.rot) probe.setAttribute('transform','rotate(90 '+lx+' '+ly+')');
   const halo=el('text',{x:lx,y:ly,'font-size':FS(3),'text-anchor':'middle','font-weight':850,
     'letter-spacing':0.2,fill:'#fff',stroke:'#fff','stroke-width':1.5,'stroke-linejoin':'round'},'DRAG ME');
   g.insertBefore(halo,probe);
@@ -1783,11 +1909,25 @@ function drawDragMe(p){
    FAIL - if the pass meant for him cannot get there, the play dies there. Reads are
    computed from the same geometry the rest of the app uses; nothing is invented. */
 const OPPNAME=id=>id==='XG'?'their goalie':'red '+String(id).slice(1);
+/* Where he stood, and where the job was, at each decision as it was judged. Written after the
+   verdict so the bound above always reads the PREVIOUS decision, never the one in flight. */
+function playMarkSpot(){
+  if(S.mode!=='play') return;
+  const pt=PLAY.pts&&PLAY.pts[PLAY.di]; if(!pt) return;
+  const t=frames()[pt.i].t, me=shown(S.pos,t), a=target(S.pos,t);
+  if(!me) return;
+  (PLAY.placed=PLAY.placed||[])[PLAY.di]={p:me.slice(),a:a?a.slice():null,t};
+}
 function passMeantForHim(i){
   const f=frames(); if(i<=0||!f[i]||!f[i-1]) return false;
   const w=f[i].puck&&f[i].puck[2], pw=f[i-1].puck&&f[i-1].puck[2];
   return w===S.pos&&pw!==S.pos;
 }
+/* Coaching, not geometry: twelve feet is a stick and a half. It is the loosest value where no
+   cell passes more than 5% of the ice, and it sits just outside Quiz's own d<=10 "right"
+   tolerance so the two modes cannot contradict each other. One constant, reversible - a
+   starting value a coach may overrule, not a finding. */
+const POSBOUND=12;
 function tryEval(i){
   const f=frames(); if(!f[i]) return null;
   const t=f[i].t, me=shown(S.pos,t), auth=target(S.pos,t);
@@ -1871,7 +2011,41 @@ function tryEval(i){
     return {at:[Math.min(188,Math.max(12,me[0])),42.5],msg:'MIDDLE IS OPEN',
       why:'Your spot is the middle lane. You left it, and the middle is the dangerous ice.',
       say:'You left the middle of the ice open.'};
+
+  /* 6. the catch-all, LAST so a specific teachable fault always wins over "too far".
+     Measured before it existed: 487 of 604 gradable cells passed more than 5% of the whole
+     ice, LD a median 28.7% at a median 87ft from his job. Not fatal - being out of position
+     is not a whistle. And deliberately NOT called TOO FAR: that name belongs to the
+     pass-length fault above, and two faults sharing one name is how a report gets confused. */
+  const off=dist(me,auth);
+  if(off>POSBOUND){
+    /* One bound, two mistakes, mechanically separable: the authored spot moves a median 6.3ft
+       between decisions and more than POSBOUND on 28% of legs, so a bare bound tells the child
+       who got the first placement exactly right the same thing it tells the one who guessed.
+       Compare his spot to his spot at the previous decision. */
+    const mv=playHeldStill(t,me);
+    if(mv) return {at:auth,msg:'THE PLAY MOVED',
+      why:'You were where you belonged, and then the play moved and you did not. '+
+          'Your job travelled '+Math.round(mv)+' feet while you stood still.'};
+    return {at:me,msg:'NOT WHERE YOU BELONG',
+      why:'You are '+Math.round(off)+' feet from the spot this play gives you - too far out '+
+          'to be part of it.'};
+  }
   return null;
+}
+/* Did he keep the spot he had at the previous decision while the job skated away? Returns how
+   far the job moved, or null when that is not what happened - no previous decision (frame 0
+   counts as placed-wrong, per the spec), he re-placed himself, or the job barely moved.
+   Play mode only: in Try mode shown() carries his drag along the authored route, so his
+   displacement is the frame-0 drag error at every frame and standing still cannot arise. */
+function playHeldStill(t,me){
+  if(S.mode!=='play'||!PLAY.placed||!(PLAY.di>0)) return null;
+  const prev=PLAY.placed[PLAY.di-1];
+  if(!prev||!prev.p||!prev.a) return null;
+  if(dist(me,prev.p)>0.5) return null;                 // he moved: that is a placement fault
+  const now=target(S.pos,t); if(!now) return null;
+  const moved=dist(now,prev.a);
+  return moved>POSBOUND?moved:null;
 }
 /* ---- Coach the play: he picks the spot, for anybody ---------------------------
    One step at a time. Tap a player, and three grey circles appear: the spot the play
@@ -2319,6 +2493,7 @@ function render(){
      the scale test by a couple of percent and turn the ice sideways) */
   const rot = isPhone() && bh > bw && perV > perH*1.05;
   S.rot=rot;
+  S.port=portrait();
   svg.setAttribute('viewBox', rot ? [vb[1],-(vb[0]+vb[2]),vb[3],vb[2]].join(' ') : vb.join(' '));
   [...svg.children].forEach(n=>{
     if(n.tagName==='defs')return;
@@ -2492,22 +2667,15 @@ function render(){
     const q=TEST.qs[TEST.i];
     if(q&&q.type==='place'){
       const c=target(q.pos,t);
-      if(c){
-        const b=disp(c), g=layer('ghost');
-        const col=TEST.lastRight?'#1b2a6b':'#bf1e2e';
-        const pulse=el('circle',{cx:b[0],cy:b[1],r:3.6,fill:'none',stroke:col,'stroke-width':0.7});
-        pulse.appendChild(el('animate',{attributeName:'r',values:'3.6;7.6;3.6',dur:'1.8s',repeatCount:'indefinite'}));
-        pulse.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.95;0;0.95',dur:'1.8s',repeatCount:'indefinite'}));
-        g.appendChild(pulse);
-        g.appendChild(el('circle',{cx:b[0],cy:b[1],r:3.4,fill:col,'fill-opacity':0.22,stroke:col,'stroke-width':0.6}));
-        const txt=TEST.lastRight?'HERE':'BE HERE';
-        const ly=b[1]<20?b[1]+FS(8.2):b[1]-FS(5.8), lh=FS(4.2), lw=FS(txt.length*2.35+0.6);
-        g.appendChild(el('rect',{x:b[0]-lw/2,y:ly-lh*0.76,width:lw,height:lh,rx:lh/2,ry:lh/2,
-          fill:col,'fill-opacity':0.95}));
-        g.appendChild(el('text',{x:b[0],y:ly,'font-size':FS(2.8),'text-anchor':'middle','font-weight':850,
-          fill:'#fff','letter-spacing':0.25},txt));
-      }
+      if(c) drawBeHere(disp(c),TEST.lastRight?'#1b2a6b':'#bf1e2e',TEST.lastRight?'HERE':'BE HERE');
     }
+  }
+  /* Play mode had no way to be shown the spot at all: retry keeps his placement on purpose,
+     so re-deciding from the same place reproduces the same verdict, and the only mode that
+     ever revealed an answer was Quiz. Same marker here, on request. */
+  if(S.mode==='play'&&PLAY.reveal&&S.sit.roster.includes(S.pos)){
+    const c=target(S.pos,t);
+    if(c) drawBeHere(disp(c),'#2a4fa8','BE HERE');
   }
 
   // when somebody is carrying it, the puck sits AHEAD of them in the direction they
@@ -2530,7 +2698,7 @@ function render(){
   if(zb){ zb.textContent=S.wide?'ZOOM':'WIDE';
     zb.title=S.wide?'Zoom in on the play':'See the whole zone';
     zb.classList.toggle('off',!S.opt.zoom); }
-  paintCue();
+  paintCue(); paintJob();
   $('scrub').value=Math.round(t*1000);
   renderTopbar(); renderNext();
 }
@@ -2549,13 +2717,21 @@ function drawLabels(){
     }
     g.appendChild(el('text',{x,y,'font-size':size,fill:'#6b7b93','text-anchor':'middle','font-weight':700,'letter-spacing':0.3},txt));
   };
-  if(!S.opt.zoom||S.wide) [[0,75,'OUR ZONE'],[75,125,'NEUTRAL ZONE'],[125,200,'THEIR ZONE']].forEach(([a,b,txt])=>{
-    const lo=Math.max(a,x0+4),hi=Math.min(b,x1-4);
-    if(hi-lo>=26) put((lo+hi)/2,5.2,2.7,txt);
-  });
   const near=(x,y)=>S.sit.roster.concat(THEMIDS).some(id=>{
     const p=shown(id,S.t); if(!p)return false; const d=disp(p);
     return Math.abs(d[0]-x)<9 && Math.abs(d[1]-y)<6;
+  });
+  /* Zoomed in, the zone names used to be dropped entirely - and with them the last words
+     telling him which end of the ice he is looking at. A crop can legitimately hold no net
+     and no line (measured: 5 of 44 defensive frames hold neither), and frameBox never goes
+     narrower than 74 feet, so the widest visible zone slice is always at least 37 - naming
+     every slice that fits is a guaranteed anchor rather than a lucky one. Same pill, same
+     placement rule; a tighter crop just gets a smaller word, at the top of what is visible
+     rather than the top of the rink. */
+  const full=!S.opt.zoom||S.wide, zy=full?5.2:y0+5.4, zs=full?2.7:2.4;
+  [[0,75,'OUR ZONE'],[75,125,'NEUTRAL ZONE'],[125,200,'THEIR ZONE']].forEach(([a,b,txt])=>{
+    const lo=Math.max(a,x0+4),hi=Math.min(b,x1-4);
+    if(hi-lo>=26) put((lo+hi)/2,zy,zs,txt);
   });
   [[11,'OUR NET'],[189,'THEIR NET']].forEach(([x,txt])=>{
     if(x<=x0+13||x>=x1-13) return;
@@ -2582,13 +2758,34 @@ function token(id,p,kind,label,role,pts,mute){
   const g=el('g',{class:'tok','data-id':id,style:'cursor:grab'});
   /* primary colors for the men in the play, subdued for the ones who are only options */
   const fill=kind==='them'?(mute?'#e0a7ad':'#bf1e2e'):(kind==='me'?'#ffc629':(mute?'#9ca6c8':'#1b2a6b'));
-  const r=TR();
+  /* YOUR dot is the biggest one on the ice. Three letters never fitted inside a circle
+     sized for one - measured, YOU drew 1.28x its own diameter and had always spilled over
+     the edge - and of everything out there, the man you are is the one that should read
+     first anyway. */
+  const r=TR()*(kind==='me'?1.4:1);
   // an invisible pad so a fingertip can grab it even though the dot is small
   g.appendChild(el('circle',{cx:p[0],cy:p[1],r:grabR(),fill:'transparent','pointer-events':'all'}));
   if(kind==='me')g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r*1.6,fill:'#12204f','fill-opacity':0.1}));
-  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r,fill,stroke:kind==='me'?'#12204f':'rgba(255,255,255,.7)','stroke-width':kind==='me'?0.4:0.4}));
-  g.appendChild(el('text',{x:p[0],y:p[1]+r*0.35,'font-size':FS(kind==='me'?2.45:2.25),'font-weight':800,
-    fill:kind==='me'?'#12204f':(mute?(kind==='them'?'#8a3038':'#35427a'):'#fff'),'text-anchor':'middle','pointer-events':'none'},kind==='me'?'YOU':label));
+  /* bigger dots touch more often - measured, 79 frames of 153 hold a pair inside a dot
+     diameter, against 43 before, because men genuinely stand one to five feet apart in this
+     data. A heavier separator on a phone keeps a touching pair reading as two men rather
+     than one blob; it is the cheaper trade against numbers nobody can read. */
+  g.appendChild(el('circle',{cx:p[0],cy:p[1],r:r,fill,
+    stroke:kind==='me'?'#12204f':'rgba(255,255,255,.85)','stroke-width':S.port?0.55:0.4}));
+  /* The baseline nudge that centres a word inside its dot has to follow the rink when the
+     rink stands up. Rotated, rink +x is screen UP and rink +y is screen RIGHT, so nudging
+     along y put every label 4-5px to the right of its own dot and 4-5px high - measured on
+     a 25px dot, half the glyph hanging over the edge onto the rink lines, which is what
+     made the numbers look both small and cut. Nudge along -x instead and it lands where it
+     does on a rink lying down. */
+  const lx=S.rot?p[0]-r*0.35:p[0], ly=S.rot?p[1]:p[1]+r*0.35;
+  /* One character has room two never had: an opponent's number measured 0.28-0.40 of its
+     own dot while LW and YOU measured 0.82 and 0.92. Size the word to its length instead of
+     holding every label down to what the longest one can fit - the numbers on the other team
+     are the ones being read, and they were the smallest thing on the ice. */
+  const one=(kind==='me'?'YOU':String(label==null?'':label)).length===1?1.28:1;
+  g.appendChild(el('text',{x:lx,y:ly,'font-size':FS((kind==='me'?2.45:2.25)*(S.port?1.34:1)*one),'font-weight':800,
+    fill:kind==='me'?'#12204f':(mute?(kind==='them'?'#6f2128':'#2b3768'):'#fff'),'text-anchor':'middle','pointer-events':'none'},kind==='me'?'YOU':label));
   if(role){
     const c=roleSpot(p,pts||[]);
     g.appendChild(el('text',{x:c[0],y:c[1],'font-size':FS(2.1),'text-anchor':'middle','font-weight':700,
@@ -2631,7 +2828,10 @@ function renderTopbar(){
   $('p-phase').textContent=p.label; $('p-phase').style.background=p.col; $('p-phase').style.color=phaseInk(p.col);
   $('p-name').textContent=S.sit.name;
   $('p-sub').textContent = S.mode==='build' ? 'Building your play'
-    : (S.mode==='quiz' ? variant().name : variant().name+'  -  '+p.sub);
+    /* portrait: the variant name alone. With the phase sentence appended it truncated to
+       "Puck in the corner - They ..." and the one word that identifies the variation was
+       the first thing cut. The pill next to it already says DEFENSE. */
+    : (S.mode==='quiz'||portrait() ? variant().name : variant().name+'  -  '+p.sub);
 }
 function nextOf(){
   let n=(NEXTSTEP[S.sit.id]||{})[variant().id]||null, hops=0;
@@ -2806,6 +3006,8 @@ function chunk(txt,opt){
 /* ---- 3. the queue ------------------------------------------------- */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function setSpeakUI(on){ const b=$('p-listen'); if(b) b.classList.toggle('speaking',!!on); }
+/* Netflix's rule: offered while the intro is talking, gone the moment it is not. */
+function syncSkip(){ const b=$('skipintro'); if(b) b.classList.toggle('on',!!SPK.skipAvail); }
 function hush(){
   if(SPK.ok){
     try{ speechSynthesis.cancel(); }catch(e){}
@@ -2823,6 +3025,7 @@ function hush(){
   }
   /* a baked clip is a real media element - cancelling speech does not stop it */
   if(AUDIO.el){ try{ AUDIO.el.pause(); AUDIO.el.currentTime=0; }catch(e){} }
+  SPK.skipAvail=false; syncSkip();
   setSpeakUI(false);
 }
 /* iOS restarts its audio session for every single utterance - that is what clips the
@@ -2834,7 +3037,9 @@ function joinForIOS(lines){
     if(!/[.!?,]$/.test(s)) s+='.';
     return s+((L.pause||0)>=300?'..':'');
   }).join(' ');
-  return [{t:t,r:1,p:1,pause:0}];
+  /* carry the boundary: merging a run into one utterance must not swallow the mark the skip
+     control seeks to, or skipping would be impossible on exactly the devices with no clips */
+  return [{t:t,r:1,p:1,pause:0,mark:lines[0]&&lines[0].mark}];
 }
 /* a baked audio file, once it exists, breaks up the queue on its own the same way a
    pause does - so only the STRETCHES between audio files need the iOS multi-utterance
@@ -2847,7 +3052,8 @@ function buildQueue(lines){
     buf=[];
   };
   lines.forEach(L=>{
-    if(AUDIO.have[L.id]){ flush(); out.push({kind:'audio',id:L.id,t:L.t,r:L.r,pause:L.pause}); }
+    if(L.mark) flush();                 // a seekable boundary never gets merged into the run before it
+    if(AUDIO.have[L.id]){ flush(); out.push({kind:'audio',id:L.id,t:L.t,r:L.r,pause:L.pause,mark:L.mark}); }
     else buf.push(L);
   });
   flush();
@@ -2902,13 +3108,25 @@ function speakLines(lines,done){
   const gen=++S.gen;
   const q=buildQueue(lines);
   try{ speechSynthesis.cancel(); }catch(e){}
-  let i=0;
+  let i=0, step=0;
+  const ahead=m=>{ for(let n=i;n<q.length;n++) if(q[n].mark===m) return true; return false; };
   const next=()=>{
     if(gen!==S.gen) return;
-    if(i>=q.length){ setSpeakUI(false); if(done)done(); return; }
-    const L=q[i++];
-    const go=()=>{ if(gen!==S.gen)return; L.pause?setTimeout(next,L.pause):next(); };
+    if(i>=q.length){ SPK.skipAvail=false; syncSkip(); setSpeakUI(false); if(done)done(); return; }
+    const L=q[i++], my=++step;
+    SPK.skipAvail=ahead('steps'); syncSkip();
+    const go=()=>{ if(gen!==S.gen||my!==step)return; L.pause?setTimeout(next,L.pause):next(); };
     say(L,go);
+  };
+  /* A skip has to SEEK, not stop: it jumps to the marked boundary in THIS queue and keeps
+     talking from there, so the child lands on "Step one" and the first cue instead of silence.
+     Bumping step orphans the line in flight - a late TTS timeout cannot then advance the queue
+     a second time and speak two lines at once. */
+  SPK.skip=m=>{
+    if(gen!==S.gen) return false;
+    let k=-1; for(let n=i;n<q.length;n++) if(q[n].mark===m){ k=n; break; }
+    if(k<0) return false;
+    step++; hush(); i=k; setSpeakUI(true); next(); return true;
   };
   setSpeakUI(true);
   /* cancel() followed immediately by speak() is silent on iOS - give it a tick. But an
@@ -2970,16 +3188,25 @@ function enumerateAudioScript(){
 window.__exportAudioScript=enumerateAudioScript;
 
 /* ---- what it actually says ---------------------------------------- */
+/* The category tagline is the right line the first time and noise the sixth - six defensive
+   drills in a row used to open with it six times. Once per phase per SESSION: a fresh open of
+   the app hears it again, because then it is genuinely useful, and moving to a phase he has
+   not heard yet plays that one. Reset by reload, never by a timer. Playback only - the line
+   stays in enumerateAudioScript(), so lines.json and the committed clips are untouched. */
+const PHASEHEARD={};
 function introLines(){
-  const p=PHASE[phaseAt(0)], c=(S.sit.coach||{})[S.pos];
+  const ph=phaseAt(0), p=PHASE[ph], c=(S.sit.coach||{})[S.pos];
   let L=[];
-  L=L.concat(chunk(p.say,{rate:0.95,pause:300,tail:360}));
+  if(!PHASEHEARD[ph]){ PHASEHEARD[ph]=1; L=L.concat(chunk(p.say,{rate:0.95,pause:300,tail:360})); }
   L=L.concat(chunk('This one is '+S.sit.name+'. '+variant().name+'.',{rate:0.97,pause:220,tail:340}));
   if(S.sit.roster.includes(S.pos)&&c){
     L=L.concat(chunk('You are the '+POSNAMES[S.pos]+'.',{rate:0.95,pause:250}));
     L=L.concat(chunk('Your job. '+c.job,{rate:0.9,pause:200,tail:380}));
   }
-  L=L.concat(chunk('Step one.',{rate:0.95,pause:230}));
+  /* the boundary the skip control seeks to: everything above it is scene-setting */
+  const steps=chunk('Step one.',{rate:0.95,pause:230});
+  if(steps[0]) steps[0].mark='steps';
+  L=L.concat(steps);
   L=L.concat(chunk(frames()[0].cue,{rate:0.93,pause:190}));
   return L;
 }
@@ -3129,6 +3356,7 @@ $('play').onclick=()=>{
 };
 $('pause').onclick=()=>{ stop(); };
 $('zoomb').onclick=()=>{ S.wide=!S.wide; render(); };
+$('skipintro').onclick=()=>{ if(SPK.skip) SPK.skip('steps'); };
 $('fwd').onclick=()=>{ const n=frames().find(x=>x.t>S.t+1e-3); stop(); startPlay(n?n.t:1); };
 $('back').onclick=()=>{ const p=frames().slice().reverse().find(x=>x.t<S.t-1e-3); stop(); S.t=p?p.t:0; render(); };
 $('reset').onclick=()=>{ hardReset(); render(); };
@@ -3237,6 +3465,10 @@ function syncQuizAllLabel(){
 function mask(which,on){ $('mask-'+which).classList.toggle('on',on); }
 $('closehelp').onclick=()=>{ mask('help',false); try{localStorage.setItem('hiq_seen','1');}catch(e){} };
 $('closeset').onclick=()=>mask('set',false);
+$('pickclose').onclick=closePick;
+$('mask-pick').onclick=e=>{ if(e.target===$('mask-pick')) closePick(); };
+$('pickplay').onclick=()=>{ const s=PICK; closePick(); if(s) openSituation(s,'play'); };
+$('pickwatch').onclick=()=>{ const s=PICK; closePick(); if(s) openSituation(s,null); };
 /* Progress export/import. 24 records is his entire history and the recovery path was
    nothing, so this is the only backstop before the next shape change - and it is what a
    real device snapshot can be handed to for testing a migration. */
@@ -3371,21 +3603,6 @@ $('mo-help').onclick=()=>{ mask('more',false); mask('help',true); };
 $('p-watch').onclick=()=>openVideos();
 
 /* ---------------- menu ---------------- */
-/* on a phone each phase is a closed accordion by default - three headers fit on
-   screen at once instead of one long list pushing the others off it */
-function toggleMcol(d){
-  const wasOpen=d.classList.contains('open');
-  d.parentElement.querySelectorAll('.mcol').forEach(c=>c.classList.remove('open'));
-  if(!wasOpen) d.classList.add('open');
-  syncTapHints();
-}
-/* the hint has to agree with the state it is describing */
-function syncTapHints(){
-  document.querySelectorAll('#menucols .mcol').forEach(c=>{
-    const h=c.querySelector('.mtaphint');
-    if(h) h.textContent=c.classList.contains('open')?' \u00b7 tap to close':' \u00b7 tap to open';
-  });
-}
 /* opening a situation from the menu always starts with the stage - and it is a real tap,
    so this is where the audio gets unlocked */
 function openSituation(s,mode){
@@ -3432,17 +3649,33 @@ function thumbSVG(sit){
   if(pk) g+='<circle cx="'+(pk[0]+1.6)+'" cy="'+(pk[1]-1.6)+'" r="1.8" fill="#0b0b0b" stroke="#fff" stroke-width="0.45"/>';
   return g+'</svg>';
 }
-function menuCard(sit,col,sub){
+/* One card, one action. Watch it / Play it is a decision to make AFTER choosing a play, not
+   twenty times while browsing - the card lands on the walkthrough and Run the play is one tap
+   in from there. The phase colour lives on the row heading now, so the dot is gone with it. */
+function menuCard(sit){
   const b=document.createElement('button');
   b.className='mitem'; b.type='button';
-  b.innerHTML='<span class="mtitle"><i class="mdot" style="background:'+col+'"></i>'+esc(sit.name)+'</span>'
-    +'<span class="mthumb">'+thumbSVG(sit)+'</span>'
-    +'<span class="mact"><span class="mgo">Watch it &#9654;</span>'
-      +'<span class="mgo mplay">Play it &#9654;</span></span>'
-    +'<span class="msub">'+esc(sub)+'</span>';
-  b.onclick=e=>openSituation(sit,(e.target&&e.target.closest&&e.target.closest('.mplay'))?'play':null);
+  b.innerHTML='<span class="mthumb">'+thumbSVG(sit)+'</span>'
+    +'<span class="mtitle">'+esc(sit.name)+'</span>';
+  b.onclick=()=>openPick(sit);
   return b;
 }
+/* Play leads: it is the destination, and Watch is how you go and look first. Both are one
+   tap from the poster, and neither is a control the wall has to carry twenty times. */
+let PICK=null;
+function openPick(sit){
+  PICK=sit;
+  const p=PHASE[sit.phase]||{label:'',col:'#b8c2da'};
+  $('pickposter').innerHTML=thumbSVG(sit);
+  const ph=$('pickphase');
+  ph.textContent=p.label; ph.style.background=p.col; ph.style.color=phaseInk(p.col);
+  $('picktitle').textContent=sit.name;
+  $('pickabout').textContent=sit.about||'';
+  mask('pick',true);
+  /* the primary action takes focus, so a keyboard lands on it and Escape still closes */
+  const b=$('pickplay'); if(b) b.focus();
+}
+function closePick(){ mask('pick',false); PICK=null; }
 /* Levels come from situations.js and nowhere else - no list lives in this file. Order is
    derived by reading the number off each label, so adding 6U needs no code.
    This is AUTHORED content metadata: which levels a situation is taught at. The app never
@@ -3480,22 +3713,19 @@ function buildAgeBar(){
 }
 function buildMenu(){
   const cols=$('menucols');
-  /* keep whatever the kid had open - a rebuild must not slam their section shut */
-  const wasOpen=[...cols.querySelectorAll('.mcol')].findIndex(c=>c.classList.contains('open'));
   cols.innerHTML='';
   const groups=[['D','they have the puck'],['T','it just changed hands'],['O','we have the puck']];
   groups.forEach(([ph,sub])=>{
     const p=PHASE[ph];
     const d=document.createElement('div');
     d.className='mcol'; d.style.borderTopColor=p.col;
-    const head=document.createElement('button'); head.className='mhead'; head.type='button';
-    head.innerHTML='<span class="mheadl"><h3 style="color:'+p.col+'">'+p.label+'</h3><div class="mq">'+p.sub+
-      '<span class="mtaphint"> &middot; tap to open</span></div></span><span class="mchev">&#9662;</span>';
-    head.onclick=()=>toggleMcol(d);
+    const head=document.createElement('div'); head.className='mhead';
+    head.innerHTML='<span class="mheadl"><h3 style="color:'+p.col+'">'+p.label+'</h3>'+
+      '<div class="mq">'+p.sub+'</div></span>';
     d.appendChild(head);
     const row=document.createElement('div'); row.className='mrow';
     const mine=SITUATIONS.filter(s=>s.phase===ph&&ageOk(s));
-    mine.forEach(s=>{ row.appendChild(menuCard(s,p.col,s.about||'')); });
+    mine.forEach(s=>{ row.appendChild(menuCard(s)); });
     if(!mine.length){
       const n=document.createElement('div'); n.className='mnone';
       n.innerHTML='Nothing here is taught at '+esc(S.age||'')+' yet.';
@@ -3507,25 +3737,15 @@ function buildMenu(){
   if(CUSTOM.length){
     const d=document.createElement('div');
     d.className='mcol'; d.style.borderTopColor='#b8c2da';
-    const head=document.createElement('button'); head.className='mhead'; head.type='button';
-    head.innerHTML='<span class="mheadl"><h3 style="color:#b8c2da">YOUR PLAYS</h3><div class="mq">built by the coach<span class="mtaphint"> &middot; tap to open</span></div></span><span class="mchev">&#9662;</span>';
-    head.onclick=()=>toggleMcol(d);
+    const head=document.createElement('div'); head.className='mhead';
+    head.innerHTML='<span class="mheadl"><h3 style="color:#b8c2da">YOUR PLAYS</h3>'+
+      '<div class="mq">built by the coach</div></span>';
     d.appendChild(head);
     const row=document.createElement('div'); row.className='mrow';
-    CUSTOM.forEach(s=>{
-      row.appendChild(menuCard(s,'#b8c2da',
-        PHASE[s.phase].label+' \u00b7 '+s.variants[0].frames.length+' step(s)'));
-    });
+    CUSTOM.forEach(s=>{ row.appendChild(menuCard(s)); });
     d.appendChild(row);
     cols.appendChild(d);
-    if(window.matchMedia('(min-width:1001px)').matches) cols.style.gridTemplateColumns='repeat(4,1fr)';
-    else cols.style.gridTemplateColumns='';
-  } else if(window.matchMedia('(min-width:1001px)').matches) cols.style.gridTemplateColumns='repeat(3,1fr)';
-  else cols.style.gridTemplateColumns='';
-  const all=cols.querySelectorAll('.mcol');
-  const keep=all[wasOpen>=0?wasOpen:0];
-  if(keep) keep.classList.add('open');
-  syncTapHints();
+  }
   renderExamples();
 }
 
@@ -3978,18 +4198,64 @@ svg.addEventListener('pointerup',()=>{
 });
 
 /* ---------------- the bottom sheet on phones ---------------- */
+/* Phone portrait only: the sheet is summoned over the ice, never parked open. It is the
+   one place where the ice is the whole point and there is no width to share. */
+function portrait(){ return window.matchMedia('(max-width:699px) and (max-aspect-ratio:1/1)').matches; }
 function sheetLabel(){
   return S.mode==='quiz'?'The question'
     :(S.mode==='build'?'Build controls'
-    :(S.mode==='coach'?'Your calls':'Your job and position'));
+    :(S.mode==='coach'?'Your calls'
+    :(S.mode==='play'?'Controls and score':'Position and controls')));
 }
-function setSheet(open){ $('railwrap').classList.toggle('open',!!open); }
+function setSheet(open){
+  $('railwrap').classList.toggle('open',!!open);
+  const sc=$('sheetscrim'); if(sc) sc.classList.toggle('on',!!open);
+  syncPbar();
+}
+/* The affordance says what it opens, and while it is open it says how to shut it - a lone
+   chevron is not something a nine-year-old reads as pressable. */
+function syncPbar(){
+  const b=$('pbmore'); if(!b) return;
+  const open=$('railwrap').classList.contains('open');
+  $('pblbl').textContent=open?'Close':sheetLabel();
+  $('pbchev').innerHTML=open?'&#9660;':'&#9650;';
+  b.setAttribute('aria-expanded',open?'true':'false');
+}
+/* YOUR JOB, pinned under the top bar on a phone. Authored text only: every roster position
+   in every play has a job (measured, 90 of 90), and if that ever stops being true the strip
+   says so rather than narrating one. Hidden in quiz (it would answer the question), in
+   coach (you move everybody, there is no single job) and in build. */
+function paintJob(){
+  const box=$('jobstrip'); if(!box) return;
+  const lab=$('jslab'), txt=$('jstext');
+  if(S.mode==='quiz'||S.mode==='coach'||S.mode==='build'){ box.classList.add('off'); return; }
+  box.classList.remove('off');
+  const nm=POSNAMES[S.pos]||S.pos;
+  if(!S.sit.roster.includes(S.pos)){
+    box.classList.add('none'); lab.textContent='YOU';
+    txt.textContent=nm+' is not on the ice in this play.'; return;
+  }
+  const c=(S.sit.coach||{})[S.pos];
+  box.classList.toggle('none',!(c&&c.job));
+  lab.textContent='YOUR JOB \u00b7 '+String(nm).toUpperCase();
+  txt.textContent=(c&&c.job)?c.job:'No job is written for the '+nm+' in this play.';
+}
 function syncSheet(){
   $('glabel').textContent=sheetLabel();
-  /* coach mode keeps the sheet shut: its whole UI is the strip under the ice */
-  if(isPhone()) setSheet(S.mode!=='learn'&&S.mode!=='coach');
+  /* coach mode keeps the sheet shut: its whole UI is the strip under the ice. In portrait
+     nothing parks it open - a multiple-choice question opens it explicitly, because its
+     answers live in it. */
+  if(isPhone()) setSheet(portrait()?false:(S.mode!=='learn'&&S.mode!=='coach'));
+  syncPbar();
 }
 $('grab').onclick=()=>setSheet(!$('railwrap').classList.contains('open'));
+$('pbmore').onclick=()=>setSheet(!$('railwrap').classList.contains('open'));
+{ const sc=$('sheetscrim'); if(sc) sc.onclick=()=>setSheet(false); }
+/* swipe down on the header to dismiss - the gesture a phone user tries first */
+{ const g=$('grab'); let y0=null;
+  g.addEventListener('touchstart',e=>{ y0=e.touches[0].clientY; },{passive:true});
+  g.addEventListener('touchmove',e=>{ if(y0!=null&&e.touches[0].clientY-y0>34){ y0=null; setSheet(false); } },{passive:true});
+  g.addEventListener('touchend',()=>{ y0=null; },{passive:true}); }
 const _qgp=$('qgoplay'); if(_qgp) _qgp.onclick=()=>playStart();
 
 /* tapping a player: pick that position, or ask who a red player is */
@@ -4896,6 +5162,7 @@ function playTeardown(){
   playIdleClear(); playInvalidate();
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.phase='idle';
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
+  PLAY.reveal=false;
   const rs=$('povres'); if(rs) rs.classList.remove('on');
   const ob=$('povopts'); if(ob) ob.innerHTML='';   // no stale buttons left in a hidden tray
 }
@@ -4920,6 +5187,7 @@ function playStart(){
   PLAY.pts=playPoints(); PLAY.di=0; PLAY.score=[]; PLAY.res=null; PLAY.tries=0;
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
+  PLAY.reveal=false; PLAY.placed=[];
   PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
   S.t=0; S.manual={};
   if(!PLAY.pts.length){
@@ -5015,7 +5283,7 @@ function playThrough(){
   PLAY.res=r;
   PLAY.score[PLAY.di]={asked:false,pos:r.posFault?0:1,
     fault:r.posFault?r.posFault.msg:null,kind:pt.kind};
-  playScoreSave();
+  playMarkSpot(); playScoreSave();
   playRun(nx?nx.t:1,()=>{
     if(PLAY.di>=PLAY.pts.length-1){ PLAY.phase='shown'; playShow(); return; }
     PLAY.di++; playThrough();
@@ -5027,6 +5295,7 @@ function playAdvance(){
      reds were staying painted through every later decision */
   PLAY.tail=null; PLAY.ghost=null; PLAY.res=null;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
+  PLAY.reveal=false;                      // a new decision is a new question
   const pt=PLAY.pts[PLAY.di];
   if(!pt){ PLAY.phase='place'; playPrompt(); render(); return; }
   playBeginLeg(); playPrompt();
@@ -5045,7 +5314,7 @@ function playPick(k){
     {asked:!!r.asked, pos:r.posFault?0:1,
      fault:r.posFault?r.posFault.msg:null, kind:choice?choice.kind:pt.kind},
     r.asked?{read:r.readOk?1:0}:{});
-  playScoreSave();
+  playMarkSpot(); playScoreSave();
   playBeginLeg(); playPrompt();
   const t=frames()[pt.i].t;
   const from=(pt.kind==='cover'||pt.kind==='repo')?(shown(S.pos,t)||puckAt(t).p):puckAt(t).p;
@@ -5125,10 +5394,28 @@ function playShow(){
   const own=PLAY.own?'<p><b style="color:#ffc629">Your way:</b> '+esc(PLAY.own.verdict)+'</p>':'';
   const onLabel=PLAY.pending==='authored'?'Show me what the play does &#9654;'
     :(last?'See how I did':'Next decision &#9654;');
+  /* The escape hatch out of retry: retry keeps his placement by design, so without this
+     the same spot produces the same verdict for as long as he keeps pressing. Wording splits
+     on whether a test actually caught him - "the correct spot" implies his was wrong, and on
+     a passing step nothing has established that. */
+  /* A wrong-demo variant has no answer key at all: target() returns null by design so the
+     mistake can never become the thing being taught, and tryEval has 101 role-frames in that
+     state across nine variants. A NET, NOT A PATH: playStart() already refuses a wrong-demo
+     variant outright ("watch-only"), so nothing reaches this branch today. It exists so that
+     if something ever does, the card cannot promise a marker it has no coordinates for. */
+  const pt0=PLAY.pts[PLAY.di];
+  const taught=(pt0&&S.sit.roster.includes(S.pos))?target(S.pos,frames()[pt0.i].t):null;
+  const spot=PLAY.reveal ? ''
+    : (taught
+      ? '<button id="povspot">'+(r.posFault?'Show me the correct spot':'Show me the taught spot')+'</button>'
+      : (S.sit.roster.includes(S.pos)
+        ? '<span class="povnospot">This variation shows the mistake on purpose - there is no taught spot to show you.</span>'
+        : ''));
   rs.innerHTML='<div class="povbody"><b class="'+o.cls+'">'+esc(o.head)+'</b>'+axes+own+
     '<p>'+esc(o.body)+'</p></div><div class="povrow">'+
     '<button id="povagain">Try this step again</button>'+
     '<button class="hot" id="povon">'+onLabel+'</button>'+
+    spot+
     '</div>';
   rs.classList.add('on');
   $('povmsg').innerHTML=esc(o.head);
@@ -5136,6 +5423,22 @@ function playShow(){
   $('povopts').innerHTML='';
   paintRail();                       // the rail tally follows the score
   $('povagain').onclick=()=>playRetry();
+  const sp=$('povspot');
+  if(sp) sp.onclick=()=>{
+    PLAY.reveal=true;
+    /* back to the moment being judged, so his dot and the marker are the same instant -
+       otherwise the gap he is being shown is between two different times */
+    const pt2=PLAY.pts[PLAY.di]; if(pt2) S.t=frames()[pt2.i].t;
+    sp.remove();
+    const body=rs.querySelector('.povbody');
+    if(body){ const p=document.createElement('p');
+      p.innerHTML='<b style="color:#8fc0ff">BE HERE</b> is the spot this play is written '+
+        'around. Drag yourself onto it and try the step again.';
+      body.appendChild(p); }
+    render();
+    /* deliberately the line Quiz mode already speaks - a new wording would orphan a clip */
+    if(SPK.on) say('The flashing circle is where you belong.');
+  };
   $('povon').onclick=()=>{
     if(PLAY.pending==='authored'){ playAuthored(); return; }
     if(last) playFinish(); else { PLAY.di++; playAdvance(); }
@@ -5153,6 +5456,7 @@ function playRetry(){
   PLAY.tail=null; PLAY.anim=null; PLAY.ghost=null; PLAY.res=null;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   delete PLAY.score[PLAY.di];
+  if(PLAY.placed) delete PLAY.placed[PLAY.di];   // this decision is unjudged again
   playScoreSave();
   S.t=pt.t; PLAY.phase='decide';
   playPrompt(); render(); playIdleArm();
@@ -5408,7 +5712,7 @@ $('r-menu').onclick=()=>showScreen('menu');
 /* ---------------- keys ---------------- */
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
-  if(e.key==='Escape'){ ['help','set','vid','coach','more'].forEach(k=>mask(k,false)); return; }
+  if(e.key==='Escape'){ ['help','set','vid','coach','more','pick'].forEach(k=>mask(k,false)); PICK=null; return; }
   if(S.screen!=='play')return;
   if(e.code==='Space'){ e.preventDefault(); if(S.mode!=='quiz') (S.playing?$('pause'):$('play')).click(); }
   else if(e.key==='ArrowRight'){ if(S.mode!=='quiz'&&S.mode!=='try'&&S.mode!=='coach')$('fwd').click(); }

@@ -97,6 +97,12 @@ anchor in frame, **expand** the box to fit aspect (never shrink, or the goalie g
 out of a defensive-zone frame), and move the frame as little as possible between steps,
 because a hard cut at every decision wipes the spatial memory the app exists to train.
 
+The zone word (OUR ZONE / NEUTRAL ZONE / THEIR ZONE) IS that anchor, and it is drawn at
+every crop, zoomed or not. It used to be dropped whenever the camera zoomed in, which left
+tight frames with no words at all — measured: 5 of 44 defensive frames hold neither a net
+nor a line. `frameBox` never goes narrower than 74 feet, so the widest visible zone slice
+is always at least 37: naming every slice that fits is a guaranteed anchor, not a lucky one.
+
 ## 6. Never break audio ids
 
 A line's id is a slug plus a hash of its exact text, case sensitive, so the same text
@@ -172,14 +178,21 @@ The dev harness runs at 924x540 in an iframe. That is not production: autoplay p
 differs, localStorage can be partitioned, `display-mode: standalone` is false, `100vh`
 is the iframe rather than the visual viewport, there are no safe-area insets, and
 clipboard behaves as an unfocused document. **Resize the harness to phone portrait**
-rather than deferring to the device — the portrait `--peek` bottom sheet was called
+(`portrait-harness.html` at the project root holds the app in a true 390x844 frame; it sits
+outside `app/` so it never ships — note that a screenshot of it comes back empty, the
+measurements come from the DOM) rather than deferring to the device — the portrait `--peek` bottom sheet was called
 "unreachable" for weeks when the real cause was the harness aspect ratio. Any check that
 can only run embedded is a harness result, not a finding about the app.
 
-## 14. No raw numbers in player-facing text
+## 14. No raw numbers in SPOKEN text
 
-Distances are banded in words a ten-year-old uses — on top of him, from the doorstep,
-from the hash marks, from the point. "A shot from 0 feet" is what this rule prevents.
+Distances in speech are banded in words a ten-year-old uses — on top of him, from the
+doorstep, from the hash marks, from the point. "A shot from 0 feet" is what this rule
+prevents. It is about the spoken line: every `say:` in the codebase is bandless, while
+`checkSpot`, TOO FAR, NO WIDTH and the displacement bound all print feet on SCREEN, where a
+number the eye can check against the ice is useful rather than absurd. Screen text is also
+free to reword without touching an audio id (rule 6). Do not read this rule as banning
+numbers from the screen — it has been misread that way twice.
 
 ## 15. Options are at most three, never padded
 
