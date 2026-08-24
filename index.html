@@ -168,6 +168,12 @@ select,input{touch-action:manipulation}
   background:rgba(6,11,20,.86);color:#eaf1fb;font-size:14.5px;font-weight:750;
   align-items:center;gap:8px;backdrop-filter:blur(7px);cursor:pointer}
 .skipintro.on{display:flex}
+.rolerow{display:flex;align-items:center;gap:10px}
+.rolerow b{flex:1 1 auto;font-size:14.5px;color:var(--ink)}
+.rolelvl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.rolelvl button{flex:1 1 82px;min-height:52px;border-radius:12px;background:var(--bg3);
+  border:1px solid var(--line);color:var(--ink);font-size:16px;font-weight:800}
+.rolelvl button.on{background:var(--us);border-color:var(--us2);color:#fff}
 /* Where he is in the play, down the right edge of the ice. Four states, because a marker for a
    step he has not reached must never read like one he passed: not reached, on it now, cleared,
    faulted. Hidden below two decisions - a rail for a single decision is decoration. */
@@ -953,7 +959,28 @@ input[type=range]{accent-color:var(--us2)}
     <div class="pickacts">
       <button class="bigbtn" id="pickplay">Play it &#9654;</button>
       <button class="bigbtn plain" id="pickwatch">Watch it &#9654;</button>
+      <button class="bigbtn plain" id="pickquiz">Quiz me on it &#9654;</button>
       <button class="bigbtn plain" id="pickclose" style="background:none;border:0">Back to the plays</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============== WHO IS USING THIS =============== -->
+<div class="mask" id="mask-role">
+  <div class="modal" style="max-width:420px">
+    <div id="rolestep1">
+      <h2>Who is holding the phone?</h2>
+      <div class="msub">This only changes which buttons you get. Nothing is sent anywhere.</div>
+      <button class="bigbtn" data-role="player" style="width:100%;margin-bottom:9px">I play</button>
+      <button class="bigbtn plain" data-role="coach" style="width:100%;margin-bottom:9px">I coach</button>
+      <button class="bigbtn plain" data-role="parent" style="width:100%;margin-bottom:9px">I&#39;m a parent</button>
+      <button class="closebtn" id="roleskip">Skip</button>
+    </div>
+    <div id="rolestep2" style="display:none">
+      <h2>What do you play?</h2>
+      <div class="msub">Your team&#39;s level, so the drills match. Not your birthday - we never ask that.</div>
+      <div class="rolelvl" id="rolelvl"></div>
+      <button class="closebtn" id="rolelvlskip">Show me everything</button>
     </div>
   </div>
 </div>
@@ -1011,8 +1038,13 @@ input[type=range]{accent-color:var(--us2)}
   <div class="modal">
     <h2>Settings</h2>
     <div class="msub">Turn things off if the ice looks busy.</div>
+    <h4>Who is using this</h4>
+    <div class="rolerow"><b id="rolenow">-</b>
+      <button class="mbtn" id="rolechange" style="padding:9px 14px;font-size:13px">Change</button></div>
+    <div class="help" id="rolewhy" style="margin:6px 0 4px"></div>
     <h4>Read it out loud</h4>
     <label class="chk" style="font-size:14px;color:var(--ink);margin-bottom:10px"><input type="checkbox" id="t-speak"> Talk me through every step</label>
+    <div id="set-voiceadv">
     <div class="railh" style="margin-bottom:5px">Voice</div>
     <div class="coachrow" style="margin-bottom:8px">
       <select class="cinput" id="voicesel" style="font-size:13.5px;padding:9px 11px"></select>
@@ -1022,7 +1054,9 @@ input[type=range]{accent-color:var(--us2)}
       <input type="range" id="voicerate" min="0.62" max="1.12" step="0.02" value="0.92" style="flex:1">
       <span id="ratelabel" style="width:36px;text-align:right"></span></label>
     <div class="help" id="voicehint" style="margin-top:7px"></div>
+    </div>
     <div class="help" id="speaknote" style="margin-top:5px"></div>
+    <div id="set-prog">
     <h4>His progress</h4>
     <div class="help" style="margin-bottom:7px">Every play he has run, as text. Copy it somewhere
       safe - there is no account and no backup. Paste it back to restore.</div>
@@ -1034,6 +1068,7 @@ input[type=range]{accent-color:var(--us2)}
       font-size:11.5px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.35;
       resize:vertical"></textarea>
     <div class="help" id="proghint" style="margin-top:5px"></div>
+    </div>
     <h4>Show on the ice</h4>
     <div class="toggles">
       <label class="chk"><input type="checkbox" id="t-roles" checked> Label the other team</label>
@@ -1048,6 +1083,7 @@ input[type=range]{accent-color:var(--us2)}
       <label class="chk"><input type="checkbox" id="t-zoom" checked> Zoom to the zone</label>
       <label class="chk"><input type="checkbox" id="t-flip"> Flip sides of the ice</label>
     </div>
+    <div id="set-plays">
     <h4>Your plays</h4>
     <div class="help" id="playcount" style="margin-bottom:8px"></div>
     <div class="coachrow">
@@ -1056,6 +1092,7 @@ input[type=range]{accent-color:var(--us2)}
     </div>
     <input type="file" id="importfile" accept=".json,application/json" style="display:none">
     <div class="help" style="margin-top:7px">Phones and tablets clear browser storage when they run low on space, so if you have built plays worth keeping, save them to a file.</div>
+    </div>
     <h4>Voice files</h4>
     <div class="help" id="audiodiag" style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5">-</div>
     <button class="mbtn" id="audiotest" style="padding:9px 14px;font-size:13px;margin-top:7px">Play a real voice file</button>
@@ -1499,14 +1536,14 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const S={
   sit:SITUATIONS[0], varIdx:0, pos:'C',
   t:0, target:1, playing:false, raf:null, lastTs:null, gen:0,
-  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
+  manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false, role:'player',
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.153';
+const BUILD='2026-08-24.154';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v156';
+const SWCACHE='hockey-iq-v157';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2056,7 +2093,8 @@ function paintStepRail(){
   for(let i=0;i<n;i++){
     const s=PLAY.score[i];
     let cls='';
-    if(s){ const clean=(s.pos===1)&&(s.asked?s.read===1:true); cls=clean?'ok':'no'; }
+    if(s){ const posOk=(s.posGraded===true)?s.pos===1:true;
+      const clean=posOk&&(s.asked?s.read===1:true); cls=clean?'ok':'no'; }
     else if(i===PLAY.di) cls='now';
     html+='<i class="'+cls+'"></i>';
   }
@@ -2870,7 +2908,16 @@ function drawLabels(){
   const g=layer('labels'), vb=S.vb||FULLVIEW;
   const x0=vb[0],x1=vb[0]+vb[2],y0=vb[1],y1=vb[1]+vb[3];
   const put=(x,y,size0,txt)=>{
-    const size=FS(size0), w=txt.length*size*0.66+2.4, h=size*1.5;
+    let size=FS(size0), w=txt.length*size*0.66+2.4;
+    /* The clamp below is a Math.max of a lower bound and a Math.min of an upper one. If the
+       word is longer than the span it has to sit in, those bounds cross and the clamp pushes
+       the word OFF the frame instead of into it - which is how a zone name loses its first
+       letter. Shrink to fit first, so the bounds can never cross. Floor at 55%: below that
+       the word is unreadable and no anchor is better than an illegible one. */
+    const span=(S.rot?(y1-y0):(x1-x0))-2;
+    if(w>span){ const k=Math.max(0.55,span/w); size*=k; w=txt.length*size*0.66+2.4; }
+    if(w>span) return false;
+    const h=size*1.5;
     if(S.rot){
       /* the rink is stood up but the words are not, so the pill lies across the ice
          and the word has to be kept clear of the boards */
@@ -2880,6 +2927,7 @@ function drawLabels(){
       g.appendChild(el('rect',{x:x-w/2,y:y-h*0.78,width:w,height:h,rx:h/2,ry:h/2,fill:'#f4f8fd','fill-opacity':0.86}));
     }
     g.appendChild(el('text',{x,y,'font-size':size,fill:'#6b7b93','text-anchor':'middle','font-weight':700,'letter-spacing':0.3},txt));
+    return true;
   };
   const near=(x,y)=>S.sit.roster.concat(THEMIDS).some(id=>{
     const p=shown(id,S.t); if(!p)return false; const d=disp(p);
@@ -3113,7 +3161,7 @@ function buildVoicePicker(){
   $('voicehint').innerHTML = best==='natural'
     ? 'Using a <b>natural</b> voice - this is as human as a browser gets without an account.'
     : (best==='better'
-      ? 'This is a decent voice. For a properly human one, open this in <b>Microsoft Edge</b> and pick a voice marked <b>Natural</b>, or on a Mac install a Premium voice in System Settings, Accessibility, Spoken Content.'
+      ? 'Almost everything spoken here is a <b>recording of a person</b>, and that needs no setup. This picker only chooses the robot that reads the few lines built from a live number.'
       : (IOS
       ? 'iPhones and iPads only hand the browser their basic voices - the good Siri and Enhanced ones are off limits to web pages. This is as good as it gets without a native app.'
       : 'Only basic robot voices are installed. In <b>Edge</b> you get free <b>Natural</b> voices; on a Mac add one under System Settings, Accessibility, Spoken Content, System Voice, Manage Voices.'));
@@ -3662,10 +3710,25 @@ function syncQuizAllLabel(){
 function mask(which,on){ $('mask-'+which).classList.toggle('on',on); }
 $('closehelp').onclick=()=>{ mask('help',false); try{localStorage.setItem('hiq_seen','1');}catch(e){} };
 $('closeset').onclick=()=>mask('set',false);
+$('rolechange').onclick=()=>{ mask('set',false); openRole(false); };
+$('roleskip').onclick=()=>{ S.role=S.role||'player'; saveRole(); applyRole(); mask('role',false); afterRole(); };
+$('rolelvlskip').onclick=()=>{ S.age=null; saveAge(); buildAgeBar(); buildMenu(); syncQuizAllLabel();
+  mask('role',false); afterRole(); };
+document.querySelectorAll('#rolestep1 [data-role]').forEach(b=>b.onclick=()=>{
+  S.role=b.dataset.role; saveRole(); applyRole();
+  /* only the player is asked what he plays - a coach or a parent picks the band per kid from
+     the level bar, and asking them here would be asking the wrong person */
+  if(S.role==='player'&&!S.age) openRole(true);
+  else { mask('role',false); afterRole(); }
+});
 $('pickclose').onclick=closePick;
 $('mask-pick').onclick=e=>{ if(e.target===$('mask-pick')) closePick(); };
 $('pickplay').onclick=()=>{ const s=PICK; closePick(); if(s) openSituation(s,'play'); };
 $('pickwatch').onclick=()=>{ const s=PICK; closePick(); if(s) openSituation(s,null); };
+/* Quiz was only reachable from inside the phone tray, below the fold. It is one of the three
+   things a player does, so it belongs beside the other two. */
+$('pickquiz').onclick=()=>{ const s=PICK; closePick();
+  if(s){ openSituation(s,null); setMode('quiz'); startTest('sit'); } };
 /* Progress export/import. 24 records is his entire history and the recovery path was
    nothing, so this is the only backstop before the next shape change - and it is what a
    real device snapshot can be handed to for testing a migration. */
@@ -3878,6 +3941,55 @@ function closePick(){ mask('pick',false); PICK=null; }
    This is AUTHORED content metadata: which levels a situation is taught at. The app never
    asks a player his age and stores nothing about him - the one saved value is the filter
    he tapped, on his own device. */
+/* WHO is holding the phone, stored as one word on this device. It is a preference, not a
+   profile: no name, no email, no birthdate, nothing transmitted (rule 16). It changes which
+   TOOLS appear and never which drills - a player still sees every situation his level teaches.
+   The level question asks for a TEAM BAND ("10U"), never a birthday: one is a category, the
+   other is personal information about a child, and only one of them is safe to hold. */
+const ROLES3={player:'A player',coach:'A coach',parent:'A parent'};
+function loadRole(){
+  try{ const v=localStorage.getItem('hiq_role'); if(ROLES3[v]) S.role=v; }catch(e){}
+}
+function saveRole(){ try{ localStorage.setItem('hiq_role',S.role||'player'); }catch(e){} }
+function applyRole(){
+  const r=S.role||'player';
+  /* Build mode has been display:none and unreachable for every user. It is a coach tool, so
+     the coach role is what makes an entire mode exist. */
+  const coach=(r==='coach');
+  const pc=$('p-coach'); if(pc) pc.style.display=coach?'':'none';
+  /* on a phone the tray IS the route to Coach - #p-coach is display:none under the phone
+     media query by design, so the tray button is what has to become full width */
+  const mc=$('mo-coach'); if(mc){ mc.style.display=coach?'block':'none';
+    mc.style.width='100%'; mc.style.marginBottom='8px'; }
+  /* the one setting a kid actually uses stays reachable for everybody - only the grown-up
+     dials go away */
+  const grown=(r!=='player');
+  const va=$('set-voiceadv'); if(va) va.style.display=grown?'':'none';
+  const sp=$('set-prog'); if(sp) sp.style.display=grown?'':'none';
+  const pl=$('set-plays'); if(pl) pl.style.display=coach?'':'none';
+  const now=$('rolenow'); if(now) now.textContent=ROLES3[r]||ROLES3.player;
+  const why=$('rolewhy');
+  if(why) why.textContent=r==='player'
+    ? 'Watch, Play and Quiz, with the grown-up dials out of the way.'
+    : (coach ? 'Everything a player sees, plus building your own plays.'
+             : 'Everything a player sees, plus the voice, progress and level controls.');
+}
+function openRole(step2){
+  $('rolestep1').style.display=step2?'none':'';
+  $('rolestep2').style.display=step2?'':'none';
+  if(step2) buildRoleLevels();
+  mask('role',true);
+}
+function buildRoleLevels(){
+  const box=$('rolelvl'); if(!box) return;
+  box.innerHTML=ageBands().map(a=>'<button data-lvl="'+a+'"'+(S.age===a?' class="on"':'')+'>'+a+'</button>').join('');
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    S.age=b.dataset.lvl; saveAge(); buildAgeBar(); buildMenu(); syncQuizAllLabel();
+    mask('role',false); afterRole();
+  });
+}
+/* first run shows the rink primer straight after, so the two never fight for the screen */
+function afterRole(){ if(!seenIntro){ seenIntro=true; mask('help',true); } }
 function ageBands(){
   const seen={};
   SITUATIONS.forEach(s=>levelsOf(s).forEach(a=>{ seen[a]=1; }));
@@ -4039,7 +4151,7 @@ function railPlay(){
   const n=PLAY.pts.length||0;
   const asks=playAsks();
   const rd=PLAY.score.filter(s=>s&&s.asked&&s.read===1).length;
-  const ps=PLAY.score.filter(s=>s&&s.pos===1).length;
+  const ps=posNum(PLAY.score), pd=posDen(PLAY.score);
   $('rail').innerHTML=railHTML(
     '<div class="qtype place">Run the play</div>'+
     '<div class="qtext">'+(PLAY.pace==='through'
@@ -4052,7 +4164,7 @@ function railPlay(){
     '<div class="railh">Reads and position</div>'+
     '<div style="display:flex;gap:14px;font-size:13px;font-weight:750;margin:0 0 6px">'+
       (asks?'<span style="color:#7fd6a2">READS '+rd+'/'+asks+'</span>':'')+
-      '<span style="color:#ffc629">POSITION '+ps+'/'+n+'</span></div>'+
+      (pd?'<span style="color:#ffc629">POSITION '+ps+'/'+pd+'</span>':'')+'</div>'+
     /* where a resumed or replayed run says so - off the ice, where a long line is free */
     (PLAY.restored&&PLAY.score.filter(x=>x).length
       ? '<div style="font-size:12px;color:#93a3bd;margin:0 0 12px">Picked up where you left '+
@@ -4754,10 +4866,25 @@ function optTarget(o,i,t){
   if(o.kind==='carry'){ const f=frames(); return (f[i+1]&&shown(puckAt(t).w,f[i+1].t))||null; }
   return null;
 }
-/* POSITION is graded by whether the chosen option can physically work from where he
-   stands - never by distance from an ideal spot. Distance punishes a kid who found a
-   different good spot, and it cannot explain itself. Screen text is free to word (it is
-   never spoken); a say: is only set where a recorded line already carries that meaning. */
+/* This comment used to claim optionFault was the POSITION grader - "graded by whether the
+   chosen option can physically work from where he stands". That intent is defensible; the
+   label was not. optionFault judges the OPTION HE CHOSE, so a wrong call with perfect feet
+   printed POSITION OFF, and a right call while holding the puck printed POSITION GOOD with
+   nothing evaluated at all. It grades the READ. tryEval grades the position, and where
+   tryEval cannot run there is no position verdict to print. Screen text is free to word (it
+   is never spoken); a say: is only set where a recorded line already carries that meaning. */
+/* Can the position axis produce a verdict here at all? A positive test, per rule 0: it asks
+   what tryEval needs rather than reading a null as "fine". Holding the puck is ungradable by
+   construction - the puck is wherever he is, so there is no authored spot to be off. */
+function posGradable(i){
+  if(!S.sit.roster.includes(S.pos)) return false;
+  const t=frames()[i].t;
+  if(puckAt(t).w===S.pos) return false;
+  return !!(shown(S.pos,t)&&target(S.pos,t));
+}
+/* coverFault mixes the two axes in one function: DOUBLED UP is about which man he took,
+   the other two are about where his own feet are. Split by message, explicitly. */
+const POSFAULTMSG={'TOO FAR OFF HIM':1,'WRONG SIDE OF HIM':1};
 /* How much room the play's OWN next action has. Every lane test in this app is relative to
    this, so no test can ever report the answer key as blocked. null when the authored action
    has no lane to measure (nothing to compare against - the absolute test stands). */
@@ -4840,32 +4967,46 @@ function laneShut(pt,o){
   return !!(f&&f.stop);
 }
 function playResolve(pt,choice){
+  const graded=posGradable(pt.i);
   if(pt.kind==='repo'||!askedAt(pt)){
     /* nothing was asked, so there is no answer - not a null answer */
-    const f=tryEval(pt.i);
-    return {asked:false,posFault:f,stop:!!(f&&f.fatal),pt,choice:null};
+    const f=graded?tryEval(pt.i):null;
+    return {asked:false,readFault:null,posGraded:graded,posFault:f,
+      stop:!!(f&&f.fatal),pt,choice:null};
   }
   if(pt.kind==='cover'){
     const readOk=!!(choice&&choice.to===pt.man);
-    let fault=coverFault(pt,choice);
+    const cf=coverFault(pt,choice);
+    let readFault=(cf&&!POSFAULTMSG[cf.msg])?cf:null;
+    const posFault=(cf&&POSFAULTMSG[cf.msg])?cf:null;
     /* taking the wrong man means YOUR man is alone - that is the consequence, and it is
        the whole lesson, so it always plays out */
     if(!readOk){
       const t=frames()[pt.i].t, mp=pt.man?shown(pt.man,t):null;
-      fault={msg:'YOUR MAN IS ALONE',at:mp||(shown(S.pos,t)||OURNET),stop:true,
+      readFault={msg:'YOUR MAN IS ALONE',at:mp||(shown(S.pos,t)||OURNET),stop:true,
         why:'You went to somebody else, so '+manName(pt.man)+' had nobody on him at all.',
         say:'You left your man alone.'};
     }
-    return {asked:true,readOk,posFault:fault,stop:!!(fault&&fault.stop),pt,choice};
+    /* a cover step grades position off his own feet against his man, so it is gradable
+       whenever coverFault could run at all */
+    const cg=(()=>{ const t=frames()[pt.i].t;
+      return !!(shown(S.pos,t)&&choice&&choice.to&&shown(choice.to,t)); })();
+    return {asked:true,readOk,readFault,posGraded:cg,posFault,
+      stop:!!((readFault&&readFault.stop)||(posFault&&posFault.stop)),pt,choice};
   }
   const readOk=choice.kind===pt.right.kind&&(choice.to||null)===(pt.right.to||null);
-  const fault=optionFault(pt,choice);
-  /* when the puck is not his, the thing being judged is his own placement */
-  const mine=(puckAt(frames()[pt.i].t).w!==S.pos)?tryEval(pt.i):null;
-  const posFault=fault||mine;
-  const stop=fault?!!fault.stop:!!(mine&&mine.fatal);
-  return {asked:true,readOk,posFault,stop,pt,choice};
+  const readFault=optionFault(pt,choice);
+  const posFault=graded?tryEval(pt.i):null;
+  const stop=readFault?!!readFault.stop:!!(posFault&&posFault.fatal);
+  return {asked:true,readOk,readFault,posGraded:graded,posFault,stop,pt,choice};
 }
+/* whichever fault actually ended the step - the read consequence first, because that is
+   where the puck died; his feet only if the read was fine */
+const endFault=r=>(r&&(r.readFault||r.posFault))||null;
+/* denominators come from the record, never from live state (rule 10), and a step whose
+   position was never graded is not in the denominator at all */
+const posDen=sc=>(sc||[]).filter(s=>s&&s.posGraded===true).length;
+const posNum=sc=>(sc||[]).filter(s=>s&&s.posGraded===true&&s.pos===1).length;
 function ownWay(pt,choice){
   const t=frames()[pt.i].t, from=puckAt(t).p, w=puckAt(t).w;
   const to=optTarget(choice,pt.i,t)||from;
@@ -5065,13 +5206,13 @@ function betterText(pt,terse){
 function playOutcome(r){
   /* ONE unasked path for every kind - there is no null answer left to fall through a guard */
   if(!r.asked){
-    const f=r.posFault;
+    const f=r.posFault;                       // an unasked step IS the position question
     return f?{cls:'off',head:'Not where you belong.',body:f.why}
             :{cls:'great',head:'That is the spot.',
               body:'The play ran its own route and you were where it needed you.'};
   }
   if(r.pt.kind==='cover'){
-    const f=r.posFault;
+    const f=endFault(r);
     if(r.readOk&&!f) return {cls:'great',head:'That is your man.',
       body:r.pt.why==='puck'
         ? 'The puck came close and you stayed with him. That is the whole job.'
@@ -5081,7 +5222,7 @@ function playOutcome(r){
     return {cls:'off',head:'You left your man.',
       body:(f?f.why:'You went to somebody else.')+' Staying with him was the play.'};
   }
-  const f=r.posFault, better=betterText(r.pt,!!PLAY.own);
+  const f=endFault(r), better=betterText(r.pt,!!PLAY.own);
   if(r.readOk&&!f) return {cls:'great',head:'That is the read.',
     body:'Right call, and you were standing somewhere it works.'};
   if(r.readOk&&f) return {cls:'off',head:'Right call - wrong place.',
@@ -5162,13 +5303,20 @@ function playScoreLoad(){
        consumer filtering s.asked silently discarded a read the kid had earned. */
     const sc=(Array.isArray(r.score)?r.score:[]).map(s=>{
       if(!s) return s;
+      let out;
       if(typeof s.asked==='boolean'){
-        if(!s.asked&&('read' in s)) { const c=Object.assign({},s); delete c.read; return c; }
-        return s;
+        out=Object.assign({},s);
+        if(!s.asked&&('read' in out)) delete out.read;
+      } else {
+        const asked=(s.read===0||s.read===1);
+        out=Object.assign({},s,{asked});
+        if(!asked) delete out.read;
       }
-      const asked=(s.read===0||s.read===1);
-      const out=Object.assign({},s,{asked});
-      if(!asked) delete out.read;
+      /* pos used to be written from the READ evaluator wearing a position label, so every
+         stored value is evidence about the wrong axis. A record with no posGraded key predates
+         the split: drop its pos rather than carry a number we now know measured something
+         else. The read half of those records is untouched and still counts. */
+      if(typeof out.posGraded!=='boolean'){ out.posGraded=false; delete out.pos; }
       return out;
     });
     const done=sc.filter(x=>x).length;
@@ -5179,7 +5327,7 @@ function playScoreLoad(){
       /* the denominator is the count that ASKED when it was played, not a re-derivation
          from today's pace */
       PLAY.last={read:sc.filter(x=>x&&x.asked&&x.read===1).length,
-        pos:sc.filter(x=>x&&x.pos===1).length,
+        pos:posNum(sc), posOf:posDen(sc),
         asks:(typeof r.asks==='number')?r.asks
              :sc.filter(x=>x&&x.asked).length,   // pre-asks record: count what actually asked
         n:PLAY.pts.length};
@@ -5315,15 +5463,15 @@ function drawPlay(t){
   }
   // where the play died
   const r=PLAY.res;
-  if(r&&r.posFault&&r.posFault.at&&PLAY.phase==='shown'){
-    const d=disp(r.posFault.at), fo=layer('focus');
+  if(r&&endFault(r)&&endFault(r).at&&PLAY.phase==='shown'){
+    const d=disp(endFault(r).at), fo=layer('focus');
     fo.appendChild(el('circle',{cx:d[0],cy:d[1],r:3.4,fill:'#bf1e2e','fill-opacity':0.2,
       stroke:'#bf1e2e','stroke-width':0.6}));
     /* MEASURE the glyph run, do not estimate it from character count. A per-character
        estimate runs short on bold caps with letter-spacing, so the clamp was computed
        against a narrower pill than the one that renders and TOO FAR still hung off the
        edge of the camera. Same fix Try mode already uses for its explanation. */
-    const tx=r.posFault.msg, lh=FS(4.2), vb=S.vb||FULLVIEW;
+    const tx=endFault(r).msg, lh=FS(4.2), vb=S.vb||FULLVIEW;
     const txt=el('text',{'font-size':FS(2.8),'text-anchor':'middle','font-weight':850,
       fill:'#fff','letter-spacing':0.25},tx);
     fo.appendChild(txt);
@@ -5497,8 +5645,10 @@ function playThrough(){
   const f=frames(), nx=f[pt.i+1];
   const r={asked:false,posFault:tryEval(pt.i),stop:false,pt,choice:null};
   PLAY.res=r;
-  PLAY.score[PLAY.di]={asked:false,pos:r.posFault?0:1,
-    fault:r.posFault?r.posFault.msg:null,kind:pt.kind};
+  PLAY.score[PLAY.di]=Object.assign(
+    {asked:false,posGraded:!!r.posGraded,
+     fault:r.posFault?r.posFault.msg:null,kind:pt.kind},
+    r.posGraded?{pos:r.posFault?0:1}:{});
   playMarkSpot(); playScoreSave();
   playRun(nx?nx.t:1,()=>{
     if(PLAY.di>=PLAY.pts.length-1){ PLAY.phase='shown'; playShow(); return; }
@@ -5527,15 +5677,16 @@ function playPick(k){
   PLAY.res=r;
   /* idempotent: one entry per decision, replaced if he comes back to it */
   PLAY.score[PLAY.di]=Object.assign(
-    {asked:!!r.asked, pos:r.posFault?0:1,
-     fault:r.posFault?r.posFault.msg:null, kind:choice?choice.kind:pt.kind},
-    r.asked?{read:r.readOk?1:0}:{});
+    {asked:!!r.asked, posGraded:!!r.posGraded,
+     fault:(endFault(r)||{}).msg||null, kind:choice?choice.kind:pt.kind},
+    r.asked?{read:r.readOk?1:0}:{},
+    r.posGraded?{pos:r.posFault?0:1}:{});
   playMarkSpot(); playScoreSave();
   playBeginLeg(); playPrompt();
   const t=frames()[pt.i].t;
   const from=(pt.kind==='cover'||pt.kind==='repo')?(shown(S.pos,t)||puckAt(t).p):puckAt(t).p;
   const to=(choice?optTarget(choice,pt.i,t):null)||from;
-  const die=r.stop&&r.posFault&&r.posFault.at?r.posFault.at:null;
+  const die=(r.stop&&endFault(r)&&endFault(r).at)?endFault(r).at:null;
   const f=frames(), nx=f[pt.i+1], onDone=()=>{ PLAY.phase='shown'; playShow(); };
   /* Only fly the puck where the puck actually goes. A wrong call the play does not make
      is drawn as a FORGONE lane and the puck stays on the carrier - flying it and then
@@ -5596,7 +5747,7 @@ function playAuthored(){
 function playShow(){
   const o=playOutcome(PLAY.res), rs=$('povres'), r=PLAY.res;
   /* keep the card out of the half the consequence is in */
-  const focusPt=(r.posFault&&r.posFault.at)||PLAY.hold||puckAt(S.t).p;
+  const focusPt=(endFault(r)&&endFault(r).at)||PLAY.hold||puckAt(S.t).p;
   const fy=disp(focusPt)?disp(focusPt)[1]:42.5;
   const vb=S.vb||FULLVIEW;
   rs.classList.toggle('attop',fy>vb[1]+vb[3]*0.5);
@@ -5604,8 +5755,11 @@ function playShow(){
   const axes='<div class="povaxes">'+
     (!r.asked?'<span style="color:#8fa4c4">NO CALL TO MAKE</span>'
       :'<span class="'+(r.readOk?'ok':'no')+'">READ '+(r.readOk?'GOOD':'OFF')+'</span>')+
-    '<span class="'+(r.posFault?'no':'ok')+'">POSITION '+(r.posFault?'OFF':'GOOD')+
-    '</span></div>';
+    (r.posGraded
+      ? '<span class="'+(r.posFault?'no':'ok')+'">POSITION '+(r.posFault?'OFF':'GOOD')+'</span>'
+      : '<span style="color:#8fa4c4" title="You had the puck, so there is no spot to be off">'+
+        'POSITION NOT GRADED</span>')+
+    '</div>';
   const last=PLAY.di>=PLAY.pts.length-1;
   const own=PLAY.own?'<p><b style="color:#ffc629">Your way:</b> '+esc(PLAY.own.verdict)+'</p>':'';
   const onLabel=PLAY.pending==='authored'?'Show me what the play does &#9654;'
@@ -5623,7 +5777,7 @@ function playShow(){
   const taught=(pt0&&S.sit.roster.includes(S.pos))?target(S.pos,frames()[pt0.i].t):null;
   const spot=PLAY.reveal ? ''
     : (taught
-      ? '<button id="povspot">'+(r.posFault?'Show me the correct spot':'Show me the taught spot')+'</button>'
+      ? '<button id="povspot">'+((r.posGraded&&r.posFault)?'Show me the correct spot':'Show me the taught spot')+'</button>'
       : (S.sit.roster.includes(S.pos)
         ? '<span class="povnospot">This variation shows the mistake on purpose - there is no taught spot to show you.</span>'
         : ''));
@@ -5687,25 +5841,28 @@ function playFinish(){
   const n=PLAY.pts.length;
   const asks=playAsks();                                   // steps that carry a read axis
   const rd=PLAY.score.filter(s=>s&&s.asked&&s.read===1).length;
-  const ps=PLAY.score.filter(s=>s&&s.pos===1).length;
+  const ps=posNum(PLAY.score), pd=posDen(PLAY.score);
   const faults={};
   PLAY.score.forEach(s=>{ if(s&&s.fault) faults[s.fault]=(faults[s.fault]||0)+1; });
   const rep=Object.keys(faults).sort((a,b)=>faults[b]-faults[a]);
   const lines=rep.length
     ? rep.map(k=>'<div>'+esc(cap(k.toLowerCase()))+' <i>&middot; '+
         (faults[k]>1?faults[k]+' times':'once')+'</i></div>').join('')
-    : (ps===n?'<div>You were in a workable spot every time.</div>'
+    : ((pd&&ps===pd)?'<div>You were in a workable spot every time.</div>'
              :'<div>Nothing went wrong in the steps you played.</div>');
   const rs=$('povres');
-  const head=asks
-    ? 'Reads '+rd+' of '+asks+' &middot; Position '+ps+' of '+n
-    : 'Position '+ps+' of '+n;                    // no questions asked: no read line at all
+  /* Never print a position score with nothing behind it. When no step could be graded on
+     position - every decision came with the puck on his stick - the axis is absent, not 0. */
+  const head=[asks?'Reads '+rd+' of '+asks:'',pd?'Position '+ps+' of '+pd:'']
+    .filter(Boolean).join(' &middot; ')||'That is the play';
   rs.innerHTML='<div class="povbody"><b class="'+
-    ((rd===asks&&ps===n)?'great':((asks?rd>=asks-1:ps>=n-1)?'good':'off'))+'">'+
+    ((rd===asks&&(!pd||ps===pd))?'great':((asks?rd>=asks-1:ps>=Math.max(0,pd-1))?'good':'off'))+'">'+
     head+'</b>'+
     '<div class="povsum">'+lines+'</div>'+
     '<p>'+(!asks
-      ? (ps===n?'You were in the right spot at every step.':'The spots you missed are the ones worth running again.')
+      ? ((pd&&ps===pd)?'You were in the right spot at every step.'
+         :(pd?'The spots you missed are the ones worth running again.'
+            :'You had the puck at every step, so there was no spot to grade.'))
       : (rd===asks?'Every call was the right one.':'The calls you missed are the ones worth running again.'))+
     (PLAY.tries?' You retried '+PLAY.tries+(PLAY.tries===1?' step.':' steps.'):'')+'</p></div>'+
     '<div class="povrow"><button class="hot" id="povrun">Run it again</button>'+
@@ -6493,7 +6650,12 @@ step('buttons',()=>{
 step('preboot',()=>{ const p=$('preboot'); if(p&&p.parentNode) p.parentNode.removeChild(p); });
 
 let seenIntro=false; try{ seenIntro=localStorage.getItem('hiq_seen')==='1'; }catch(e){}
-step('intro',()=>{ if(!seenIntro) mask('help',true); });
+step('role',()=>{
+  let stored=null; try{ stored=localStorage.getItem('hiq_role'); }catch(e){}
+  loadRole(); applyRole();
+  /* never block entry on it: a skip is a player, and the primer follows either way */
+  if(!stored) openRole(false); else if(!seenIntro) mask('help',true);
+});
 
 </script>
 <script>
