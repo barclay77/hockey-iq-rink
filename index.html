@@ -168,6 +168,18 @@ select,input{touch-action:manipulation}
   background:rgba(6,11,20,.86);color:#eaf1fb;font-size:14.5px;font-weight:750;
   align-items:center;gap:8px;backdrop-filter:blur(7px);cursor:pointer}
 .skipintro.on{display:flex}
+/* Where he is in the play, down the right edge of the ice. Four states, because a marker for a
+   step he has not reached must never read like one he passed: not reached, on it now, cleared,
+   faulted. Hidden below two decisions - a rail for a single decision is decoration. */
+.steprail{position:absolute;right:7px;top:50%;transform:translateY(-50%);z-index:6;
+  display:none;flex-direction:column;gap:7px;align-items:center;pointer-events:none}
+.steprail.on{display:flex}
+.steprail i{display:block;width:11px;height:11px;border-radius:50%;
+  background:rgba(8,14,26,.45);border:1.5px solid rgba(255,255,255,.5)}
+.steprail i.now{width:15px;height:15px;background:var(--tra);border-color:#fff;
+  box-shadow:0 0 0 3px rgba(255,198,41,.28)}
+.steprail i.ok{background:#2a4fa8;border-color:#cfe0ff}
+.steprail i.no{background:#bf1e2e;border-color:#ffd0d6}
 .skipintro:active{transform:scale(.97)}
 svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none}
 
@@ -865,6 +877,7 @@ input[type=range]{accent-color:var(--us2)}
         <svg id="rink" viewBox="-6 -6 212 97" preserveAspectRatio="xMidYMid meet" aria-label="Hockey rink"></svg>
         <button class="zoomb" id="zoomb" title="Zoom in on the play">ZOOM</button>
         <button class="skipintro" id="skipintro">Skip the intro &#9197;</button>
+        <div class="steprail" id="steprail" aria-hidden="true"></div>
         <div class="stageover" id="stageover"><div class="stagecard" id="stagecard"></div></div>
         <div class="pov" id="pov">
           <div class="povtop"><span class="povstep" id="povstep">Step</span><span class="povmsg" id="povmsg"></span></div>
@@ -1489,11 +1502,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false,
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.151';
+const BUILD='2026-08-24.152';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v154';
+const SWCACHE='hockey-iq-v155';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -1609,12 +1622,49 @@ const ZF=()=>Math.pow(Math.min(1,((S.zf!=null?S.zf:((S.vb&&S.vb[2])||212))||212)
 /* Grow a viewBox to the panel's shape, never shrink it - shrinking is what cuts the goalie out
    of a defensive-zone frame. Standing up, screen-x is rink-y, so the axis that gets the room is
    up-ice, which is also the axis most likely to bring a net or a line into frame. */
-function fitPanel(box,bw,bh,rot){
+const LANDMARKS=[11,75,100,125,189];
+/* The men and the puck, along the up-ice axis - the subject the frame is supposed to be about.
+   Same membership rule frameBox uses, so the camera and this agree on what "the play" is. */
+function subjectSpanX(t){
+  const pts=[], pk=puckAt(t).p; pts.push(pk[0]);
+  S.sit.roster.forEach(id=>{ const p=shown(id,t); if(p) pts.push(p[0]); });
+  if(S.opt.them) THEMIDS.forEach(id=>{ const p=shown(id,t); if(p&&dist(p,pk)<26) pts.push(p[0]); });
+  if(pts.length<2) return null;
+  return {lo:Math.min.apply(null,pts),hi:Math.max.apply(null,pts)};
+}
+/* How little of the frame the play may occupy before expansion stops buying anything. Measured
+   on support/triangle, the drill that raised it: the authored focus is 105ft for a play 47ft
+   long, and expanding it to the panel's shape left the five men in 39% of the frame with 45% of
+   it empty ice behind them. Rule 5 expands rather than shrinks so a goalie is never CROPPED -
+   that is about not losing content, not about adding blank ice. So expansion is allowed only
+   while the subject keeps this share of the frame; past it, letterbox instead. */
+const SUBJSHARE=0.45;
+function fitPanel(box,bw,bh,rot,subj){
   if(!bw||!bh) return box;
   let x=box[0], y=box[1], w=box[2], hh=box[3];
   const want = rot ? (bh/bw) : (bw/bh);        // rink-x over rink-y, in the panel's terms
   const cur = w/hh;
-  if(cur<want){ const nw=hh*want; x-=(nw-w)/2; w=nw; }
+  if(cur<want){
+    let nw=hh*want;
+    /* cap the growth by what it costs the subject */
+    if(subj){
+      const span=Math.max(1,subj.hi-subj.lo);
+      const maxW=Math.max(w,span/SUBJSHARE);
+      if(nw>maxW) nw=maxW;
+    }
+    const g=nw-w;
+    /* and spend it on the side that buys an anchor - a line or a net the eye can orient by -
+       rather than splitting it evenly into whichever ice happens to be adjacent */
+    if(g>0){
+      const inside=v=>v>x+1&&v<x+w-1;
+      const gainsLeft=LANDMARKS.some(v=>!inside(v)&&v<x&&v>=x-g-1);
+      const gainsRight=LANDMARKS.some(v=>!inside(v)&&v>x+w&&v<=x+w+g+1);
+      if(gainsLeft&&!gainsRight) x-=g;
+      else if(gainsRight&&!gainsLeft) { /* grows to the right: x unchanged */ }
+      else x-=g/2;
+      w=nw;
+    }
+  }
   else if(cur>want){ const nh=w/want; y-=(nh-hh)/2; hh=nh; }
   if(w>212){ x=-6; w=212; }
   if(hh>97){ y=-6; hh=97; }
@@ -1961,6 +2011,22 @@ function drawDragMe(p){
 const OPPNAME=id=>id==='XG'?'their goalie':'red '+String(id).slice(1);
 /* Where he stood, and where the job was, at each decision as it was judged. Written after the
    verdict so the bound above always reads the PREVIOUS decision, never the one in flight. */
+/* Rule 11 applies: the score array is sparse and read:0 is a real wrong answer, so every state
+   here is an explicit test, never a truthiness check. */
+function paintStepRail(){
+  const r=$('steprail'); if(!r) return;
+  const n=(S.mode==='play'&&PLAY.pts)?PLAY.pts.length:0;
+  if(n<2){ r.classList.remove('on'); r.innerHTML=''; return; }
+  let html='';
+  for(let i=0;i<n;i++){
+    const s=PLAY.score[i];
+    let cls='';
+    if(s){ const clean=(s.pos===1)&&(s.asked?s.read===1:true); cls=clean?'ok':'no'; }
+    else if(i===PLAY.di) cls='now';
+    html+='<i class="'+cls+'"></i>';
+  }
+  r.innerHTML=html; r.classList.add('on');
+}
 function playMarkSpot(){
   if(S.mode!=='play') return;
   const pt=PLAY.pts&&PLAY.pts[PLAY.di]; if(!pt) return;
@@ -2542,7 +2608,7 @@ function render(){
   const rot = isPhone() && bh > bw;
   S.rot=rot;
   S.port=portrait();
-  const vb=fitPanel(crop,bw,bh,rot);
+  const vb=fitPanel(crop,bw,bh,rot,subjectSpanX(t));
   S.vb=vb; S.zf=crop[2];
   const perH=Math.min(bw/vb[2],bh/vb[3]), perV=Math.min(bw/vb[3],bh/vb[2]);
   svg.setAttribute('viewBox', rot ? [vb[1],-(vb[0]+vb[2]),vb[3],vb[2]].join(' ') : vb.join(' '));
@@ -2752,7 +2818,7 @@ function render(){
   if(zb){ zb.textContent=S.wide?'ZOOM':'WIDE';
     zb.title=S.wide?'Zoom in on the play':'See the whole zone';
     zb.classList.toggle('off',!S.opt.zoom); }
-  paintCue(); paintJob();
+  paintCue(); paintJob(); paintStepRail();
   $('scrub').value=Math.round(t*1000);
   renderTopbar(); renderNext();
 }
