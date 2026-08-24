@@ -153,7 +153,8 @@ A server-backed voice is coming and needs one place to plug in.
 ## 10. Score shape: `asked` is a boolean, `read` exists only when it is true
 
 Same shape on the position axis as of .154: `posGraded` is a boolean and `pos` exists only
-when it is true. A step where the puck is on his own stick has no authored spot to be off, so
+when it is true, and on the spot axis as of .157: `spotAsked` is a boolean and `spot` exists
+only when it is true. A step where the puck is on his own stick has no authored spot to be off, so
 it carries no `pos` at all rather than a 1. Denominators count `posGraded===true`.
 
 The tri-state is gone as a representation, not guarded. Nothing falsy can be eaten by a

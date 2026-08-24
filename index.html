@@ -347,6 +347,20 @@ svg#rink{width:100%;height:100%;display:block;touch-action:none;user-select:none
 .stagecard h2{font-size:26px;line-height:1.15}
 .stagecard .stagewhat{margin:0;font-size:17px;line-height:1.4;color:#dbe6f5;max-width:34ch}
 .stagecard .stagesay{margin:0;font-size:14.5px;line-height:1.4;color:var(--dim);max-width:36ch}
+/* the same two words, in the same two colours, as the strips pinned to the ice - so the card
+   teaches the thing the rink then keeps repeating */
+.stageends{display:flex;flex-direction:column;gap:4px;width:100%;max-width:300px}
+.stageends span{border-radius:8px;padding:7px 11px;font-size:13px;font-weight:800;
+  letter-spacing:.04em;color:#fff}
+.stageends .seTheir{background:#bf1e2e}
+.stageends .seOur{background:#2a4fa8}
+.pickasks{display:flex;flex-direction:column;gap:7px;margin:0 0 12px;text-align:left}
+.pickasks .pkv{background:var(--bg3);border:1px solid var(--line);border-radius:10px;
+  padding:8px 11px;font-size:13px;color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.pickasks .pkv.watch{border-color:#5a4a1e;background:#231d0c}
+.pickasks .pkv b{font-weight:750}
+.pickasks .pkv i{font-style:normal;font-size:12.5px;color:var(--dim);line-height:1.35}
+.stagecard .stageask{margin:0;font-size:14.5px;line-height:1.4;color:#ffc629;font-weight:700;max-width:34ch}
 .stagebtn{background:var(--hi);color:#fff;border-radius:12px;padding:15px 26px;
   font-size:16.5px;font-weight:750;min-height:52px}
 .posgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;margin-top:2px}
@@ -973,6 +987,7 @@ input[type=range]{accent-color:var(--us2)}
     <span class="pickphase" id="pickphase"></span>
     <h2 id="picktitle"></h2>
     <p class="pickabout" id="pickabout"></p>
+    <div class="pickasks" id="pickasks"></div>
     <div class="pickacts">
       <button class="bigbtn" id="pickplay">Play it &#9654;</button>
       <button class="bigbtn plain" id="pickwatch">Watch it &#9654;</button>
@@ -1556,11 +1571,11 @@ const S={
   manual:{}, mode:'learn', tab:'look', screen:'menu', fs:1, narrating:false, wide:true, age:null, port:false, role:'player',
   opt:{roles:true,ghost:true,look:true,space:true,pass:false,lanes:false,them:true,trail:true,zoom:true,flip:false,focus:true}
 };
-const BUILD='2026-08-24.156';
+const BUILD='2026-08-24.158';
 /* Must equal CACHE in sw.js - bumped in the same export (rule 17). The receipt compares
    this against what the active worker reports, so a mismatch shows up on the device
    instead of hiding. */
-const SWCACHE='hockey-iq-v159';
+const SWCACHE='hockey-iq-v161';
 window.__hiqBuild=BUILD;
 const SPK={on:false, rate:0.92, voice:null, list:[], ok:('speechSynthesis' in window)};
 /* baked audio: AUDIO.have[id]=true once audio/manifest.json says a real file exists for
@@ -2175,14 +2190,30 @@ function drawPlaceChoices(){
   const chosen=PLAY.spot;
   opts.forEach((o,k)=>{
     const d=disp(o.p), on=(chosen===k);
+    /* "I can barely see the circles" was not a size complaint - they measured 47-71px, above
+       the 44 floor, on a drill drawn larger than the median. It was weight: a 13% white fill
+       and a hairline dash against a light rink is not something a nine-year-old reads as a
+       button. Solid dark disc, bright ring, and a pulse so it announces itself as waiting. */
     const c=el('circle',{class:'spotpick',cx:d[0],cy:d[1],r:r,
-      fill:on?'#ffc629':'rgba(244,248,253,0.13)','fill-opacity':on?0.9:1,
-      stroke:on?'#fff':'#f4f8fd','stroke-width':on?0.9:0.7,'stroke-dasharray':on?'':'2.2 1.8'});
+      fill:on?'#ffc629':'rgba(8,14,32,0.60)','fill-opacity':1,
+      stroke:on?'#fff':'#ffc629','stroke-width':on?1.0:0.85});
+    if(!on){
+      c.appendChild(el('animate',{attributeName:'stroke-opacity',values:'1;0.42;1',
+        dur:'1.9s',begin:(k*0.28).toFixed(2)+'s',repeatCount:'indefinite'}));
+      const halo=el('circle',{cx:d[0],cy:d[1],r:r,fill:'none',stroke:'#ffc629','stroke-width':0.5});
+      halo.appendChild(el('animate',{attributeName:'r',values:r.toFixed(2)+';'+(r*1.5).toFixed(2),
+        dur:'1.9s',begin:(k*0.28).toFixed(2)+'s',repeatCount:'indefinite'}));
+      halo.appendChild(el('animate',{attributeName:'stroke-opacity',values:'0.85;0',
+        dur:'1.9s',begin:(k*0.28).toFixed(2)+'s',repeatCount:'indefinite'}));
+      g.appendChild(halo);
+    }
     c.style.cursor='pointer'; c.style.pointerEvents='auto';
     c.addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); playChoose(k); });
     g.appendChild(c);
     if(on){ g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.95),'font-size':FS(2.5),
       'text-anchor':'middle','font-weight':850,fill:'#241c02'},'YOU')); }
+    else { g.appendChild(el('text',{x:d[0],y:d[1]+FS(0.85),'font-size':FS(2.2),
+      'text-anchor':'middle','font-weight':850,fill:'#ffd75e'},'TAP')); }
   });
   return true;
 }
@@ -2195,6 +2226,10 @@ function playChoose(k){
   S.manual[S.pos]=opts[k].p.slice();
   const o=opts[k];
   PLAY.spotWhy=o.right?null:(o.fault?o.fault.why:null);
+  /* the CHOICE, not its index: a retry reseeds the order on attempt, so an index saved now
+     would point at a different circle by the time the step resolves */
+  PLAY.spotPick={right:!!o.right,msg:o.right?null:((o.fault||{}).msg||null),
+                 why:o.right?null:((o.fault||{}).why||null)};
   playPrompt(); render();
 }
 /* ============ ONE decision about where the teaching panels live ============
@@ -3125,9 +3160,24 @@ function drawLabels(){
      every slice that fits is a guaranteed anchor rather than a lucky one. Same pill, same
      placement rule; a tighter crop just gets a smaller word, at the top of what is visible
      rather than the top of the rink. */
+  /* THE ORIENTATION ANCHOR, pinned to the FRAME and not to the ice. The tight camera crops both
+     nets out of 79 of 289 decisions, and 9 of those hold no line either - and a blue line is
+     symmetric, so even when one is visible it cannot say which end is yours. The zone word names
+     where the PUCK is, not which way he is facing, which is why "the ice is sideways" kept coming
+     back on an upright rink: nothing on screen demonstrated the orientation. These two strips are
+     drawn at the up-ice edges of whatever is visible, every frame, net in shot or not. Position
+     carries the direction (ours at the bottom of a stood-up rink, per rule 5) and the words name
+     it, in the colours the app already uses for the two teams. */
+  const endBand=Math.max(3.6,FS(3.9));
+  [[x0,'OUR END','#2a4fa8',1],[x1,'THEIR END','#bf1e2e',-1]].forEach(([ex,txt,col,dir])=>{
+    const bx=dir>0?ex:ex-endBand;
+    g.appendChild(el('rect',{x:bx,y:y0,width:endBand,height:y1-y0,fill:col,'fill-opacity':0.9}));
+    g.appendChild(el('text',{x:bx+endBand*0.5,y:(y0+y1)/2+FS(0.85),'font-size':FS(2.45),
+      fill:'#fff','text-anchor':'middle','font-weight':850,'letter-spacing':0.5},txt));
+  });
   const full=!S.opt.zoom||S.wide, zy=full?5.2:y0+5.4, zs=full?2.7:2.4;
   [[0,75,'OUR ZONE'],[75,125,'NEUTRAL ZONE'],[125,200,'THEIR ZONE']].forEach(([a,b,txt])=>{
-    const lo=Math.max(a,x0+4),hi=Math.min(b,x1-4);
+    const lo=Math.max(a,x0+4+endBand),hi=Math.min(b,x1-4-endBand);
     if(hi-lo>=26) put((lo+hi)/2,zy,zs,txt);
   });
   [[11,'OUR NET'],[189,'THEIR NET']].forEach(([x,txt])=>{
@@ -3831,6 +3881,31 @@ function setStageUI(on){
   else { $('nextbar').style.display='none'; }
 }
 function clearStage(){ STAGE.step=null; STAGE.cue=null; setStageUI(false); }
+/* What KIND of question is coming. Three kinds feel like three different games and they used to
+   arrive unannounced - and a watch-only variant announced nothing at all, so a tap on it landed
+   on the unasked path and read as praise. Derived from the union of every roster position's
+   decision list, so it does not need him to have picked a position yet. */
+function variantAsk(sit,v){
+  if(v.wrong) return {watch:true,label:'A demonstration',
+    text:'This one shows the mistake on purpose. Nothing to answer - just watch what goes wrong.'};
+  const keep=[S.sit,S.varIdx,S.pos];
+  const kinds={};
+  try{
+    S.sit=sit; S.varIdx=sit.variants.indexOf(v);
+    (sit.roster||[]).forEach(p=>{ S.pos=p;
+      let pts=[]; try{ pts=playPoints(); }catch(e){ return; }
+      pts.forEach(pt=>{ kinds[pt.kind]=1; });
+    });
+  } finally { S.sit=keep[0]; S.varIdx=keep[1]; S.pos=keep[2]; }
+  const bits=[];
+  if(kinds.cover) bits.push('pick the man you take');
+  if(kinds.puck) bits.push('choose what the puck does');
+  if(kinds.repo) bits.push('put yourself in the right spot');
+  if(!bits.length) return {watch:true,label:'A demonstration',
+    text:'There is no decision written into this one yet - watch it instead.'};
+  return {watch:false,label:bits.length>1?'Mixed':cap(bits[0]),
+    text:'This one asks you to '+bits.join(', then ')+'.'};
+}
 function stageSituation(){
   const p=PHASE[S.sit.phase];
   STAGE.step='situation'; STAGE.label='The situation'; STAGE.cue=S.sit.about;
@@ -3838,6 +3913,11 @@ function stageSituation(){
     '<span class="pill" style="background:'+p.col+';color:'+phaseInk(p.col)+'">'+p.label+'</span>'+
     '<h2>'+esc(S.sit.name)+'</h2>'+
     '<p class="stagewhat">'+esc(S.sit.about)+'</p>'+
+    /* Silent copy on purpose: a new spoken sentence would mint a new audio id and orphan
+       nothing but would need a render pass (rule 6). This is screen text only. */
+    '<div class="stageends"><span class="seTheir">THEIR END &#9650; up the screen</span>'+
+      '<span class="seOur">OUR END &#9660; down the screen</span></div>'+
+    '<p class="stageask">'+esc(variantAsk(S.sit,variant()).text)+'</p>'+
     '<p class="stagesay">'+esc(p.say)+'</p>'+
     '<button class="stagebtn" id="stagego">Next: pick my spot &#9654;</button>';
   setStageUI(true); paintCue();
@@ -4116,6 +4196,15 @@ function openPick(sit){
   ph.textContent=p.label; ph.style.background=p.col; ph.style.color=phaseInk(p.col);
   $('picktitle').textContent=sit.name;
   $('pickabout').textContent=sit.about||'';
+  /* Two variants of one drill behaved completely differently and the interface presented them
+     identically. Say what each one asks, here, before he taps Play it. */
+  const pa=$('pickasks');
+  if(pa){
+    const rows=(sit.variants||[]).map(v=>{ const a=variantAsk(sit,v);
+      return '<span class="pkv'+(a.watch?' watch':'')+'"><b>'+esc(v.name)+'</b>'+
+        (a.watch?' &middot; watch only':'')+'<i>'+esc(a.text)+'</i></span>'; });
+    pa.innerHTML=rows.join('');
+  }
   mask('pick',true);
   /* the primary action takes focus, so a keyboard lands on it and Escape still closes */
   const b=$('pickplay'); if(b) b.focus();
@@ -5156,8 +5245,8 @@ function playResolve(pt,choice){
   if(pt.kind==='repo'||!askedAt(pt)){
     /* nothing was asked, so there is no answer - not a null answer */
     const f=graded?tryEval(pt.i):null;
-    return {asked:false,readFault:null,posGraded:graded,posFault:f,
-      stop:!!(f&&f.fatal),pt,choice:null};
+    return Object.assign({asked:false,readFault:null,posGraded:graded,posFault:f,
+      stop:!!(f&&f.fatal),pt,choice:null},spotResult(graded));
   }
   if(pt.kind==='cover'){
     const readOk=!!(choice&&choice.to===pt.man);
@@ -5176,14 +5265,27 @@ function playResolve(pt,choice){
        whenever coverFault could run at all */
     const cg=(()=>{ const t=frames()[pt.i].t;
       return !!(shown(S.pos,t)&&choice&&choice.to&&shown(choice.to,t)); })();
-    return {asked:true,readOk,readFault,posGraded:cg,posFault,
-      stop:!!((readFault&&readFault.stop)||(posFault&&posFault.stop)),pt,choice};
+    return Object.assign({asked:true,readOk,readFault,posGraded:cg,posFault,
+      stop:!!((readFault&&readFault.stop)||(posFault&&posFault.stop)),pt,choice},spotResult(cg));
   }
   const readOk=choice.kind===pt.right.kind&&(choice.to||null)===(pt.right.to||null);
   const readFault=optionFault(pt,choice);
   const posFault=graded?tryEval(pt.i):null;
   const stop=readFault?!!readFault.stop:!!(posFault&&posFault.fatal);
-  return {asked:true,readOk,readFault,posGraded:graded,posFault,stop,pt,choice};
+  return Object.assign({asked:true,readOk,readFault,posGraded:graded,posFault,stop,pt,choice},
+    spotResult(graded));
+}
+/* A THIRD axis, deliberately not folded into POSITION. "Did you choose the taught spot" is not
+   "does your position work" - blending those two is exactly the defect .154 removed - so it gets
+   its own name and its own field, and it appears ONLY where POSITION cannot be graded: the steps
+   with the puck on his own stick, where there is no authored spot to be off.
+   FEEDBACK ONLY, on purpose. These are the steps where the app admits it cannot judge his
+   position; scoring him on a proxy for it would be the same overreach in a smaller costume. So
+   it enters no denominator, it cannot dirty a step in the rail, and no percentage counts it. */
+function spotResult(graded){
+  if(graded||!PLAY.spotPick) return {spotAsked:false};
+  return {spotAsked:true,spotOk:!!PLAY.spotPick.right,
+          spotWhy:PLAY.spotPick.why||null,spotMsg:PLAY.spotPick.msg||null};
 }
 /* whichever fault actually ended the step - the read consequence first, because that is
    where the puck died; his feet only if the read was fine */
@@ -5502,6 +5604,9 @@ function playScoreLoad(){
          the split: drop its pos rather than carry a number we now know measured something
          else. The read half of those records is untouched and still counts. */
       if(typeof out.posGraded!=='boolean'){ out.posGraded=false; delete out.pos; }
+      /* the spot axis is new in .157 and no stored record can carry it. Declaring it absent
+         rather than leaving the field undefined is what keeps every consumer's test positive. */
+      if(typeof out.spotAsked!=='boolean'){ out.spotAsked=false; delete out.spot; }
       return out;
     });
     const done=sc.filter(x=>x).length;
@@ -5738,7 +5843,8 @@ function playStart(){
   PLAY.pts=playPoints(); PLAY.di=0; PLAY.score=[]; PLAY.res=null; PLAY.tries=0;
   PLAY.anim=null; PLAY.tail=null; PLAY.ghost=null; PLAY.nudge=false;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null; PLAY._pos=null;
-  PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0; PLAY.spot=null; PLAY.spotWhy=null;
+  PLAY.reveal=false; PLAY.placed=[]; PLAY.dock=0;
+  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;
   PLAY.key=S.sit.id+'|'+variant().id+'|'+S.pos;
   S.t=0; S.manual={};
   if(!PLAY.pts.length){
@@ -5854,9 +5960,10 @@ function playThrough(){
   const r={asked:false,posFault:tryEval(pt.i),stop:false,pt,choice:null};
   PLAY.res=r;
   PLAY.score[PLAY.di]=Object.assign(
-    {asked:false,posGraded:!!r.posGraded,
+    {asked:false,posGraded:!!r.posGraded,spotAsked:!!r.spotAsked,
      fault:r.posFault?r.posFault.msg:null,kind:pt.kind},
-    r.posGraded?{pos:r.posFault?0:1}:{});
+    r.posGraded?{pos:r.posFault?0:1}:{},
+    r.spotAsked?{spot:r.spotOk?1:0}:{});
   playMarkSpot(); playScoreSave();
   playRun(nx?nx.t:1,()=>{
     if(PLAY.di>=PLAY.pts.length-1){ PLAY.phase='shown'; playShow(); return; }
@@ -5870,7 +5977,7 @@ function playAdvance(){
   PLAY.tail=null; PLAY.ghost=null; PLAY.res=null;
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   PLAY.reveal=false;                      // a new decision is a new question
-  PLAY.spot=null; PLAY.spotWhy=null;      // and a new placement
+  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;   // and a new placement
   const pt=PLAY.pts[PLAY.di];
   if(!pt){ PLAY.phase='place'; playPrompt(); render(); return; }
   playBeginLeg(); playPrompt();
@@ -5886,10 +5993,11 @@ function playPick(k){
   PLAY.res=r;
   /* idempotent: one entry per decision, replaced if he comes back to it */
   PLAY.score[PLAY.di]=Object.assign(
-    {asked:!!r.asked, posGraded:!!r.posGraded,
+    {asked:!!r.asked, posGraded:!!r.posGraded, spotAsked:!!r.spotAsked,
      fault:(endFault(r)||{}).msg||null, kind:choice?choice.kind:pt.kind},
     r.asked?{read:r.readOk?1:0}:{},
-    r.posGraded?{pos:r.posFault?0:1}:{});
+    r.posGraded?{pos:r.posFault?0:1}:{},
+    r.spotAsked?{spot:r.spotOk?1:0}:{});
   playMarkSpot(); playScoreSave();
   playBeginLeg(); playPrompt();
   const t=frames()[pt.i].t;
@@ -5968,6 +6076,12 @@ function playShow(){
       ? '<span class="'+(r.posFault?'no':'ok')+'">POSITION '+(r.posFault?'OFF':'GOOD')+'</span>'
       : '<span style="color:#8fa4c4" title="You had the puck, so there is no spot to be off">'+
         'POSITION NOT GRADED</span>')+
+    /* both statements are true at once on these steps, so both are printed: the app cannot
+       judge whether his position works, AND it knows which circle he tapped */
+    (r.spotAsked
+      ? '<span class="'+(r.spotOk?'ok':'no')+'" title="Which circle you tapped. Not scored.">'+
+        'YOUR SPOT '+(r.spotOk?'TAUGHT':'NOT IT')+'</span>'
+      : '')+
     '</div>';
   const last=PLAY.di>=PLAY.pts.length-1;
   const own=PLAY.own?'<p><b style="color:#ffc629">Your way:</b> '+esc(PLAY.own.verdict)+'</p>':'';
@@ -6041,6 +6155,7 @@ function playRetry(){
   PLAY.own=null; PLAY.hold=null; PLAY.pending=null; PLAY.label=null;
   delete PLAY.score[PLAY.di];
   if(PLAY.placed) delete PLAY.placed[PLAY.di];   // this decision is unjudged again
+  PLAY.spot=null; PLAY.spotWhy=null; PLAY.spotPick=null;  // and unplaced: the order reseeds
   playScoreSave();
   S.t=pt.t; PLAY.phase='decide';
   playPrompt(); render(); playIdleArm();
@@ -6051,6 +6166,8 @@ function playFinish(){
   const asks=playAsks();                                   // steps that carry a read axis
   const rd=PLAY.score.filter(s=>s&&s.asked&&s.read===1).length;
   const ps=posNum(PLAY.score), pd=posDen(PLAY.score);
+  const sd=PLAY.score.filter(s=>s&&s.spotAsked===true).length;
+  const sn=PLAY.score.filter(s=>s&&s.spotAsked===true&&s.spot===1).length;
   const faults={};
   PLAY.score.forEach(s=>{ if(s&&s.fault) faults[s.fault]=(faults[s.fault]||0)+1; });
   const rep=Object.keys(faults).sort((a,b)=>faults[b]-faults[a]);
@@ -6073,7 +6190,12 @@ function playFinish(){
          :(pd?'The spots you missed are the ones worth running again.'
             :'You had the puck at every step, so there was no spot to grade.'))
       : (rd===asks?'Every call was the right one.':'The calls you missed are the ones worth running again.'))+
-    (PLAY.tries?' You retried '+PLAY.tries+(PLAY.tries===1?' step.':' steps.'):'')+'</p></div>'+
+    (PLAY.tries?' You retried '+PLAY.tries+(PLAY.tries===1?' step.':' steps.'):'')+'</p>'+
+    /* Deliberately a sentence and not a score line: it names what happened without pretending
+       to measure whether he was in a good position, which on these steps nobody can. */
+    (sd?'<p style="color:#9fb2cc">On '+sd+(sd===1?' step':' steps')+' the puck was on your stick, '+
+      'so there was no spot to grade. You tapped the taught circle on '+sn+' of '+sd+
+      ' - worth knowing, not counted.</p>':'')+'</div>'+
     '<div class="povrow"><button class="hot" id="povrun">Run it again</button>'+
     '<button id="povwatch">Watch it done right</button></div>';
   rs.classList.add('on');
